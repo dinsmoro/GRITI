@@ -23,7 +23,6 @@ In **GRITI_main_settings.ini you must set paths and relevant login info** (if yo
 - [Pockerflat ISR](http://cedar.openmadrigal.org/list) (needs more methods for data processing to achieve higher output quality)
 
 ## Selection of Supported Analysis Methods
----
 - Keograms \[delta-vTEC, AMPERE-derived ionospheric model estimates, and Canadian magnetometer network]
 - Radius-around-a-point averaging \[delta-vTEC]
 - Movies & snapshots of movies \[delta-vTEC, AMPERE-derived ionospheric model estimates]
@@ -47,6 +46,17 @@ Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is
 
 **GRITI** has been tested with Python 3.7, so later versions should work and earlier Python 3 versions may work. Python 2 probably won't work.
 
-**GRITI** has only been tested with Windows 10, and some path stuff may not be properly setup to work in all instances (among other stuff I'm sure). Raise an issue on this repo to let me know if any issues arise from other OSes.
+**GRITI** has only been tested with Windows 10, and some path stuff may not be properly setup to work in all instances (among other stuff, I'm sure). [Raise an issue](https://github.com/dinsmoreo/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
 
-**GRITI** is still under some construction (like the Basemap to Cartopy conversion) and some functions may not work. Raise an issue on this repo to let me know about it.
+**GRITI** is still under some construction (like the Basemap to Cartopy conversion) and some functions may not work as-is. [Raise an issue](https://github.com/dinsmoreo/GRITI/issues/new) on this repo to let me know about it.
+
+**Find any issue?** [Raise that issue!](https://github.com/dinsmoreo/GRITI/issues/new)
+
+## Contributing
+Follow this [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) and raise an issue or make a pull request with the new addition/fix. Make sure the new feature/fix is commented!
+
+## GRITI Literature
+Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, P.J., Urbina, J., 2021. Multi-instrument observations of SCIPS: 1. ISR and GPS TEC results. Journal of Atmospheric and Solar-Terrestrial Physics 213, 105515. https://doi.org/10.1016/j.jastp.2020.105515
+
+---
+**GRITI** was made by [Ross Dinsmore](https://github.com/dinsmoro), who was supported by the US National Science Foundation under Grant No. AGS-1241407 to The Pennsylvania State University. 
