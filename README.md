@@ -47,11 +47,11 @@ Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is
 
 **GRITI** has been tested with Python 3.7, so later versions should work and earlier Python 3 versions may work. Python 2 probably won't work.
 
-**GRITI** has only been tested with Windows 10, and some path stuff may not be properly setup to work in all instances (among other stuff, I'm sure). [Raise an issue](https://github.com/dinsmoreo/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
+**GRITI** has only been tested with Windows 10, and some path stuff may not be properly setup to work in all instances (among other stuff, I'm sure). [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
 
-**GRITI** is still under some construction (like the Basemap to Cartopy conversion) and some functions may not work as-is. [Raise an issue](https://github.com/dinsmoreo/GRITI/issues/new) on this repo to let me know about it.
+**GRITI** is still under some construction (like the Basemap to Cartopy conversion) and some functions may not work as-is. [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know about it.
 
-**Find any issue?** [Raise that issue!](https://github.com/dinsmoreo/GRITI/issues/new)
+**Find any issue?** [Raise that issue!](https://github.com/dinsmoro/GRITI/issues/new)
 
 ## Contributing
 Follow this [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) and raise an issue or make a pull request with the new addition/fix. Make sure the new feature/fix is commented!
