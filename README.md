@@ -36,10 +36,10 @@ To get the code from this repository, clone it using Git or click the green Code
 **GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, Numba, Cartopy, Basemap, Astropy, timezonefinder, pytz, and html2text.
 
 [Anaconda](https://www.anaconda.com/products/individual), a Python 3 distribution that includes many useful scientific packages, comes with many of those needed packages automatically. It doesn't come with:
-- [Cartopy](https://scitools.org.uk/cartopy/docs/latest/) install with **conda** using `conda install -c anaconda cartopy` 
+- [Cartopy](https://scitools.org.uk/cartopy/docs/latest/) install with **conda** using `conda install -c anaconda cartopy`.
 - [Basemap](https://matplotlib.org/basemap/) !deprecated, I am in the process of converting to Cartopy! install with **conda** using `conda install -c anaconda basemap`, if needed install higher-res maps with `conda install -c conda-forge basemap-data-hires`, and see [this link](https://stackoverflow.com/questions/52295117/basemap-import-error-in-pycharm-keyerror-proj-lib/53751941) for `KeyError: 'PROJ_LIB'` issues that may arise.
-- [timezonefinder](https://timezonefinder.readthedocs.io/en/latest/) install with **conda** using `conda install -c conda-forge timezonefinder`
-- [html2text](https://github.com/Alir3z4/html2text/) install with **pip** using `pip install html2text`
+- [timezonefinder](https://timezonefinder.readthedocs.io/en/latest/) install with **conda** using `conda install -c conda-forge timezonefinder`.
+- [html2text](https://github.com/Alir3z4/html2text/) install with **pip** using `pip install html2text`.
 
 _Note: On Windows, use Anaconda Prompt to input **conda** or **pip** commands._
 
@@ -55,6 +55,8 @@ Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is
 
 ## Contributing
 Follow this [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) and raise an issue or make a pull request with the new addition/fix. Make sure the new feature/fix is commented!
+
+**GRITI** is simple as far as a software suite goes, and main ideally should only have function calls. (I develop in main before packaging as a function, so main isn't only functions at the moment.)
 
 ## GRITI Literature
 Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, P.J., Urbina, J., 2021. Multi-instrument observations of SCIPS: 1. ISR and GPS TEC results. Journal of Atmospheric and Solar-Terrestrial Physics 213, 105515. https://doi.org/10.1016/j.jastp.2020.105515
