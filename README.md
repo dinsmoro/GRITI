@@ -40,6 +40,7 @@ To get the code from this repository, clone it using Git or click the green Code
 - [Basemap](https://matplotlib.org/basemap/) !depreciated, I am in the process of converting to Cartopy! install with **conda** using `conda install -c anaconda basemap`, if needed install higher-res maps with `conda install -c conda-forge basemap-data-hires`, and see [this link](https://stackoverflow.com/questions/52295117/basemap-import-error-in-pycharm-keyerror-proj-lib/53751941) for `KeyError: 'PROJ_LIB'` issues that may arise.
 - [timezonefinder](https://timezonefinder.readthedocs.io/en/latest/) install with **conda** using `conda install -c conda-forge timezonefinder`
 - [html2text](https://github.com/Alir3z4/html2text/) install with **pip** using `pip install html2text`
+
 _Note: On Windows, use Anaconda Prompt to input **conda** or **pip** commands._
 
 Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is a very easy place to run **GRITI** from. Open **GRITI_main.py** in Spyder, set the relevant settings, and hit the green "Run File" arrow to use **GRITI** quickly.
