@@ -1,18 +1,14 @@
 # GRITI: General Resource for Ionospheric Transient Investigations
----
 
 ## About GRITI
----
 **GRITI** is an open-source, Python 3-based analysis tool for ionospheric activity. For several data sources it supports data download, loading, and analysis while for other data sources it only covers data loading and analysis. It is designed for flexibility and expandability in adding new data sources and analysis methods.
 
 ## Using GRITI
----
 Everything in **GRITI** is launched from **GRITI_main.py**. The settings are from the beginning from the file to the line **#!!!END OF SETTINGS!!!**. The settings are grouped under data sources or analysis methods, if the analysis method spans multiple data sources. Data sources are loaded on run based on the analysis methods chosen in **GRITI_main.py**'s settings.
 
 In **GRITI_main_settings.ini you must set paths and relevant login info** (if you don't plan on using a data source that needs login info, then you don't need to fill that login info in).
 
 ## Supported Data Sources
----
 ### Automatic Download if Needed
 - delta-vTEC (vertical total electron content) based on [Madrigal's TEC dataset](http://cedar.openmadrigal.org/list)
 - [Kp Index](http://www.gfz-potsdam.de/en/kp-index/)
@@ -36,7 +32,6 @@ In **GRITI_main_settings.ini you must set paths and relevant login info** (if yo
 - Walking FFT \[delta-vTEC, AMPERE-derived ionospheric model estimates, NASA OMNI data]
 
 ## Installation
----
 To get the code from this repository, clone it using Git or click the green Code button at the top and "Download ZIP". All of the functions need to be in the same directory as **GRITI_main.py** but the data sources folder and other output folders can be set elsewhere in **GRITI_main_settings.ini**.
 
 **GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, Numba, Cartopy, Basemap, Astropy, timezonefinder, pytz, and html2text.
