@@ -9,7 +9,7 @@ Everything in **GRITI** is launched from **GRITI_main.py**. The settings are fro
 In **GRITI_main_settings.ini you must set paths and relevant login info** (if you don't plan on using a data source that needs login info, then you don't need to fill that login info in).
 
 ## Supported Data Sources
-### Automatic Download if Needed
+### Automatic Download
 - delta-vTEC (vertical total electron content) based on [Madrigal's TEC dataset](http://cedar.openmadrigal.org/list)
 - [Kp Index](http://www.gfz-potsdam.de/en/kp-index/)
 - [NASA OMNI Data](https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/hroformat.txt)
