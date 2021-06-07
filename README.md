@@ -20,7 +20,7 @@ In **GRITI_main_settings.ini you must set paths and relevant login info** (if yo
 - [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates (model estimates not yet live)
 
 ### Not Fully Implemented
-- [Pockerflat ISR](http://cedar.openmadrigal.org/list) (needs more methods for data processing to achieve higher output quality)
+- [Pokerflat ISR](http://cedar.openmadrigal.org/list) (needs more methods for data processing to achieve higher output quality)
 
 ## Selection of Supported Analysis Methods
 - Keograms \[delta-vTEC, AMPERE-derived ionospheric model estimates, and Canadian magnetometer network]
@@ -37,7 +37,7 @@ To get the code from this repository, clone it using Git or click the green Code
 
 [Anaconda](https://www.anaconda.com/products/individual), a Python 3 distribution that includes many useful scientific packages, comes with many of those needed packages automatically. It doesn't come with:
 - [Cartopy](https://scitools.org.uk/cartopy/docs/latest/) install with **conda** using `conda install -c anaconda cartopy` 
-- [Basemap](https://matplotlib.org/basemap/) !depreciated, I am in the process of converting to Cartopy! install with **conda** using `conda install -c anaconda basemap`, if needed install higher-res maps with `conda install -c conda-forge basemap-data-hires`, and see [this link](https://stackoverflow.com/questions/52295117/basemap-import-error-in-pycharm-keyerror-proj-lib/53751941) for `KeyError: 'PROJ_LIB'` issues that may arise.
+- [Basemap](https://matplotlib.org/basemap/) !deprecated, I am in the process of converting to Cartopy! install with **conda** using `conda install -c anaconda basemap`, if needed install higher-res maps with `conda install -c conda-forge basemap-data-hires`, and see [this link](https://stackoverflow.com/questions/52295117/basemap-import-error-in-pycharm-keyerror-proj-lib/53751941) for `KeyError: 'PROJ_LIB'` issues that may arise.
 - [timezonefinder](https://timezonefinder.readthedocs.io/en/latest/) install with **conda** using `conda install -c conda-forge timezonefinder`
 - [html2text](https://github.com/Alir3z4/html2text/) install with **pip** using `pip install html2text`
 
@@ -47,7 +47,7 @@ Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is
 
 **GRITI** has been tested with Python 3.7, so later versions should work and earlier Python 3 versions may work. Python 2 probably won't work.
 
-**GRITI** has only been tested with Windows 10, and some path stuff may not be properly setup to work in all instances (among other stuff, I'm sure). [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
+**GRITI** has only been tested with Windows 10, and paths may not be properly be setup to work in all instances (among other things, I'm sure). [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
 
 **GRITI** is still under some construction (like the Basemap to Cartopy conversion) and some functions may not work as-is. [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know about it.
 
