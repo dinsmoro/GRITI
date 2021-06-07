@@ -17,7 +17,7 @@ In **GRITI_main_settings.ini you must set paths and relevant login info** (if yo
 ### User Must Download from Source
 - [Haystack ISR](http://cedar.openmadrigal.org/list) (incoherent scatter radar)
 - [Canadian magnetometer network](https://www.geomag.nrcan.gc.ca/data-donnee/sd-en.php)
-- [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates
+- [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates (model estimates not yet live)
 
 ### Not Fully Implemented
 - [Pockerflat ISR](http://cedar.openmadrigal.org/list) (needs more methods for data processing to achieve higher output quality)
