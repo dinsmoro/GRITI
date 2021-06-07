@@ -56,7 +56,7 @@ Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is
 ## Contributing
 Follow this [code of conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/) and raise an issue or make a pull request with the new addition/fix. Make sure the new feature/fix is commented!
 
-**GRITI** is simple as far as a software suite goes, and main ideally should only have function calls. (I develop in main before packaging as a function, so main isn't only functions at the moment.)
+**GRITI** is simple as far as a software suite goes, and **GRITI_main.py** ideally should only have function calls. (I develop in **GRITI_main.py** before packaging as a function, so **GRITI_main.py** isn't only functions at the moment - but I wish it was!)
 
 ## GRITI Literature
 Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, P.J., Urbina, J., 2021. Multi-instrument observations of SCIPS: 1. ISR and GPS TEC results. Journal of Atmospheric and Solar-Terrestrial Physics 213, 105515. https://doi.org/10.1016/j.jastp.2020.105515
