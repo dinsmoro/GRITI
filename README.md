@@ -6,7 +6,7 @@
 ## Using GRITI
 Everything in **GRITI** is launched from **GRITI_main.py**. The settings are from the beginning from the file to the line **`#!!!END OF SETTINGS!!!`**. The settings are grouped under data sources or analysis methods, if the analysis method spans multiple data sources. Data sources are loaded on run based on the analysis methods chosen in **GRITI_main.py**'s settings.
 
-In **GRITI_main_settings.ini you must set paths and relevant login info** (if you don't plan on using a data source that needs login info, then you don't need to fill that login info in).
+In **GRITI_main_config.ini you must set paths and relevant login info** (if you don't plan on using a data source that needs login info, then you don't need to fill that login info in).
 
 ## Supported Data Sources
 ### Automatic Download
