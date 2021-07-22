@@ -15,13 +15,15 @@ import matplotlib.ticker as tick
 import timezonefinder
 from datetime import datetime, timedelta
 import pytz
-from astroplan import Observer
-import astropy.units as astroUnits
-from astropy.time import Time
+# from astroplan import Observer
+# import astropy.units as astroUnits
+# from astropy.time import Time
 from urllib.request import urlopen
 from subfun_strstr import strstr
 from subfun_dateORdayNum_to_fullRange import subfun_dateORdayNum_to_fullRange
 from subfun_figFitter import figFitter
+from subfun_sunAlsoRises import sunAlsoRises
+from subfun_date_to_dayNum import subfun_date_to_dayNum
 
 
 def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,TEC_plotLimValu, \
@@ -265,18 +267,29 @@ def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,
     
     
     #!!!DAY NITE PLOT STUFF!!!
-    Xaxisvar_min = (time_Ref[0] - dateRange_dayNum_zeroHr[1]*86400)/3600; #UT hr, min time to compare to
-    Xaxisvar_max = (time_Ref[-1] - dateRange_dayNum_zeroHr[1]*86400)/3600; #UT hr, max time to compare to
+    # Xaxisvar_min = (time_Ref[0] - dateRange_dayNum_zeroHr[1]*86400)/3600; #UT hr, min time to compare to
+    # Xaxisvar_max = (time_Ref[-1] - dateRange_dayNum_zeroHr[1]*86400)/3600; #UT hr, max time to compare to
 #         #below is alt. full time
 #         Xaxisvar_min = (min(timeUnique) - dateRange_zeroHr(2))*24; #UT hr, min time to compare to
 #         Xaxisvar_max = (max(timeUnique) - dateRange_zeroHr(2))*24; #UT hr, min time to compare to
 
     #FIRST BATTLE: REGION WHERE LAT/LONG IS   
+    if( (np.min(plotLatRange) <= latLong_ref[0][0]) & (np.max(plotLatRange) >= latLong_ref[0][0]) & \
+       (np.min(plotLongRange) <= latLong_ref[0][1]) & (np.max(plotLongRange) >= latLong_ref[0][1]) ):
+        # Only use latLong_ref if its within the plot area, otherwise ditch it b/c it's set wronk
+        latLong_use = (latLong_ref[0][0],latLong_ref[0][1]);
+    else:
+        print('WARNING: latLong_ref[0] '+str(np.round(latLong_ref[0][0],2)).rstrip('0').rstrip('.')+' lat | '+str(np.round(latLong_ref[0][1],2)).rstrip('0').rstrip('.')+\
+              ' long is not within lat range of '+str(np.min(plotLatRange))+' to '+str(np.max(plotLatRange))+\
+              ' | long range of '+str(np.min(plotLongRange))+' to '+str(np.max(plotLongRange))+'. Ignoring latLong_ref[0] and using mean of plotLat/LongRange.'+\
+              '('+str(np.round(np.mean(plotLatRange),2)).rstrip('0').rstrip('.')+' lat | '+str(np.round(np.mean(plotLongRange),2)).rstrip('0').rstrip('.')+' long)'); # Report a warning on a wrong setting
+        latLong_use = (np.mean(plotLatRange),np.mean(plotLongRange)); # Set to mean of plotLat/LongRange
+    #END IF    
     tf = timezonefinder.TimezoneFinder(); #prep the time zone finder function thing
-    dayNite_timeZoneID = tf.certain_timezone_at(lat=latLong_ref[0][0], lng=latLong_ref[0][1]); #use it to find the time zone
+    dayNite_timeZoneID = tf.certain_timezone_at(lat=latLong_use[0], lng=latLong_use[1]); #use it to find the time zone
     if dayNite_timeZoneID is None:
         #use geonames site as a backup
-        url = 'http://api.geonames.org/timezone?lat='+str(latLong_ref[0][0])+'&lng='+str(latLong_ref[0][1])+'&username=razzluhdzuul'; #create link for lat/long
+        url = 'http://api.geonames.org/timezone?lat='+str(latLong_use[0])+'&lng='+str(latLong_use[1])+'&username=razzluhdzuul'; #create link for lat/long
         webpage = urlopen(url).read(); #get the raw HTML and read it
         try:
             charset = webpage.headers.get_content_charset(); #get the charset from the page holder, w/o it doesn't work
@@ -318,124 +331,129 @@ def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,
     # dayNite_sunrise = 12 - np.arccos(-np.tan(latLong_ref[0]*np.pi/180)*np.tan(dayNite_solar_declination*np.pi/180))/15 - dayNite_solar_corrected/60; #hr, sunrise time
     # dayNite_sunset = 12 + np.arccos(-np.tan(latLong_ref[0]*np.pi/180)*np.tan(dayNite_solar_declination*np.pi/180))/15 - dayNite_solar_corrected/60; #hr, sunrise time
 
-    ISR = Observer(longitude=latLong_ref[0][1]*astroUnits.deg, latitude=latLong_ref[0][0]*astroUnits.deg, \
-        elevation=0*astroUnits.m, name='ISR', timezone=dayNite_timeZoneID); #make an atroplan observer at the ISR location
+    dayNite_sunrise, dayNite_sunset, dateRange_fullPad = sunAlsoRises(dateRange_full,latLong_use[0],latLong_use[1]); # Get the sunrise and sunset times
+    dateRange_dayNum_fullPad = subfun_date_to_dayNum(dateRange_fullPad); #convert
     timeZoneObj = pytz.timezone(dayNite_timeZoneID); #make a timezone object
-    timeZoneObj_UTC = pytz.timezone('UTC'); #make a timezone object
+    # timeZoneObj_UTC = pytz.timezone('UTC'); #make a timezone object
     #Daylight savings local time fix
     
     #Pad dateRange_full to account for the timezone offset (a day/night change might happen the next local day, so pad for it)
-    tzString = datetime.strptime(str(dateRange_full[0,:]), '[%Y\t%m\t%d]').astimezone(timeZoneObj).strftime('%z').rstrip('0'); #get the timezone string
-    if( tzString[0] == '+' ):
-        tempTime = datetime.strptime(str(dateRange_full[-1,:]), '[%Y\t%m\t%d]') + timedelta(days=1);
-        dateRange_fullPad = np.vstack(( dateRange_full, np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%m')), np.int16(tempTime.strftime('%d'))) ) ));
-        dateRange_dayNum_fullPad = np.vstack(( dateRange_dayNum_full, np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%j'))) ) ));
-    else:
-        tempTime = datetime.strptime(str(dateRange_full[0,:]), '[%Y\t%m\t%d]') - timedelta(days=1);
-        dateRange_fullPad = np.vstack(( np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%m')), np.int16(tempTime.strftime('%d'))) ), dateRange_full ));
-        dateRange_dayNum_fullPad = np.vstack(( np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%j'))) ), dateRange_dayNum_full ));
-    #END IF
-    dayNite_sunrise = np.zeros( (dateRange_fullPad.shape[0],) ); #preallocate
-    dayNite_sunset = np.zeros( (dateRange_fullPad.shape[0],) ); #preallocate
-    for i in range(0,dateRange_fullPad.shape[0]):
-        dateRange_timeObj = Time(str(dateRange_fullPad[i,0])+'-'+str(dateRange_fullPad[i,1])+'-'+str(dateRange_fullPad[i,2])+'T12:00:00', format='isot', scale='utc'); #make an astropy time object
+    # tzString = datetime.strptime(str(dateRange_full[0,:]), '[%Y\t%m\t%d]').astimezone(timeZoneObj).strftime('%z').rstrip('0'); #get the timezone string
+    # if( tzString[0] == '+' ):
+    #     tempTime = datetime.strptime(str(dateRange_full[-1,:]), '[%Y\t%m\t%d]') + timedelta(days=1);
+    #     dateRange_fullPad = np.vstack(( dateRange_full, np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%m')), np.int16(tempTime.strftime('%d'))) ) ));
+    #     dateRange_dayNum_fullPad = np.vstack(( dateRange_dayNum_full, np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%j'))) ) ));
+    # else:
+    #     tempTime = datetime.strptime(str(dateRange_full[0,:]), '[%Y\t%m\t%d]') - timedelta(days=1);
+    #     dateRange_fullPad = np.vstack(( np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%m')), np.int16(tempTime.strftime('%d'))) ), dateRange_full ));
+    #     dateRange_dayNum_fullPad = np.vstack(( np.array( ( np.int16(tempTime.strftime('%Y')), np.int16(tempTime.strftime('%j'))) ), dateRange_dayNum_full ));
+    # #END IF
+    
+    # for i in range(0,dateRange_fullPad.shape[0]):
+    #     dateRange_timeObj = Time(str(dateRange_fullPad[i,0])+'-'+str(dateRange_fullPad[i,1])+'-'+str(dateRange_fullPad[i,2])+'T12:00:00', format='isot', scale='utc'); #make an astropy time object
         
-        #Run through the days
-        dayNite_sunriseTemp = ISR.sun_rise_time(dateRange_timeObj, which='nearest', horizon=0*astroUnits.deg, n_grid_points=150).to_value('isot'); #get the sunrise time
-        dayNite_sunriseObj = timeZoneObj_UTC.localize(datetime.strptime(dayNite_sunriseTemp, '%Y-%m-%dT%H:%M:%S.%f')).astimezone(timeZoneObj); #create datetime object, set it to the UTC time zone (which it is, datetime just doesn't know), then convert it to local time zone
-        #convert to decimal hour
-        dayNite_sunriseTemp = dayNite_sunriseObj.isoformat(); #convert to a string that's easily readable
-        index_start = strstr(dayNite_sunriseTemp,'T')[0]; #get where the hour starts
-        index_colon = strstr(dayNite_sunriseTemp,':'); #get where the colons are
-        index_dash = strstr(dayNite_sunriseTemp,'-')[-1]; #get where the last -, end of time
-        if( index_colon[1] > index_dash ):
-            #then it is +UTC for local instead of -UTC - so search for last +
-            index_dash = strstr(dayNite_sunriseTemp,'+')[-1]; #get where the last -, end of time
-        #END IF
-        dayNite_sunrise[i] = dateRange_dayNum_fullPad[i,1] + np.int64(dayNite_sunriseTemp[index_start+1:index_colon[0]])/24 + \
-            np.int64(dayNite_sunriseTemp[index_colon[0]+1:index_colon[1]])/1440 + np.float64(dayNite_sunriseTemp[index_colon[1]+1:index_dash])/86400; #make into day units
+    #     #Run through the days
+    #     dayNite_sunriseTemp = ISR.sun_rise_time(dateRange_timeObj, which='nearest', horizon=0*astroUnits.deg, n_grid_points=150).to_value('isot'); #get the sunrise time
+    #     dayNite_sunriseObj = timeZoneObj_UTC.localize(datetime.strptime(dayNite_sunriseTemp, '%Y-%m-%dT%H:%M:%S.%f')).astimezone(timeZoneObj); #create datetime object, set it to the UTC time zone (which it is, datetime just doesn't know), then convert it to local time zone
+    #     #convert to decimal hour
+    #     dayNite_sunriseTemp = dayNite_sunriseObj.isoformat(); #convert to a string that's easily readable
+    #     index_start = strstr(dayNite_sunriseTemp,'T')[0]; #get where the hour starts
+    #     index_colon = strstr(dayNite_sunriseTemp,':'); #get where the colons are
+    #     index_dash = strstr(dayNite_sunriseTemp,'-')[-1]; #get where the last -, end of time
+    #     if( index_colon[1] > index_dash ):
+    #         #then it is +UTC for local instead of -UTC - so search for last +
+    #         index_dash = strstr(dayNite_sunriseTemp,'+')[-1]; #get where the last -, end of time
+    #     #END IF
+    #     dayNite_sunrise[i] = dateRange_dayNum_fullPad[i,1] + np.int64(dayNite_sunriseTemp[index_start+1:index_colon[0]])/24 + \
+    #         np.int64(dayNite_sunriseTemp[index_colon[0]+1:index_colon[1]])/1440 + np.float64(dayNite_sunriseTemp[index_colon[1]+1:index_dash])/86400; #make into day units
         
-        #Run through the days
-        dayNite_sunsetTemp = ISR.sun_set_time(dateRange_timeObj, which='nearest', horizon=0*astroUnits.deg, n_grid_points=150).to_value('isot'); #get the sunrise time
-        dayNite_sunsetObj = timeZoneObj_UTC.localize(datetime.strptime(dayNite_sunsetTemp, '%Y-%m-%dT%H:%M:%S.%f')).astimezone(timeZoneObj); #create datetime object, set it to the UTC time zone (which it is, datetime just doesn't know), then convert it to local time zone
-        #convert to decimal hour
-        dayNite_sunsetTemp = dayNite_sunsetObj.isoformat(); #convert to a string that's easily readable
-        index_start = strstr(dayNite_sunsetTemp,'T')[0]; #get where the hour starts
-        index_colon = strstr(dayNite_sunsetTemp,':'); #get where the colons are
-        index_dash = strstr(dayNite_sunsetTemp,'-')[-1]; #get where the last -, end of time
-        if( index_colon[1] > index_dash ):
-            #then it is +UTC for local instead of -UTC - so search for last +
-            index_dash = strstr(dayNite_sunsetTemp,'+')[-1]; #get where the last -, end of time
-        #END IF
-        dayNite_sunset[i] = dateRange_dayNum_fullPad[i,1] + np.int64(dayNite_sunsetTemp[index_start+1:index_colon[0]])/24 + \
-            np.int64(dayNite_sunsetTemp[index_colon[0]+1:index_colon[1]])/1440 + np.float64(dayNite_sunsetTemp[index_colon[1]+1:index_dash])/86400; #make into day units
-    #END FOR i
-    dayNite_DSToffset_str = dayNite_sunriseTemp[index_dash:]; #get the DST time offset
-    if( strstr(dayNite_DSToffset_str,':').size > 0 ):
-        if( dayNite_DSToffset_str[strstr(dayNite_DSToffset_str,':')[0]+1:] == '00' ):
-            dayNite_DSToffset_str = dayNite_DSToffset_str[:strstr(dayNite_DSToffset_str,':')[0]]; #remove the :00 if it's just that
-            if( dayNite_DSToffset_str[1] == '0' ):
-                dayNite_DSToffset_str = dayNite_DSToffset_str.replace('0',''); #remove the 0 that was extraneous
+    #     #Run through the days
+    #     dayNite_sunsetTemp = ISR.sun_set_time(dateRange_timeObj, which='nearest', horizon=0*astroUnits.deg, n_grid_points=150).to_value('isot'); #get the sunrise time
+    #     dayNite_sunsetObj = timeZoneObj_UTC.localize(datetime.strptime(dayNite_sunsetTemp, '%Y-%m-%dT%H:%M:%S.%f')).astimezone(timeZoneObj); #create datetime object, set it to the UTC time zone (which it is, datetime just doesn't know), then convert it to local time zone
+    #     #convert to decimal hour
+    #     dayNite_sunsetTemp = dayNite_sunsetObj.isoformat(); #convert to a string that's easily readable
+    #     index_start = strstr(dayNite_sunsetTemp,'T')[0]; #get where the hour starts
+    #     index_colon = strstr(dayNite_sunsetTemp,':'); #get where the colons are
+    #     index_dash = strstr(dayNite_sunsetTemp,'-')[-1]; #get where the last -, end of time
+    #     if( index_colon[1] > index_dash ):
+    #         #then it is +UTC for local instead of -UTC - so search for last +
+    #         index_dash = strstr(dayNite_sunsetTemp,'+')[-1]; #get where the last -, end of time
+    #     #END IF
+    #     dayNite_sunset[i] = dateRange_dayNum_fullPad[i,1] + np.int64(dayNite_sunsetTemp[index_start+1:index_colon[0]])/24 + \
+    #         np.int64(dayNite_sunsetTemp[index_colon[0]+1:index_colon[1]])/1440 + np.float64(dayNite_sunsetTemp[index_colon[1]+1:index_dash])/86400; #make into day units
+    # #END FOR i
+    timeZoneObj_zeroHr = timeZoneObj.localize(datetime.strptime(str(dateRange_zeroHr), '[%Y\t%m\t%d]')); #time zone info at zero hr
+    # dayNite_DSToffset_str = timeZoneObj_zeroHr.strftime('%z'); #get the DST time offset
+    # if( strstr(dayNite_DSToffset_str,':').size > 0 ):
+    #     if( dayNite_DSToffset_str[strstr(dayNite_DSToffset_str,':')[0]+1:] == '00' ):
+    #         dayNite_DSToffset_str = dayNite_DSToffset_str[:strstr(dayNite_DSToffset_str,':')[0]]; #remove the :00 if it's just that
+    #         if( dayNite_DSToffset_str[1] == '0' ):
+    dayNite_DSToffset_str = timeZoneObj_zeroHr.strftime('%z').replace('0',''); #remove the 0 that was extraneous
             #END IF
-            dayNite_DSToffset = np.int64(dayNite_DSToffset_str); #get the number version
+    dayNite_DSToffset = np.int64(dayNite_DSToffset_str); #get the number version
         #END IF
-        else:
-            dayNite_DSToffset = np.float64(dayNite_DSToffset_str[:strstr(dayNite_DSToffset_str,':')[0]]) + \
-                np.int64(dayNite_DSToffset_str[strstr(dayNite_DSToffset_str,':')[0]+1:])/60; #convert to an hour decimal
-        #END IF
+        # else:
+        #     dayNite_DSToffset = np.float64(dayNite_DSToffset_str[:strstr(dayNite_DSToffset_str,':')[0]]) + \
+        #         np.int64(dayNite_DSToffset_str[strstr(dayNite_DSToffset_str,':')[0]+1:])/60; #convert to an hour decimal
+        # #END IF
     #END IF
-    dayNite_timeZoneName = dayNite_sunsetObj.tzname(); #get the time zone name (like 'EST' or 'EDT' depending on standard or daylight savings time)
-    dateNite_DSTnUTCOffset = dayNite_sunsetObj.dst().total_seconds()/3600; #get the time offset
+    dayNite_timeZoneName = timeZoneObj_zeroHr.tzname(); #get the time zone name (like 'EST' or 'EDT' depending on standard or daylight savings time)
+    dateNite_DSTnUTCOffset = timeZoneObj_zeroHr.dst().total_seconds()/3600; #get the time offset
     if( np.mod(dateNite_DSTnUTCOffset,1) == 0 ):
         dateNite_DSTnUTCOffset = np.int64(dateNite_DSTnUTCOffset); #convert to integer
     #END IF
 
     #THIRD STEP: PREP FOR PLOTTING BY ALIGNING TIMES, MAKING PLOT VARIABLES
-    Xaxisvar_min = Xaxisvar_min + dayNite_DSToffset; #hr local, UT time of -12 conv. to local
-    Xaxisvar_max = Xaxisvar_max + dayNite_DSToffset; #hr local, UT time of -12 conv. to local
+    Xaxisvar_min = np.min(xAxisLims) + dayNite_DSToffset; #hr local, UT time of -12 conv. to local
+    Xaxisvar_max = np.max(xAxisLims) + dayNite_DSToffset; #hr local, UT time of -12 conv. to local
 
-    dayNite_sunrise = (dayNite_sunrise - dateRange_dayNum_zeroHr[1]*86400)/3600; #hr, convert so 0 hr is in the middle (and convert from days to hours)
-    dayNite_sunset = (dayNite_sunset - dateRange_dayNum_zeroHr[1]*86400)/3600; #hr, convert so 0 hr is in the middle (and convert from days to hours)
+    dayNite_sunrise = (dayNite_sunrise + dayNite_DSToffset/24 + dateRange_dayNum_fullPad[:,1] - dateRange_dayNum_zeroHr[1])*24; #hr, convert so 0 hr is in the middle (and convert from days to hours)
+    dayNite_sunset = (dayNite_sunset + dayNite_DSToffset/24 + dateRange_dayNum_fullPad[:,1] - dateRange_dayNum_zeroHr[1])*24; #hr, convert so 0 hr is in the middle (and convert from days to hours)
 
     xTime = np.sort( np.concatenate( (dayNite_sunrise,dayNite_sunset) ) ); #hr, xvar to plot against
+    kmin = xTime < Xaxisvar_min; # Calc these for dealing with dayNite continuation
+    kmax = xTime > Xaxisvar_max;
+    xTime[ kmin ] = Xaxisvar_min; #limit the xTime to the plotted times
+    xTime[ kmax ] = Xaxisvar_max;
     yDayNite = np.ones(xTime.shape); #prep if day or night, set all to day
     for i in range(0,dayNite_sunset.size):
         yDayNite[xTime == dayNite_sunset[i]] = 0; #set sunset times to sunset
     #END FOR i
+    yDayNite[kmin] = np.abs(yDayNite[np.where(kmin)[0][-1]+1]-1); #set time below the minimum plotted value to be the other thing
+    yDayNite[kmax] = yDayNite[np.where(kmax)[0][0]-1]; #set time above the maximum plotted value to be the same (so there's no weird day shift on the edge of the plot due to stuff)
     xTime = xTime.repeat(2); #interleave repeated values
     yDayNite = np.roll(yDayNite.repeat(2),1) #interleave repeated values and circular shift by 1
     yDayNite[0] = yDayNite[1]; #set that to match (for plotting niceness)
     yDayNite[-1] = yDayNite[-2]; #set that to match (for plotting niceness)
-    if( (xTime[0] > Xaxisvar_min) ):
-        #if this is so, gotta append the Xaxisvar_min
-        if( np.any(np.isin(dayNite_sunrise,xTime[0])) ):
-            #if true, then edge time is a sunrise - so the appended time would be night until that sunrise time
-            yDayNite[0] = 0; #set to sunset
-            yDayNite = np.insert(yDayNite,0,np.zeros(2)); #add a new value that's also 0 to make plotting work for the new xTime value
-        else:
-            #if false is sunset - so appended time would be day until that sunset time
-            yDayNite[0] = 1; #set to sunrise
-            yDayNite = np.insert(yDayNite,0,np.ones(2)); #add a new value that's also 0 to make plotting work for the new xTime value
-        #END IF
-        xTime = np.insert(xTime,0,np.tile(Xaxisvar_min,2)); #deal with time edges
-    #END IF
-    if( (xTime[-1] < Xaxisvar_max) ):
-        #if this is so, gotta append the Xaxisvar_min
-        if( np.any(np.isin(dayNite_sunset,xTime[-1])) ):
-            #if true, then edge time is a sunset - so it is sunset until the end of the plotting time
-            yDayNite[-1] = 0; #set to sunset
-            yDayNite = np.append(yDayNite,np.zeros(2)); #add a new value that's also 0 to make plotting work for the new xTime value
-        else:
-            #if false is sunrise - so it is sunrise until the end of the plotting time
-            yDayNite[-1] = 1; #set to sunrise
-            yDayNite = np.append(yDayNite,np.ones(2)); #add a new value that's also 0 to make plotting work for the new xTime value
-        #END IF
-        xTime = np.append(xTime,np.tile(Xaxisvar_max,2)); #deal with time edges
-    #END IF
+    # if( (xTime[0] > Xaxisvar_min) ):
+    #     #if this is so, gotta append the Xaxisvar_min
+    #     if( np.any(np.isin(dayNite_sunrise,xTime[0])) ):
+    #         #if true, then edge time is a sunrise - so the appended time would be night until that sunrise time
+    #         yDayNite[0] = 0; #set to sunset
+    #         yDayNite = np.insert(yDayNite,0,np.zeros(2)); #add a new value that's also 0 to make plotting work for the new xTime value
+    #     else:
+    #         #if false is sunset - so appended time would be day until that sunset time
+    #         yDayNite[0] = 1; #set to sunrise
+    #         yDayNite = np.insert(yDayNite,0,np.ones(2)); #add a new value that's also 0 to make plotting work for the new xTime value
+    #     #END IF
+    #     xTime = np.insert(xTime,0,np.tile(Xaxisvar_min,2)); #deal with time edges
+    # #END IF
+    # if( (xTime[-1] < Xaxisvar_max) ):
+    #     #if this is so, gotta append the Xaxisvar_min
+    #     if( np.any(np.isin(dayNite_sunset,xTime[-1])) ):
+    #         #if true, then edge time is a sunset - so it is sunset until the end of the plotting time
+    #         yDayNite[-1] = 0; #set to sunset
+    #         yDayNite = np.append(yDayNite,np.zeros(2)); #add a new value that's also 0 to make plotting work for the new xTime value
+    #     else:
+    #         #if false is sunrise - so it is sunrise until the end of the plotting time
+    #         yDayNite[-1] = 1; #set to sunrise
+    #         yDayNite = np.append(yDayNite,np.ones(2)); #add a new value that's also 0 to make plotting work for the new xTime value
+    #     #END IF
+    #     xTime = np.append(xTime,np.tile(Xaxisvar_max,2)); #deal with time edges
+    # #END IF
         
     
-    xTime[ xTime < np.min(xAxisLims)+dayNite_DSToffset ] = np.min(xAxisLims)+dayNite_DSToffset; #limit the xTime to the plotted times
-    xTime[ xTime > np.max(xAxisLims)+dayNite_DSToffset ] = np.max(xAxisLims)+dayNite_DSToffset;
+
     # xTime[0] = xTime[1]; #set that to match (for plotting niceness)
     # xTime[-1] = xTime[-2]; #set that to match (for plotting niceness)
     
@@ -458,11 +476,11 @@ def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,
     for i in range(1,xTime.size-2,2):
         if(xTime[i+1]-xTime[i] > 5 ):
             if( yDayNite[i] == 1 ):
-                ax[1].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.3, \
-                    0.25,'Day', color='k', fontproperties=FONT_titleFM); #print the text saying the day or nite
+                ax[1].text( (xTime[i+1]-xTime[i])/2+xTime[i], \
+                    0.25,'Day', color='k', horizontalalignment='center', fontproperties=FONT_titleFM); #print the text saying the day or nite
             else:
-                ax[1].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.9, \
-                   0.25, 'Night', color='k', fontproperties=FONT_titleFM); #print the text saying the day or nite
+                ax[1].text( (xTime[i+1]-xTime[i])/2+xTime[i], \
+                   0.25, 'Night', color='k', horizontalalignment='center', fontproperties=FONT_titleFM); #print the text saying the day or nite
             #END IF
         #END IF
     #END FOR i

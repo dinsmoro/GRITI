@@ -267,57 +267,69 @@ def GRITI_import_TEC_Madrigal(dates, settings):
                     FLG_newYr = dateRange_full[i,0]; #set it so the flag works good
                 
                     web_fileSearch = web_base_site + web_base + str(dateRange_dayNum_full[i,0]) + web_baseAfter; #build site to go to
-                    page = urlopen(web_fileSearch); #get raw HTML
-                    html_content = page.read(); #read off the HTML from whatever the page holder is
-                    charset = page.headers.get_content_charset(); #get the charset from the page holder, w/o it doesn't work
-                    if( charset is None ):
-                        charset = 'utf-8'; #assume utf-8
-                    #END IF
-                    html_content = html_content.decode(charset); #"decode" the HTML content so it's legible
-                    rendered_content = html2text.html2text(html_content); #render the HTML like webpage would and get the real stuff
-                    #print("{}".format(rendered_content)); #print for debug
-                    web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
-                    web_fileNotNamesIndex = strstrNB(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
-                    web_fileLinksIndex = strstrNB(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
-                    web_fileLinksEndIndex = strstrNB(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
-                
-                    web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
+                    try:
+                        page = urlopen(web_fileSearch); #get raw HTML
+                        FLG_webWork = True; #flag for web working
+                    except:
+                        FLG_webWork = False; #flag for web no work
+                        print('WARNING: No internet access, can\'t check Madrigal for latest data availability.');
+                    #END TRYING
+                    if( FLG_webWork == True ):
+                        html_content = page.read(); #read off the HTML from whatever the page holder is
+                        charset = page.headers.get_content_charset(); #get the charset from the page holder, w/o it doesn't work
+                        if( charset is None ):
+                            charset = 'utf-8'; #assume utf-8
+                        #END IF
+                        html_content = html_content.decode(charset); #"decode" the HTML content so it's legible
+                        rendered_content = html2text.html2text(html_content); #render the HTML like webpage would and get the real stuff
+                        #print("{}".format(rendered_content)); #print for debug
+                        web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                        web_fileNotNamesIndex = strstrNB(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
+                        web_fileLinksIndex = strstrNB(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
+                        web_fileLinksEndIndex = strstrNB(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
                     
-                    web_fileNames = []; #prep a list for strings, names of the files
-                    web_fileNamesDate = []; #prep a list for strings, dates of the files
-                    web_fileLinks = []; #prep a list for strings, links to the files
-                    for j in range(0,len(web_fileNamesIndex)):
-                        web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
-                        web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
-                        web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
-                    #END FOR j
-                    web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
+                        web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
+                        
+                        web_fileNames = []; #prep a list for strings, names of the files
+                        web_fileNamesDate = []; #prep a list for strings, dates of the files
+                        web_fileLinks = []; #prep a list for strings, links to the files
+                        for j in range(0,len(web_fileNamesIndex)):
+                            web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
+                            web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
+                            web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
+                        #END FOR j
+                        web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
+                    #END IF
                 #END IF
                 
                 #Check if website has data for the date requested
-                if( np.any(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ) == 1 )): #basically checks the date vector with all the dates on the website, if one matches we're good
-                    TEC_dataAvail[i] = 2; #note data is there but needs to be downloaded
-                else:
-                    if( np.all(np.any(dateRange_dayNum_full_orig == dateRange_dayNum_full[i,:],axis=0)) == 1 ): 
-                        #Catch where no data available
-                        print("\n==============ERROR==============");
-                        print("There is no data availiable on {}/{}/{} in YR/M/D format. Printing availiable data days for the relevant year - will exit on finishing checking all days:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
-                        print("{}".format(web_fileNamesDate)); #print for error - lets user know available days
-                        TEC_dataAvail[i] = -1; #note the error
+                if( FLG_webWork == True ):
+                    if( np.any(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ) == 1 )): #basically checks the date vector with all the dates on the website, if one matches we're good
+                        TEC_dataAvail[i] = 2; #note data is there but needs to be downloaded
                     else:
-                        #Catch where no data available - but it is a padded day to help with filtering on day edges
-                        if( FLG_reqPaddedDays == 0 ):
-                            print("\n==============~Warning~==============");
-                            print("There is no data availiable on ~PADDED DAY~ {}/{}/{} in YR/M/D format. Padded days are NOT required via passed flag - program will not quit but filtering on day edges will be impacted.\nPrinting availiable data days for the relevant year:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
-                            print("{}".format(web_fileNamesDate)); #print for error - lets user know available days
-                            TEC_dataAvail[i] = 0; #note the error
-                        else:
+                        if( np.all(np.any(dateRange_dayNum_full_orig == dateRange_dayNum_full[i,:],axis=0)) == 1 ): 
+                            #Catch where no data available
                             print("\n==============ERROR==============");
-                            print("There is no data availiable on ~PADDED DAY~ {}/{}/{} in YR/M/D format. Padded days are required via passed flag.\nPrinting availiable data days for the relevant year - will exit on finishing checking all days:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
+                            print("There is no data availiable on {}/{}/{} in YR/M/D format. Printing availiable data days for the relevant year - will exit on finishing checking all days:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
                             print("{}".format(web_fileNamesDate)); #print for error - lets user know available days
                             TEC_dataAvail[i] = -1; #note the error
+                        else:
+                            #Catch where no data available - but it is a padded day to help with filtering on day edges
+                            if( FLG_reqPaddedDays == 0 ):
+                                print("\n==============~Warning~==============");
+                                print("There is no data availiable on ~PADDED DAY~ {}/{}/{} in YR/M/D format. Padded days are NOT required via passed flag - program will not quit but filtering on day edges will be impacted.\nPrinting availiable data days for the relevant year:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
+                                print("{}".format(web_fileNamesDate)); #print for error - lets user know available days
+                                TEC_dataAvail[i] = 0; #note the error
+                            else:
+                                print("\n==============ERROR==============");
+                                print("There is no data availiable on ~PADDED DAY~ {}/{}/{} in YR/M/D format. Padded days are required via passed flag.\nPrinting availiable data days for the relevant year - will exit on finishing checking all days:".format(dateRange_full[i,0],dateRange_full[i,1],dateRange_full[i,2]) );
+                                print("{}".format(web_fileNamesDate)); #print for error - lets user know available days
+                                TEC_dataAvail[i] = -1; #note the error
+                            #END IF
                         #END IF
                     #END IF
+                else:
+                    TEC_dataAvail[i] = -1; #note the error, this is just to punt (seems to work if data already avail and calc'd, may not in some instances (e.g. calc needs to occur but raw data avail))
                 #END IF
             elif( os.path.isfile(TEC_dataFilePathUnfilt[i]) == 1 ): #check if unfiltered data file exists            
                 try: #gonna try to read the file - if we fail, it failed mid download probably
