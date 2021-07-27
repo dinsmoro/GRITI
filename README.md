@@ -59,6 +59,10 @@ Follow this [code of conduct](https://www.contributor-covenant.org/version/2/0/c
 **GRITI** is simple as far as a software suite goes, and **GRITI_main.py** ideally should only have function calls. (I develop in **GRITI_main.py** before packaging as a function, so **GRITI_main.py** isn't only functions at the moment - but I wish it was!)
 
 ## GRITI Literature
+### Cite this paper
+Dinsmore, R., Mathews, J.D., Urbina, J., 2021. General resource for ionospheric transient investigations (GRITI): An open-source code developed in support of the Dinsmore et al. (2021) results. MethodsX 8, 101456. https://doi.org/10.1016/j.mex.2021.101456
+
+### Papers that have used GRITI
 Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, P.J., Urbina, J., 2021. Multi-instrument observations of SCIPS: 1. ISR and GPS TEC results. Journal of Atmospheric and Solar-Terrestrial Physics 213, 105515. https://doi.org/10.1016/j.jastp.2020.105515
 
 ---
