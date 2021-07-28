@@ -12,5 +12,4 @@ authors:
     orcid: https://orcid.org/0000-0001-6281-4905
 title: "General resource for ionospheric transient investigations (GRITI): An open-source code developed in support of the Dinsmore et al. (2021) results"
 doi: 10.1016/j.mex.2021.101456
-version: 1.0.0
 date-released: 2021-7-23
