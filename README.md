@@ -33,7 +33,7 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 ## Installation
 To get the code from this repository, clone it using Git or click the green Code button at the top and "Download ZIP". All of the functions need to be in the same directory as **GRITI_main.py** but the data sources folder and other output folders can be set elsewhere in **GRITI_main_settings.ini**.
 
-**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, Numba, Cartopy, Basemap, Astropy, Pandas, timezonefinder, pytz, and html2text.
+**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, Numba, Cartopy, Basemap, Astropy, timezonefinder, pytz, and html2text.
 
 [Anaconda](https://www.anaconda.com/products/individual), a Python 3 distribution that includes many useful scientific packages, comes with many of those needed packages automatically. It doesn't come with:
 - [Cartopy](https://scitools.org.uk/cartopy/docs/latest/) install with **conda** using `conda install -c anaconda cartopy`.
