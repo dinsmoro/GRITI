@@ -18,6 +18,7 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 - [Haystack ISR](http://cedar.openmadrigal.org/list) (incoherent scatter radar)
 - [Canadian magnetometer network](https://www.geomag.nrcan.gc.ca/data-donnee/sd-en.php)
 - [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates (model estimates not yet live)
+- [LISN's TEC dataset](http://lisn.igp.gob.pe/) supports LISN's modified post-processed RINEX format
 
 ### Not Fully Implemented
 - [Pokerflat ISR](http://cedar.openmadrigal.org/list) (needs more methods for data processing to achieve higher output quality)
