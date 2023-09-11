@@ -424,8 +424,8 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 
 # plotLatRange = [30,75]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
-plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing)
-plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
+# plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing)
+# plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
 
 # plotLatRange = [25,55]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
@@ -697,7 +697,7 @@ FLG_combinedPlot_keo_TEC_n_AMPERE_1Dintegration_auroralZone_spectra_timeMatch = 
 
 FLG_FFTthruTime_KEOnAvgPtnAMPEREintegrated = 0; #perform FFT power spectra walking through time on TEC Keogram & TEC at a pt & AMPERE integrated
 
-FLG_keo_stacker = 2; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
+FLG_keo_stacker = 0; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
 FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables clipping higher/lower values
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['OMNI','Bz GSM'], 'comparison':'less than|0 & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
@@ -705,10 +705,10 @@ FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables
 FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':[['SuperMAG','SMUs'],['OMNI','Bz GSM']], 'comparison':['elevated|auto,pos only & rate|auto & nan', 'less than|0 & nan'], 'time offset':[122*60, 122*60]}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
-FLG_keo_stackerPlot = 1; #plots the stacked keograms
+FLG_keo_stackerPlot = 0; #plots the stacked keograms
 
 
-FLG_keo_featureFinder = 1; #find some features, good luck tiger
+FLG_keo_featureFinder = 0; #find some features, good luck tiger
 
 FLG_keo_zenithOrMISA = 0; #0 for plot vs Zenith ISR, 1 for plot vs MISA ISR
 FLG_keo_timeMatch_n_HP_Scargle = 0; #Scargles the data
@@ -976,7 +976,7 @@ FLG_ISR_plot_ScargleSet = 0; #shows both bands SNR/SNR HP/Scargle of SNR HP all 
 FLG_ISR_AMPERE_CPSD_cutOut = 0; #perform CPSD between ISR & JH over designated time cutout range (all time series data)
 
 #==============Kp and OMNI and SuperMAG and NRCanMAG Mecha Ploter Options==============
-FLG_MECHACOMBO_plot = 1; #plots
+FLG_MECHACOMBO_plot = 0; #plots
 # FLG_MECHACOMBO_plot_names = ['Kp','Bz GSM','Psw','Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = [['Bx GSE & GSM','By GSM','Bz GSM'],'Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Proton Density',['SMR','HUA-X &R detrended','SJG-X &R detrended'],'Psw',['Bx GSE & GSM','By GSM','Bz GSM']]; #names of things to plot for Salih's paper
@@ -1202,7 +1202,7 @@ FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':[0*3600,24*3
 FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':time_cutout_range}; #use defined cutout range
 
 
-FLG_AMPERE_integrate_plot = 1; #plot AMPERE integrated across the northern and southern hemispheres vs time
+FLG_AMPERE_integrate_plot = 0; #plot AMPERE integrated across the northern and southern hemispheres vs time
 FLG_AMPERE_integrate_plot_highlightIMFSouth = True; #highlights IMF south (magnetic reconnection) times
 FLG_AMPERE_integrate_plot_highlightIMFSouth_type = 'Bz GSM'; #OMNI data type to use for negative == south
 FLG_AMPERE_integrate_area = 0; #plot scatter shot of the data
