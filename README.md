@@ -18,8 +18,7 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 ### User Must Download from Source
 - [Haystack ISR](http://cedar.openmadrigal.org/list) (incoherent scatter radar)
 - [Canadian magnetometer network](https://www.geomag.nrcan.gc.ca/data-donnee/sd-en.php)
-- [SuperMAG Indices/Individual Stations](https://supermag.jhuapl.edu/), for indicies you want "Large Download Durations: (Full Year)" (set to the year you want), "Format: CSV", and check whatever you want included to be analysed.
-
+- [SuperMAG Indices/Individual Stations](https://supermag.jhuapl.edu/), for indicies on the [Indices page's](https://supermag.jhuapl.edu/indices/) "Download Indicies" tab you need to choose "Large Download Durations: (Full Year)" (set to the year you want), "Format: CSV", and check whatever you want included to be analysed.
 - [LISN's TEC dataset](http://lisn.igp.gob.pe/) supports LISN's modified post-processed RINEX format
 
 ### Not Fully Implemented
@@ -32,15 +31,16 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 - RTI (range-time-intensity) \[ISR]
 - FFT, Lomb-Scargle, & CPSD (cross-power spectral density) \[all]
 - Walking FFT \[delta-vTEC, AMPERE-derived ionospheric model estimates, NASA OMNI data]
+- Sliding correlation
+- Walking correlation
 
 ## Installation
 To get the code from this repository, clone it using Git or click the green Code button at the top and "Download ZIP". All of the functions need to be in the same directory as **GRITI_main.py** but the data sources folder and other output folders can be set elsewhere in **GRITI_main_settings.ini**.
 
-**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, Numba, Cartopy, Basemap, Astropy, timezonefinder, pytz, and html2text.
+**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, netCDF4, Numba, Cartopy, Joblib, aacgmv2, timezonefinder, pytz, and html2text.
 
 [Anaconda](https://www.anaconda.com/products/individual), a Python 3 distribution that includes many useful scientific packages, comes with many of those needed packages automatically. It doesn't come with:
-- [Cartopy](https://scitools.org.uk/cartopy/docs/latest/) install with **conda** using `conda install -c anaconda cartopy`.
-- [Basemap](https://matplotlib.org/basemap/) !deprecated, I am in the process of converting to Cartopy! install with **conda** using `conda install -c anaconda basemap`, if needed install higher-res maps with `conda install -c conda-forge basemap-data-hires`, and see [this link](https://stackoverflow.com/questions/52295117/basemap-import-error-in-pycharm-keyerror-proj-lib/53751941) for `KeyError: 'PROJ_LIB'` issues that may arise.
+- [aacgmv2](https://pypi.org/project/aacgmv2/) install with **pip** using `pip install aacgmv2`. On Windows you'll likely need to install Visual Studio Build Tools to get it to install; errors will tell you what to get.
 - [timezonefinder](https://timezonefinder.readthedocs.io/en/latest/) install with **conda** using `conda install -c conda-forge timezonefinder`.
 - [html2text](https://github.com/Alir3z4/html2text/) install with **conda** using `conda install -c conda-forge html2text`.
 
@@ -48,7 +48,7 @@ _Note: On Windows, use Anaconda Prompt to input **conda** commands._
 
 Anaconda comes with [Spyder](https://www.spyder-ide.org/), a Python IDE, that is a very easy place to run **GRITI** from. Open **GRITI_main.py** in Spyder, set the relevant settings, and hit the green "Run File" arrow to use **GRITI** quickly.
 
-**GRITI** has been tested with Python 3.7, so later versions should work and earlier Python 3 versions may work. Python 2 probably won't work.
+**GRITI** has been tested with Python 3.10, so later versions should work and earlier Python 3 versions may work. Python 2 probably won't work.
 
 **GRITI** has only been tested with Windows 10, and paths may not be properly be setup to work in all instances (among other things, I'm sure). [Raise an issue](https://github.com/dinsmoro/GRITI/issues/new) on this repo to let me know if any issues arise from other OSes.
 
@@ -68,5 +68,7 @@ Dinsmore, R., Mathews, J.D., Urbina, J., 2021. General resource for ionospheric 
 ### Papers that have used GRITI
 Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, P.J., Urbina, J., 2021. Multi-instrument observations of SCIPS: 1. ISR and GPS TEC results. Journal of Atmospheric and Solar-Terrestrial Physics 213, 105515. https://doi.org/10.1016/j.jastp.2020.105515
 
+Bostan, S.M., Urbina, J.V., Mathews, J.D., Dinsmore, R.L., Robinson, R.M., 2023. Multi-instrument study of a spread-F event at Arecibo linked to solar wind variations. Journal of Atmospheric and Solar-Terrestrial Physics 249, 106099. https://doi.org/10.1016/j.jastp.2023.106099
+
 ---
-**GRITI** was made by [Ross Dinsmore](https://github.com/dinsmoro), who was supported by the US National Science Foundation under Grant No. AGS-1241407 to The Pennsylvania State University. 
+**GRITI** was made by [Ross Dinsmore](https://github.com/dinsmoro), who was supported by the US National Science Foundation under Grant No. AGS-1241407 to The Pennsylvania State University for updates up to the "Multi-instrument observations of SCIPS: 1." paper. 
