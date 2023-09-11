@@ -11,13 +11,15 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 ## Supported Data Sources
 ### Automatic Download
 - delta-vTEC (vertical total electron content) based on [Madrigal's TEC dataset](http://cedar.openmadrigal.org/list)
+- [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates
 - [Kp Index](http://www.gfz-potsdam.de/en/kp-index/)
 - [NASA OMNI Data](https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/hroformat.txt)
 
 ### User Must Download from Source
 - [Haystack ISR](http://cedar.openmadrigal.org/list) (incoherent scatter radar)
 - [Canadian magnetometer network](https://www.geomag.nrcan.gc.ca/data-donnee/sd-en.php)
-- [AMPERE](http://ampere.jhuapl.edu/dataget/index.html)-derived ionospheric model estimates (model estimates not yet live)
+- [SuperMAG Indices/Individual Stations](https://supermag.jhuapl.edu/), for indicies you want "Large Download Durations: (Full Year)" (set to the year you want), "Format: CSV", and check whatever you want included to be analysed.
+
 - [LISN's TEC dataset](http://lisn.igp.gob.pe/) supports LISN's modified post-processed RINEX format
 
 ### Not Fully Implemented
