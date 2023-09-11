@@ -18,7 +18,9 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 ### User Must Download from Source
 - [Haystack ISR](http://cedar.openmadrigal.org/list) (incoherent scatter radar)
 - [Canadian magnetometer network](https://www.geomag.nrcan.gc.ca/data-donnee/sd-en.php)
-- [SuperMAG Indices/Individual Stations](https://supermag.jhuapl.edu/), for indicies on the [Indices page's](https://supermag.jhuapl.edu/indices/) "Download Indicies" tab you need to choose "Large Download Durations: (Full Year)" (set to the year you want), "Format: CSV", and check whatever you want included to be analysed.
+- - Create a set of folders in your data directory like this and put the data in them: datafolder/Magnetometer/<YEAR>/NRCan
+- [SuperMAG Indices/Individual Stations](https://supermag.jhuapl.edu/)
+- - For indicies on the [Indices page's](https://supermag.jhuapl.edu/indices/) "Download Indicies" tab you need to choose "Large Download Durations: (Full Year)" (set to the year you want), "Format: CSV", and check whatever you want included to be analysed. Create a set of folders in your data directory like this and put the CSV files in it: datafolder/SuperMAG/Indices
 - [LISN's TEC dataset](http://lisn.igp.gob.pe/) supports LISN's modified post-processed RINEX format
 
 ### Not Fully Implemented
@@ -31,8 +33,7 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 - RTI (range-time-intensity) \[ISR]
 - FFT, Lomb-Scargle, & CPSD (cross-power spectral density) \[all]
 - Walking FFT \[delta-vTEC, AMPERE-derived ionospheric model estimates, NASA OMNI data]
-- Sliding correlation
-- Walking correlation
+- Sliding correlation, walking-sliding correlation
 
 ## Installation
 To get the code from this repository, clone it using Git or click the green Code button at the top and "Download ZIP". All of the functions need to be in the same directory as **GRITI_main.py** but the data sources folder and other output folders can be set elsewhere in **GRITI_main_settings.ini**.
