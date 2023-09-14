@@ -273,12 +273,12 @@ dateRange = np.array([[2013,5,6],[2013,5,8]],dtype="int16"); #Paper 1 & 2
 #dateRange = np.array([[2015,2,11],[2015,2,13]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2015,3,16],[2015,3,18]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2011,3,11],[2011,3,11]],dtype="int16"); #dates are in int16 because they can be
-# dateRange = np.array([[2017,3,14],[2017,3,16]],dtype="int16"); #Salih Paper
+dateRange = np.array([[2017,3,14],[2017,3,16]],dtype="int16"); #Salih Paper
 # dateRange = np.array([[2017,3,15],[2017,3,15]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,13],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,12],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
-dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
-dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look
+# # dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
+# # dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look
 # dateRange = np.array([[2018,3,28],[2018,4,7]],dtype="int16"); #dates are in int16 because they can be <- kinda calm
 # dateRange = np.array([[2018,4,27],[2018,5,4]],dtype="int16"); #dates are in int16 because they can be <- very calm period [no AMPERE data here yet...]
 # dateRange = np.array([[2019,5,17],[2019,5,21]],dtype="int16"); #dates are in int16 because they can be <- kinda calm, one SWPPE
@@ -291,6 +291,7 @@ dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16
 # dateRange = np.array([[2020,6,3],[2020,6,3]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2014,5,5],[2014,5,9]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2022,1,14],[2022,1,18]],dtype="int16"); #dates are in int16 because they can be
+# dateRange = np.array([[2015,11,1],[2015,11,3]],dtype="int16"); #dates are in int16 because they can be <- Salih new dates
 #dates better go earlier -> later
 #print("{}".format(dateRange))
 dateRange_zeroHr_override = [2013,5,7]; #overrides the zero hr, which is normally estimated based on the middle of the given dateRange
@@ -424,8 +425,8 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 
 # plotLatRange = [30,75]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
-# plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing)
-# plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
+plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing)
+plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
 
 # plotLatRange = [25,55]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
@@ -439,8 +440,8 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 # plotLatRange = [-90,25]; #latitude limit for Up to Mexico & South America
 # plotLongRange = [-120,-20]; #longitude limit for Up to Mexico & South America
 
-# plotLatRange = [-90,5]; #latitude limit for South America
-# plotLongRange = [-100,-25]; #longitude limit for South America
+plotLatRange = [-90,5]; #latitude limit for South America
+plotLongRange = [-100,-25]; #longitude limit for South America
 
 # plotLatRange = [30,75]; #latitude limit for Europe
 # plotLongRange = [-15,40]; #longitude limit for Europe
@@ -493,8 +494,8 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 # plotLongRange = [-2.47,25.50]; #!MAG! #good for AO down to AO magnetic conjugate in South America
 
 #SA Andes regions
-# plotLatRange = [-18,-4]; # Peru Andes
-# plotLongRange = [-85,-68]; # Peru Andes
+plotLatRange = [-18,-4]; # Peru Andes
+plotLongRange = [-85,-68]; # Peru Andes
 
 # plotLatRange = [-35,-18]; # Chile Andes
 # plotLongRange = [-72,-68]; # Chile Andes
@@ -626,7 +627,7 @@ latLong_ref.append( [latMillstoneMISA,longMillstoneMISA] ); #record it in the mu
 # longMillstone = 37.5; #put at 54 deg E
 
 #==============TEC Data Options==============
-FLG_TEC_use = [2,]; #0 uses all TEC sources and combines. 
+FLG_TEC_use = [2,3]; #0 uses all TEC sources and combines. 
 #Can combine numbers bellow in an array like [2,3,5] to get just those data sources
 #1 - Pre-processed data (alternate to 2, will not combine with 2)
 #2 - Madrigal Database TEC (will not combine with 1)
@@ -683,7 +684,7 @@ settings_TEC = {
 #!!!-----0 for off, 1 for on-----!!!
 FLG_keo = 1; #averaging TEC in bands, needed for anything with _anyAngle
 FLG_keo_plot = 1; #averaging TEC in bands
-FLG_keo_plot_timeCutout = 1; #Uses the time cutout range defined above (if 'use local time' is True, the time cutout range is taken to be a UTC time STILL)
+FLG_keo_plot_timeCutout = 0; #Uses the time cutout range defined above (if 'use local time' is True, the time cutout range is taken to be a UTC time STILL)
 #[ONLY FANCY PLOTS]
 FLG_keo_dataDensity = 0; #1 shows the data density for the period involved and the area involved (2 shows receiver location, 3 plots both data density and receiver location on two seperate plots)
 FLG_keo_plot_wNoise = 0; #[ONLY FANCY PLOT]
@@ -697,7 +698,7 @@ FLG_combinedPlot_keo_TEC_n_AMPERE_1Dintegration_auroralZone_spectra_timeMatch = 
 
 FLG_FFTthruTime_KEOnAvgPtnAMPEREintegrated = 0; #perform FFT power spectra walking through time on TEC Keogram & TEC at a pt & AMPERE integrated
 
-FLG_keo_stacker = 0; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
+FLG_keo_stacker = 2; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
 FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables clipping higher/lower values
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['OMNI','Bz GSM'], 'comparison':'less than|0 & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
@@ -705,7 +706,7 @@ FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables
 FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':[['SuperMAG','SMUs'],['OMNI','Bz GSM']], 'comparison':['elevated|auto,pos only & rate|auto & nan', 'less than|0 & nan'], 'time offset':[122*60, 122*60]}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
-FLG_keo_stackerPlot = 0; #plots the stacked keograms
+FLG_keo_stackerPlot = 1; #plots the stacked keograms
 
 
 FLG_keo_featureFinder = 0; #find some features, good luck tiger
@@ -976,7 +977,7 @@ FLG_ISR_plot_ScargleSet = 0; #shows both bands SNR/SNR HP/Scargle of SNR HP all 
 FLG_ISR_AMPERE_CPSD_cutOut = 0; #perform CPSD between ISR & JH over designated time cutout range (all time series data)
 
 #==============Kp and OMNI and SuperMAG and NRCanMAG Mecha Ploter Options==============
-FLG_MECHACOMBO_plot = 0; #plots
+FLG_MECHACOMBO_plot = 1; #plots
 # FLG_MECHACOMBO_plot_names = ['Kp','Bz GSM','Psw','Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = [['Bx GSE & GSM','By GSM','Bz GSM'],'Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Proton Density',['SMR','HUA-X &R detrended','SJG-X &R detrended'],'Psw',['Bx GSE & GSM','By GSM','Bz GSM']]; #names of things to plot for Salih's paper
@@ -1202,7 +1203,7 @@ FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':[0*3600,24*3
 FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':time_cutout_range}; #use defined cutout range
 
 
-FLG_AMPERE_integrate_plot = 0; #plot AMPERE integrated across the northern and southern hemispheres vs time
+FLG_AMPERE_integrate_plot = 1; #plot AMPERE integrated across the northern and southern hemispheres vs time
 FLG_AMPERE_integrate_plot_highlightIMFSouth = True; #highlights IMF south (magnetic reconnection) times
 FLG_AMPERE_integrate_plot_highlightIMFSouth_type = 'Bz GSM'; #OMNI data type to use for negative == south
 FLG_AMPERE_integrate_area = 0; #plot scatter shot of the data
@@ -1451,9 +1452,9 @@ snaps_Grid_Long_Spaces = 80; #how many spaces to break the longitude range up in
 
 #==============Movie Options==============
 #-----0 for off, 1 for on-----
-FLG_movieCreation_enable = 0; #1 for on, 0 for off 
+FLG_movieCreation_enable = 1; #1 for on, 0 for off 
 #-----Settings for above plots-----
-movieType = 5; #see below
+movieType = 1; #see below
 #0 = dTEC moving data points (Fastest, confusing to actually see what up)
 #1 = dTEC stationary data points
 #2 = dTEC stationary data points + Zenith ISR overlay on 2nd plot
@@ -3947,7 +3948,7 @@ if( FLG_keo_stackerPlot == 1 ):
 
 #==============Analysis: automatic feature finder time==============
 if( FLG_keo_featureFinder >= 1 ):
-    sys.crash()
+    # sys.crash()
     from scipy.signal import fftconvolve, gaussian, argrelextrema
     from Code.GRITI_plotHelper_axisizerLatLong import GRITI_plotHelper_axisizerLatLong
     from Code.GRITI_plotHelper_axisizerTime import GRITI_plotHelper_axisizerTime
@@ -4245,7 +4246,7 @@ if( FLG_keo_featureFinder >= 1 ):
         
     
     #remove times w/ undesired activity/near sunrise/sunset
-    FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
+    FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan & prune|120,600 & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 
     kCompare = subfun_comparator(FLG_keo_featureFinder_ignore[1], data, dates=dates); #get when is bad
 
@@ -4343,7 +4344,7 @@ if( FLG_keo_featureFinder >= 1 ):
     figFitter(fig); #fit the fig fast
     plt.show()
     
-    
+    sys.crash()
 #END IF
 
 #==============Analysis: delta-vTEC Double Keo w/ AMPERE==============
