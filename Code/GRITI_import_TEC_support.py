@@ -44,7 +44,7 @@ def GRITI_import_TEC_support_filter(settings_paths,settings_config,paths_TEC,TEC
         #--- estimate the memory needed to filter 1 day ---
         i = instances_toDo_where[0]; #start off with i=first one
         j = 0; #start off with j=0
-        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i+j], 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
+        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i+j]), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
             #----- Read in the unfiltered data, size it up -----
             unfilt_dictTemp_elev = TEC_fileUnfilt.get('elev')[()]; #get that dataset out
             TEC_goodVals = unfilt_dictTemp_elev >= minElevation; #get the locations where elevation is above the min elevation
@@ -158,7 +158,7 @@ def GRITI_import_TEC_support_filter_perDay(i, dateRange_dayNum_full, dateRange_d
             unfilt_dict = {}; #prep this
             for j in range(-1,2): #run through the days to get the main day and the days around it
                 if( (TEC_dataAvail[i+j] == 4) | (TEC_dataAvail[i+j] == 7) | (TEC_dataAvail[i+j] == -3) ): #make sure data is there before reading it (4 or 7 mean it is there) and -3 also means it is there, just a padded day
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i+j], 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i+j]), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
                         #----- Read in the unfiltered data, keep only the good data -----
                         keyz = list(unfilt_dict.keys()); #get the saved keys
                         keyzNew = list(TEC_fileUnfilt.keys()); #get the saved keys
@@ -1255,7 +1255,7 @@ def GRITI_import_TEC_support_filter_perDay(i, dateRange_dayNum_full, dateRange_d
             #with h5py.File(TEC_dataFilePath[i], 'w') as TEC_file:
             h5pyChunkShape = filt_dict['dTEC'].shape; #get the shape of one of the vectors and use it as a chunk (read only whole chunks)
             #use the with thing because it prevents the file being "open in python" still in the event of a crash THERE IS NO WAY TO CLOSE A FILE?
-            with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'w', rdcc_nbytes =500*1024*1024) as TEC_file:
+            with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'w', rdcc_nbytes =500*1024*1024) as TEC_file:
                 for j in range(0,len(keyz)):
                     if( np.isscalar(filt_dict[keyz[j]]) == False ):
                         TEC_file.create_dataset(keyz[j], data=filt_dict[keyz[j]], chunks=h5pyChunkShape, compression='gzip', compression_opts=4, shuffle=True, fletcher32=True); #write that data
