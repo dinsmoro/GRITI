@@ -700,31 +700,45 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
         
         #-----CONVERT THE DATA TO FASTER FORMAT-----
         if( numInstances_toDo > 1 ):
-            #--- pack up for parallel ---
-            print('WARNING in GRITI_import_TEC: Parallelization possible for converting raw data to unfiltered data, which will speed it up. Downside is that no updates will be printed. See you on the other side!');
-            tic = time();
-            parallel_list = []; #Prep
-            for i in range(0,instances_toDo_where.size): # Every iteration appends a list of inputs to parallel_list, each index of parallel_list will be independently run
-                parallel_list.append([ instances_toDo_where[i], TEC_dataAvail, dateRange_full, dateRange_dayNum_full,
-                                       TEC_dataFileNameUnfilt, dataType_str, dataType_meth,
-                                       locIntUnfilt_size, locFloatUnfilt_size, locStringUnfilt_size, current_timePerVect,
-                                       settings_paths, paths_TEC, version_unfilt,
-                                       FLG_deleteOrig, True ]);
-            #END FOR i
-            
-            #--- apply parallel calc on function ---
-            with joblib.parallel_backend('loky'):
-                with joblib.Parallel(n_jobs=numInstances_toDo,pre_dispatch=numInstances_toDo,batch_size=1) as parallel_arbiter:    
-                    parallel_results = parallel_arbiter(joblib.delayed(GRITI_import_TEC_Madrigal_raw2unfilt)(*sublist) for sublist in parallel_list); #annoyingly I need to unpack every variable input manually
+            try:
+                #--- pack up for parallel ---
+                print('WARNING in GRITI_import_TEC: Parallelization possible for converting raw data to unfiltered data, which will speed it up. Downside is that no updates will be printed. See you on the other side!');
+                tic = time();
+                parallel_list = []; #Prep
+                for i in range(0,instances_toDo_where.size): # Every iteration appends a list of inputs to parallel_list, each index of parallel_list will be independently run
+                    parallel_list.append([ instances_toDo_where[i], TEC_dataAvail, dateRange_full, dateRange_dayNum_full,
+                                           TEC_dataFileNameUnfilt, dataType_str, dataType_meth,
+                                           locIntUnfilt_size, locFloatUnfilt_size, locStringUnfilt_size, current_timePerVect,
+                                           settings_paths, paths_TEC, version_unfilt,
+                                           FLG_deleteOrig, True ]);
+                #END FOR i
+                
+                #--- apply parallel calc on function ---
+                with joblib.parallel_backend('loky'):
+                    with joblib.Parallel(n_jobs=numInstances_toDo,pre_dispatch=numInstances_toDo,batch_size=1) as parallel_arbiter:    
+                        parallel_results = parallel_arbiter(joblib.delayed(GRITI_import_TEC_Madrigal_raw2unfilt)(*sublist) for sublist in parallel_list); #annoyingly I need to unpack every variable input manually
+                    #END WITH
                 #END WITH
-            #END WITH
-            del parallel_list #save some mem
-            #--- unpack parallel results ---
-            for i in range(0,len(parallel_results)):
-                TEC_dataAvail[instances_toDo_where[i]] = parallel_results[i][0]; #1st one is data avail value, 2nd doesn't matter for parallel
-            #END FOR i
-            del parallel_results #save some mem
-            print('\nTime to convert '+str(instances_toDo_where.size)+' days in parallel took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end   
+                del parallel_list #save some mem
+                #--- unpack parallel results ---
+                for i in range(0,len(parallel_results)):
+                    TEC_dataAvail[instances_toDo_where[i]] = parallel_results[i][0]; #1st one is data avail value, 2nd doesn't matter for parallel
+                #END FOR i
+                del parallel_results #save some mem
+            except Exception as err:
+                print('WARNING IN GRITI_import_TEC_Madrigal: ERROR detected in parallelization attempt. Trying non-parallelization. Error message here:\n'+str(err)); #report something went bad, hopefully it was joblib
+                tic = time();
+                for i in range(0,instances_toDo_where.size):
+                     raw2unfilt_results = GRITI_import_TEC_Madrigal_raw2unfilt(instances_toDo_where[i], TEC_dataAvail, dateRange_full, dateRange_dayNum_full,
+                                           TEC_dataFileNameUnfilt, dataType_str, dataType_meth,
+                                           locIntUnfilt_size, locFloatUnfilt_size, locStringUnfilt_size, current_timePerVect,
+                                           settings_paths, paths_TEC, version_unfilt,
+                                           FLG_deleteOrig, False);
+                     TEC_dataAvail[instances_toDo_where[i]] = raw2unfilt_results[0]; #1st one is new data avail value
+                     current_timePerVect = raw2unfilt_results[1]; #2nd one is new current_timePerVect
+                #END FOR i
+            #END TRYING
+            print('\nTime to convert '+str(instances_toDo_where.size)+' days in series took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end   
         else:
             # no need to parallelize if just 1 instance can run
             for i in range(0,instances_toDo_where.size):
