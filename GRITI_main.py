@@ -716,9 +716,9 @@ FLG_keo_timeMatch_n_HP_Scargle = 0; #Scargles the data
 FLG_keo_Scargle_FFT = 1; #0 for Scargle, 1 for FFT
 #FLG_keo_fullTime = 1; #0 for match to Zenith/MISA (norm), 1 for full time (will break stuff later I bet)
 #-----Settings for above plots-----
-keo_angle = 90; #deg, user defined angle
+keo_angle = 0; #deg, user defined angle
 keo_Width_orig = 360; #arcdeg, total width - not an angle in this instance [put 360 for 0/90/180/270 because the code will autotruncate that]
-keo_N = 200; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
+keo_N = 50; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
 keo_polarMode = 0; #0 for regular plotting, 1 for polar plotting of the averaging area
 keo_45vsLatLong = 1; #0 for longitude on xaxis on a 45 degree angle (or multiple of it), 1 for latitude on xaxis
 keo_Zoom = 5; #+/-# arcdeg around the Millstone Hill beam of choice, zoom for the time-cut plot
@@ -2972,7 +2972,7 @@ if( FLG_dataTypes[FLG_AMPEREloc] == 1):
     # data['AMPERE']['FAC +'][data['AMPERE']['FAC'] < 0] = np.nan; #nan stuff that's negative
     # data['AMPERE']['FAC -'] = np.copy(data['AMPERE']['FAC']); #copy it over
     # data['AMPERE']['FAC -'][data['AMPERE']['FAC'] > 0] = np.nan; #nan stuff that's positive
-    # with h5py.File(settings_paths['data'] + '\\' + folder_AMPERE + '\\' + str(dateRange_full[i,0]) + '\\' + AMPERE_fileName, 'r') as AMPERE_file:
+    # with h5py.File(os.path.join(settings_paths['data'], folder_AMPERE, str(dateRange_full[i,0]), AMPERE_fileName), 'r') as AMPERE_file:
     if( FLG_AMPERE_integrate == True ):
         #only integrate if needed
         AMPERE_integrated = GRITI_AMPERE_integrator(data['AMPERE'], dates, settings['AMPERE'], plotLatRange, plotLongRange, AMPERE_integrateMethod, AMPERE_integrateMethod_val, 
@@ -5413,9 +5413,9 @@ if( FLG_doubleKeo_xcorr == 1 ):
             doubleKeo_xcorr_TEC_filtMethod.replace(' ','').replace('-','').lower() + \
             '_'+str(doubleKeo_xcorr_noiseIterations)+'_'+textNice(TEC_dataRate)+'_'+textNice(TEC_timeUnique.size); #hash of all of the settings in string form 
             
-        if( os.path.isfile(settings['paths']['cache']+'\\'+'keoTECnoise_'+noiseHash+'.pkl') == 1 ):
+        if( os.path.isfile(os.path.join(settings['paths']['cache'],'keoTECnoise_'+noiseHash+'.pkl')) == 1 ):
             #if the data already exists, load it in
-            with open(settings['paths']['cache']+'\\'+'keoTECnoise_'+noiseHash+'.pkl', 'rb') as doubleKeo_filer:
+            with open(os.path.join(settings['paths']['cache'],'keoTECnoise_'+noiseHash+'.pkl'), 'rb') as doubleKeo_filer:
                 doubleKeo_keo_noise_xcorr[i] = pickle.load(doubleKeo_filer); #load in the data
             #END WITH
             FLG_doubleKeo_xcorr_makeNoise = 0; #set the flag to off, data was already made and saved
@@ -5533,7 +5533,7 @@ if( FLG_doubleKeo_xcorr == 1 ):
         #END FOR j
         if( FLG_doubleKeo_xcorr_makeNoise == 1 ):
             #save the noise data if it was newly made
-            with open(settings['paths']['cache']+'\\'+'keoTECnoise_'+noiseHash+'.pkl', 'wb') as doubleKeo_filer:
+            with open(os.path.join(settings['paths']['cache'],'keoTECnoise_'+noiseHash+'.pkl'), 'wb') as doubleKeo_filer:
                 pickle.dump(doubleKeo_keo_noise_xcorr[i], doubleKeo_filer); #save that data
             #END WITH
             toc = time.time() - tic; #calc the time it took
@@ -6404,7 +6404,7 @@ if( FLG_doubleKeo_xcorr == 1 ):
     #final plot adjusting stuff
     figFitter(fig); #fit that fig fast
     if( FLG_fancyPlot_justHere != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+'doubleKeo_CSD_'+' & '.join(doubleKeo_namesNice).replace(' ','_')+'_vs_'+settings['AMPERE']['data type'].replace(' ','_')+'_'+textNice(time_cutout_range[0]/3600)+'_to_'+textNice(time_cutout_range[1]/3600)+'hrs'+'.png'); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],'doubleKeo_CSD_'+' & '.join(doubleKeo_namesNice).replace(' ','_')+'_vs_'+settings['AMPERE']['data type'].replace(' ','_')+'_'+textNice(time_cutout_range[0]/3600)+'_to_'+textNice(time_cutout_range[1]/3600)+'hrs'+'.png')); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF  
@@ -11269,7 +11269,7 @@ if( FLG_OMNI_plot_combined == 1 ):
     
     figFitter(fig); #fit the fig fast
     if( FLG_fancyPlot != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+'OMNI_duelingData.png'); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],'OMNI_duelingData.png')); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF
@@ -11670,7 +11670,7 @@ if( FLG_OMNI_IMFclockAngle == 1 ):
     # fig.subplots_adjust(wspace=0.25); #sets padding to small numbers for minimal white space
     figFitter(fig); #fit the fig fast
     if( FLG_fancyPlot != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+'OMNI_IMFclockAngle.png'); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],'OMNI_IMFclockAngle.png')); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF
@@ -13991,7 +13991,7 @@ if( FLG_magicks == 1 ):
     #~~~~~ scikit-learn ~~~~~
     from sklearn.preprocessing import StandardScaler
     from sklearn.neural_network import MLPRegressor
-    if( os.path.isfile(settings['paths']['cache']+'\\'+'magicks_sklearn_'+inputType+'2TEC.pkl') == False ):      
+    if( os.path.isfile(os.path.join(settings['paths']['cache'],'magicks_sklearn_'+inputType+'2TEC.pkl')) == False ):      
         
         #--- scale input data for training ---
         scaler = StandardScaler(); #prep a scaler function
@@ -14043,11 +14043,11 @@ if( FLG_magicks == 1 ):
         #END FOR i
         
         magicks_dateTrained = dates['date range'];
-        with open(settings['paths']['cache']+'\\'+'magicks_sklearn_'+inputType+'2TEC.pkl', 'wb') as pklr:
+        with open(os.path.join(settings['paths']['cache'],'magicks_sklearn_'+inputType+'2TEC.pkl'), 'wb') as pklr:
             pkl.dump([magicks,model_activations,scaler,scaler_out,magicks_dateTrained], pklr); #save the data
         #END WITH
     else:
-        with open(settings['paths']['cache']+'\\'+'magicks_sklearn_'+inputType+'2TEC.pkl', 'rb') as pklr:
+        with open(os.path.join(settings['paths']['cache'],'magicks_sklearn_'+inputType+'2TEC.pkl'), 'rb') as pklr:
             [magicks,model_activations,scaler,scaler_out,magicks_dateTrained] = pkl.load(pklr); #load the data if there
         #END WITH
         
