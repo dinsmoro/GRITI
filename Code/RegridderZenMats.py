@@ -19,7 +19,7 @@ def RegridderZenMats(inSize, outSize):
     xRange = np.arange(0,inSize[0]+xFact,xFact); # Get a range of pixel slices to make
     xRangeAdj = np.copy(xRange); # Copy to avoid python variable issues
     for i in range(0,xRangeAdj.size): # Run through all of the x ranges and adjust as needed
-        if( xRangeAdj[i] == int(xRangeAdj[i]) ): # Catch true integers
+        if( np.isclose(xRangeAdj[i], int(xRangeAdj[i])) ): # Catch true integers
             xRangeAdj[i] = xRangeAdj[i] - .1; # Force any int values to floor to the previous integer for counting reasons
         # END IF
     # END FOR i
@@ -54,7 +54,7 @@ def RegridderZenMats(inSize, outSize):
     yRange = np.arange(0,inSize[1]+yFact,yFact); # Get a range of pixel slices to make
     yRangeAdj = np.copy(yRange); # Copy to avoid python variable issues
     for i in range(0,yRangeAdj.size): # Run through all of the y ranges and adjust as needed
-        if( yRangeAdj[i] == int(yRangeAdj[i]) ): # Catch true integers
+        if( ynp.isclose(yRangeAdj[i], int(yRangeAdj[i])) ): # Catch true integers
             yRangeAdj[i] = yRangeAdj[i] - .1; # Force any int values to floor to the previous integer for counting reasons
         # END IF
     # END FOR i

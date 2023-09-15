@@ -7,6 +7,7 @@
 import numpy as np #import in here I dunno
 import matplotlib.pyplot as plt
 import warnings
+import os
 from Code.subfun_timeMatch import subfun_timeMatch
 from Code.subfun_filter import subfun_filter
 from Code.subfun_spectra import subfun_spectra
@@ -178,7 +179,7 @@ def GRITI_spectral_6minAnalysisPlot(dataz, timez, timezUnit, dataRate, dataRateU
     # fig.subplots_adjust(left = 0.050, right = 0.985, top = 0.96, bottom = 0.065); #sets padding to small numbers for minimal white space
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
     if( FLG_fancyPlot != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+'spectra_6min_'+fileNamer+'.png'); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],'spectra_6min_'+fileNamer+'.png')); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF   

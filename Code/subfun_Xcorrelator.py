@@ -576,7 +576,7 @@ def subfun_Xcorrelator(sig1, sig2, sig1_filt=None, sig2_filt=None, sig1_noise=No
             
             figFitter(fig); #fit the fig fast
             if( FLG_fancyPlot != 0 ):
-                fig.savefig(settings_paths['fancyPlots']+'\\'+'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_timeSeries'+'.png'); #save the figure
+                fig.savefig(os.path.join(settings_paths['fancyPlots'],'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_timeSeries'+'.png')); #save the figure
                 plt.close(); #close figure b/c it lurks apparently
                 plt.ion(); #re-enable it for later stuff
             #END IF
@@ -730,7 +730,7 @@ def subfun_Xcorrelator(sig1, sig2, sig1_filt=None, sig2_filt=None, sig1_noise=No
             
             figFitter(fig); #fit the fig fast
             if( FLG_fancyPlot != 0 ):
-                fig.savefig(settings_paths['fancyPlots']+'\\'+'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_FFT'+'.png'); #save the figure
+                fig.savefig(os.path.join(settings_paths['fancyPlots'],'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_FFT'+'.png')); #save the figure
                 plt.close(); #close figure b/c it lurks apparently
                 plt.ion(); #re-enable it for later stuff
             #END IF
@@ -798,7 +798,7 @@ def subfun_Xcorrelator(sig1, sig2, sig1_filt=None, sig2_filt=None, sig1_noise=No
     
         figFitter(fig); #fit the fig fast
         if( FLG_fancyPlot != 0 ):
-            fig.savefig(settings_paths['fancyPlots']+'\\'+'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_Xcorr'+'.png'); #save the figure
+            fig.savefig(os.path.join(settings_paths['fancyPlots'],'Xcorr_'+mode+plotName_fileName.replace(' ','+')+'_Xcorr'+'.png')); #save the figure
             plt.close(); #close figure b/c it lurks apparently
             plt.ion(); #re-enable it for later stuff
         #END IF

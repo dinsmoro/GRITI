@@ -155,13 +155,50 @@ def subfun_comparator(rule_holder, data, dates=None):
                 
             elif( 'nan' in kCompare_method_curr ):
                 kCompare = kCompare | np.isnan(data2compare); #tack on nan check\
+                    
+            elif( 'prune' in kCompare_method_curr ):
+                #remove short-lived stuff so it doesn't mess with long-term analysis stuff; assumes no gaps - should be OK, gaps can be NaN'd via a subfun_filter call
+                if( kCompare_method_specifics is not None ):
+                    #convert em
+                    kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #sec, if activity duration less than X secs, investigate pruning
+                    kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]); #sec, if no activitiy within X secs, prune
+                else:
+                    kCompare_method_specifics = [120, 600]; #sec, defaults of 2 min duration and no other activity within 10 min applied if no specs supplied
+                #END IF
+                
+                minDuration2indx = np.int64(np.ceil(kCompare_method_specifics[0]/data_ref['data rate'])); #convert to indexes
+                minDist2indx = np.int64(np.ceil(kCompare_method_specifics[1]/data_ref['data rate'])); #convert to indexes
+                                
+                kCompare_len = np.diff(np.where(np.concatenate(([kCompare[0]], kCompare[:-1] != kCompare[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
+                kCompare_where = np.where(np.concatenate(([kCompare[0]], kCompare[:-1] != kCompare[1:])))[0][::2];
+                kCompare_prune = np.where(kCompare_len <= minDuration2indx)[0]; #see what lengths are too tiny, investigate
+                for i in range(0, kCompare_prune.size):
+                    #check before
+                    if( kCompare_prune[i] > 0 ):
+                        prune_before = (kCompare_where[kCompare_prune[i]]-minDist2indx) > (kCompare_where[kCompare_prune[i]-1]+kCompare_len[kCompare_prune[i]-1]); #True prunes, False keeps
+                    else:
+                        prune_before = True; #if at the edge, defaults to prune (True)
+                    #END IF
+                    #check after
+                    if( kCompare_prune[i] < kCompare_where.size ):
+                        prune_after = (kCompare_where[kCompare_prune[i]]+kCompare_len[kCompare_prune[i]]+minDist2indx) < kCompare_where[kCompare_prune[i]+1]; #True prunes, False keeps
+                    else:
+                        prune_after = True; #if at the edge, defaults to prune (True)
+                    #END IF
+                    #decide to prune or not
+                    if( prune_before and prune_after ):
+                        kCompare[kCompare_where[kCompare_prune[i]]:kCompare_where[kCompare_prune[i]]+kCompare_len[kCompare_prune[i]]] = False; #Prune if both prune checks are true
+                    #END IF
+                #END FOR i                                
           
             elif( ('sunrisesunset' in kCompare_method_curr) | ('sunrisensunset' in kCompare_method_curr) | ('sunriseandsunset' in kCompare_method_curr) ):
+                print('yee')
                 #reqs 'sunrise|lat#,long#,timeBeforeToExclude,timeAfterToExclude' - note these can be tacked onto any other analysis, consider adding a "dummy" data if needed since these don't need a data loaded (other than the ref)
-                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #convert em
-                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]);
-                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]);
-                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]);
+                #convert em
+                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #arcdeg, lat for sunrise/set times
+                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]); #arcdeg, long for sunrise/set times
+                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]); #sec, time before sunrise/set to exclude
+                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]); #sec, time after sunrise/set to exclude
                 [sunRise, sunSet, dateRange_fullPad] = sunAlsoRises(dates['date range full'],kCompare_method_specifics[0],kCompare_method_specifics[1]); #get the sunrise and sunset times for the days at the loc  
                 
                 dateRange_dayNum_fullPad = subfun_date_to_dayNum(dateRange_fullPad); #convert to dayNum
@@ -176,11 +213,13 @@ def subfun_comparator(rule_holder, data, dates=None):
                 #END FOR i
                 
             elif( 'sunrise' in kCompare_method_curr ):
+                print('yoo noo')
                 #reqs 'sunrise|lat#,long#,timeBeforeToExclude,timeAfterToExclude' - note these can be tacked onto any other analysis, consider adding a "dummy" data if needed since these don't need a data loaded (other than the ref)
-                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #convert em
-                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]);
-                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]);
-                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]);
+                #convert em
+                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #arcdeg, lat for sunrise/set times
+                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]); #arcdeg, long for sunrise/set times
+                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]); #sec, time before sunrise/set to exclude
+                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]); #sec, time after sunrise/set to exclude
                 [sunRise, _, dateRange_fullPad] = sunAlsoRises(dates['date range full'],kCompare_method_specifics[0],kCompare_method_specifics[1]); #get the sunrise and sunset times for the days at the loc  
                 
                 dateRange_dayNum_fullPad = subfun_date_to_dayNum(dateRange_fullPad); #convert to dayNum
@@ -192,11 +231,13 @@ def subfun_comparator(rule_holder, data, dates=None):
                 #END FOR i
                 
             elif( 'sunset' in kCompare_method_curr ):
+                print('breh')
                 #reqs 'sunrise|lat#,long#,timeBeforeToExclude,timeAfterToExclude' - note these can be tacked onto any other analysis, consider adding a "dummy" data if needed since these don't need a data loaded (other than the ref)
-                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #convert em
-                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]);
-                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]);
-                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]);
+                #convert em
+                kCompare_method_specifics[0] = str2num(kCompare_method_specifics[0]); #arcdeg, lat for sunrise/set times
+                kCompare_method_specifics[1] = str2num(kCompare_method_specifics[1]); #arcdeg, long for sunrise/set times
+                kCompare_method_specifics[2] = str2num(kCompare_method_specifics[2]); #sec, time before sunrise/set to exclude
+                kCompare_method_specifics[3] = str2num(kCompare_method_specifics[3]); #sec, time after sunrise/set to exclude
                 [_, sunSet, dateRange_fullPad] = sunAlsoRises(dates['date range full'],kCompare_method_specifics[0],kCompare_method_specifics[1]); #get the sunrise and sunset times for the days at the loc  
                 
                 dateRange_dayNum_fullPad = subfun_date_to_dayNum(dateRange_fullPad); #convert to dayNum

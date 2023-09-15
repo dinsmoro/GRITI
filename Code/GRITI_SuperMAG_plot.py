@@ -15,6 +15,7 @@ import numpy as np #import in here I dunno
 import matplotlib.pyplot as plt
 from Code.subfun_textNice import textNice
 from Code.subfun_figFitter import figFitter
+import os
 
 def GRITI_SuperMAG_plot(SuperMAG_data, settings_SuperMAG, dates, settings_plot, \
         opt=0, time_Ref=None, time_Reference=None, settings_paths=None):
@@ -149,12 +150,12 @@ def GRITI_SuperMAG_plot(SuperMAG_data, settings_SuperMAG, dates, settings_plot, 
         FLG_win = False; #prep flag
         while( (tryNum < tryLim) & (FLG_win == False) ):
             try:
-                fig.savefig(settings_paths['fancyPlots']+'\\'+'SuperMAG_products'+settings_plot['save file type']); #save the figure
+                fig.savefig(os.path.join(settings_paths['fancyPlots'],'SuperMAG_products'+settings_plot['save file type'])); #save the figure
                 plt.close(); #close figure b/c it lurks apparently
                 plt.ion(); #re-enable it for later stuff
                 FLG_win = True;
             except PermissionError:
-                print('WARNING in GRITI_SuperMAG_plot: Try #'+str(tryNum+1)+'/'+str(tryLim)+', error saving a FancyPlot(TM): PermissionError for the file '+settings_paths['fancyPlots']+'\\'+'SuperMAG_products'+settings_plot['save file type']+' Waiting 3 seconds.');
+                print('WARNING in GRITI_SuperMAG_plot: Try #'+str(tryNum+1)+'/'+str(tryLim)+', error saving a FancyPlot(TM): PermissionError for the file '+os.path.join(settings_paths['fancyPlots'],'SuperMAG_products'+settings_plot['save file type'])+' Waiting 3 seconds.');
                 try:
                     time.sleep(3);
                 except:
@@ -165,7 +166,7 @@ def GRITI_SuperMAG_plot(SuperMAG_data, settings_SuperMAG, dates, settings_plot, 
             #END TRY
         #END WHILE
         if( tryNum == tryLim ):
-            print('\nWARNING in GRITI_SuperMAG_plot: Error saving a FancyPlot(TM): PermissionError for the file '+settings_paths['fancyPlots']+'\\'+'SuperMAG_products'+settings_plot['save file type']+' Disabling FancyPlot(TM), plot will likely be real messed.');
+            print('\nWARNING in GRITI_SuperMAG_plot: Error saving a FancyPlot(TM): PermissionError for the file '+os.path.join(settings_paths['fancyPlots'],'SuperMAG_products'+settings_plot['save file type'])+' Disabling FancyPlot(TM), plot will likely be real messed.');
             plt.ion(); #re-enable it for later stuff
             plt.show(); #req to make plot show up
         #END IF
