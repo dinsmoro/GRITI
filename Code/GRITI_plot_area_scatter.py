@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as tickr
 import cartopy.crs as ccrs #cartopy replaces basemap b/c it's updated
 import cartopy.feature as cfeature #cartopy replaces basemap b/c it's updated
-# import os
+import os
 from Code.subfun_figFitter import figFitter
 
 def GRITI_plot_area_scatter(data_data, data_time, data_lat, data_long, data_timeUnique, data_timeRef, \
@@ -288,7 +288,7 @@ def GRITI_plot_area_scatter(data_data, data_time, data_lat, data_long, data_time
     
     figFitter(fig, tryLim = 2); #fit the fig fast
     if( FLG_fancyPlot != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+settings_dataSpecific['name'].replace(' ','-')+'_area_scatter.png'); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['name'].replace(' ','-')+'_area_scatter.png')); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF

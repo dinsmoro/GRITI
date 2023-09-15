@@ -741,11 +741,11 @@ def GRITI_keo_plot(keo, data_timeUnique, data_timeRef, dates, \
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
     if( FLG_fancyPlot != 0 ):
         if( np.any(timeCutout != None) ):
-            figFileName = settings_paths['fancyPlots']+'\\'+settings_dataSpecific['keo data type']+'_keo_cutout'+settings_plot['save file type'];
+            figFileName = os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['keo data type']+'_keo_cutout'+settings_plot['save file type']);
         elif( FLG_drawSun == True ):
-            figFileName = settings_paths['fancyPlots']+'\\'+settings_dataSpecific['keo data type']+'_keo_wSun'+settings_plot['save file type']; #save the figure
+            figFileName = os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['keo data type']+'_keo_wSun'+settings_plot['save file type']); #save the figure
         else:
-            figFileName = settings_paths['fancyPlots']+'\\'+settings_dataSpecific['keo data type']+'_keo'+settings_plot['save file type']; #save the figure
+            figFileName = os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['keo data type']+'_keo'+settings_plot['save file type']); #save the figure
         #END IF
         # if( settings_plot['save file type'].lower() != '.pdf' ):
         fig.savefig(figFileName); #save the figure

@@ -220,10 +220,10 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     #The padding is required for filtering since the two days 
     
     #==============Check if data already there==============
-    if( os.path.isdir(settings_paths['data'] + '\\' + paths_TEC) == 0 ): #check if TEC folder exists
+    if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC)) == 0 ): #check if TEC folder exists
         #if not, make it
-        os.makedirs(settings_paths['data'] + '\\' + paths_TEC);
-        print("NOTA BENE: Importing TEC Madrigal Func - Created TEC directory: {}\n".format(settings_paths['data'] + '\\' + paths_TEC) );
+        os.makedirs(os.path.join(settings_paths['data'], paths_TEC));
+        print("NOTA BENE: Importing TEC Madrigal Func - Created TEC directory: {}\n".format(os.path.join(settings_paths['data'], paths_TEC)) );
     #END IF
         
     dateRange_uniqueYears = np.unique(dateRange_dayNum_full[:,0]); #get the unique years involved
@@ -248,10 +248,10 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     TEC_dataFilePathUnfilt = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
     
     for i in range(0,len(dateRange_uniqueYears)): #loop to check if data folder for the year exists
-        if( os.path.isdir(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) ) == 0 ): #check if date folders exist
+        if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ) == 0 ): #check if date folders exist
             #doesn't exist, gotta make it
-            os.makedirs(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) );
-            print("NOTA BENE: Importing TEC Madrigal Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) ));
+            os.makedirs(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) );
+            print("NOTA BENE: Importing TEC Madrigal Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ));
         #END IF
     #END FOR
         
@@ -266,7 +266,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             #los_20140227.001.h5 - example file name [001 means final data, 00p is custom for preliminary data]
             TEC_fileNameOrig = get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC); #call function that deals with various raw data names and which are preferred if there's multiple types
             
-            if( (os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) == 0) and (os.path.isfile(TEC_dataFilePathUnfilt[i]) == 0) ):
+            if( (os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) == 0) and (os.path.isfile(TEC_dataFilePathUnfilt[i]) == 0) ):
                 #if the unconverted file is not there, download it
                 #first - need to check if TEC data is availiable for the days requested
                 
@@ -361,7 +361,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     with h5py.File(TEC_dataFilePathUnfilt[i], 'r', rdcc_nbytes =500*1024*1024) as testFile:
                         testFile.keys(); #tries to check out some stuff in the file
                     #END WITH
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
                         TEC_unfilt_version = TEC_fileUnfilt.attrs['version']; #read the version
                     #END WITH
                     if( TEC_unfilt_version >= version_unfilt ):
@@ -371,8 +371,8 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     else:
                         print("\n==============~Warning~==============");
                         print("The file {} uses version {} while version {} is the most current version. The file will be renamed with _oldV{} and remade with the new version of the algorithm.\n".format(TEC_dataFilePathUnfilt[i], TEC_unfilt_version , version_unfilt, TEC_unfilt_version) );
-                        os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], \
-                                  settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p')); #rename
+                        os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), \
+                                  os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p'))); #rename
                         #force an OSError to use the rest of the algorithm - uses ***'s which can't be in file names
                         with h5py.File(TEC_dataFilePathUnfilt[i]+'.***notapossiblefile', 'r', rdcc_nbytes =500*1024*1024) as testFile:
                             testFile.keys(); #tries to check out some stuff in the file
@@ -387,36 +387,36 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                         pass;
                     #END TRY
                     try: #gonna try to read the file - if we fail, it failed mid download
-                        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r', rdcc_nbytes =500*1024*1024) as testFile:
+                        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r', rdcc_nbytes =500*1024*1024) as testFile:
                             testFile.keys(); #tries to check out some stuff in the file
                         #END WITH
                         TEC_dataAvail[i] = 3; #note data is already downloaded but needs to be converted to the standardized format & naming scheme
                         #use case if download success but failure on conversion - big enough files to warrant this care :)
                     except (OSError , KeyError):
                         print("\n==============~Warning~==============");
-                        print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) );
-                        os.remove(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig); #delete partially downloaded file to avoid conflicts
+                        print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) );
+                        os.remove(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)); #delete partially downloaded file to avoid conflicts
                         TEC_dataAvail[i] = 2; #data wasn't downloaded fully and needs to be redownloaded
                     #END TRYING
                 #END TRYING
             else: #otherwise orig data downloaded but not converted to standard (fast) format
                 try: #gonna try to read the file - if we fail, it failed mid download
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r', rdcc_nbytes =500*1024*1024) as testFile:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r', rdcc_nbytes =500*1024*1024) as testFile:
                         testFile.keys(); #tries to check out some stuff in the file
                     #END WITH
                     TEC_dataAvail[i] = 3; #note data is already downloaded but needs to be converted to the standardized format & naming scheme
                     #use case if download success but failure on conversion - big enough files to warrant this care :)
                 except (OSError , KeyError):
                     print("\n==============~Warning~==============");
-                    print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) );
-                    os.remove(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig); #delete partially downloaded file to avoid conflicts
+                    print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) );
+                    os.remove(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)); #delete partially downloaded file to avoid conflicts
                     TEC_dataAvail[i] = 2; #data wasn't downloaded fully and needs to be redownloaded
                 #END TRYING
             #END IF
             
         else:
             try:
-                with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'r', rdcc_nbytes =500*1024*1024) as TEC_file:
+                with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'r', rdcc_nbytes =500*1024*1024) as TEC_file:
                     TEC_version = TEC_file.attrs['version']; #read the version
                 #END WITH
             except(OSError, KeyError):
@@ -428,10 +428,10 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 print("\n==============~Warning~==============");
                 print("The file {} uses version {} while version {} is the most current version. The file will be renamed with _oldV{} and remade with the new version of the algorithm.\n".format(TEC_dataFilePath[i], TEC_version , version_filt, TEC_version) );
                 #the filtered version is too old and needs to be redone
-                os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], \
-                        settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_oldV'+str(TEC_version).replace('.','p')); #rename
+                os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), \
+                        os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]+'_oldV'+str(TEC_version).replace('.','p'))); #rename
                 try:
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:
                         TEC_unfilt_version = TEC_fileUnfilt.attrs['version']; #read the version
                     #END WITH
                     if( TEC_unfilt_version >= version_unfilt ):
@@ -439,8 +439,8 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     else:
                         print("\n==============~Warning~==============");
                         print("The file {} uses version {} while version {} is the most current version. The file will be renamed with _oldV{} and remade with the new version of the algorithm.\n".format(TEC_dataFilePathUnfilt[i], TEC_unfilt_version , version_unfilt, TEC_unfilt_version) );
-                        os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], \
-                                  settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p')); #rename
+                        os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), \
+                                  os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p'))); #rename
                         #force an OSError to use the rest of the algorithm - uses ***'s which can't be in file names
                         with h5py.File(TEC_dataFilePathUnfilt[i]+'.***notapossiblefile', 'r', rdcc_nbytes =500*1024*1024) as testFile:
                             testFile.keys(); #tries to check out some stuff in the file
@@ -449,15 +449,15 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 except (OSError , KeyError):
                     TEC_fileNameOrig = get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC); #call function that deals with various raw data names and which are preferred if there's multiple types
                     try: #gonna try to read the file - if we fail, it failed mid download
-                        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r', rdcc_nbytes =500*1024*1024) as testFile:
+                        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r', rdcc_nbytes =500*1024*1024) as testFile:
                             testFile.keys(); #tries to check out some stuff in the file
                         #END WITH
                         TEC_dataAvail[i] = 3; #note data is already downloaded but needs to be converted to the standardized format & naming scheme
                         #use case if download success but failure on conversion - big enough files to warrant this care :)
                     except (OSError , KeyError):
                         print("\n==============~Warning~==============");
-                        print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) );
-                        os.remove(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig); #delete partially downloaded file to avoid conflicts
+                        print("Data wasn't downloaded fully for {} and will be redownloaded. Deleting partial file as well.\n".format(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) );
+                        os.remove(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)); #delete partially downloaded file to avoid conflicts
                         TEC_dataAvail[i] = 2; #data wasn't downloaded fully and needs to be redownloaded
                     #END TRYING
                 #END TRYING
@@ -476,7 +476,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             
             if( os.path.isfile(TEC_dataFilePathUnfilt[i]) == True ): #if this is true, unfiltered data is already downloaded and converted
                 TEC_dataAvail[i] = 4; #unfiltered data is already downloaded and converted
-            elif( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) == True ): #if this is true, orig data is downloaded but not converted to the faster format
+            elif( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) == True ): #if this is true, orig data is downloaded but not converted to the faster format
                 TEC_dataAvail[i] = 3; #orig data is downloaded but not converted
             else: #otherwise get data from download, since data is 1 - assume it exists on the site cause how else would the data have been filtered to start
                 TEC_dataAvail[i] = 2; #orig data needs to be downloaded
@@ -493,7 +493,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     
                     if( os.path.isfile(TEC_dataFilePathUnfilt[i]) == True ): #if this is true, unfiltered data is already downloaded and converted
                         TEC_dataAvail[i] = 4; #unfiltered data is already downloaded and converted
-                    elif( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) == True ): #if this is true, orig data is downloaded but not converted to the faster format
+                    elif( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) == True ): #if this is true, orig data is downloaded but not converted to the faster format
                         TEC_dataAvail[i] = 3; #orig data is downloaded but not converted
                     else: #otherwise get data from download, since data is 1 - assume it exists on the site cause how else would the data have been filtered to start
                         TEC_dataAvail[i] = 2; #orig data needs to be downloaded
@@ -511,7 +511,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     
                     if( os.path.isfile(TEC_dataFilePathUnfilt[i]) == True ): #if this is true, unfiltered data is already downloaded and converted
                         TEC_dataAvail[i] = 7; #unfiltered data is already downloaded and converted - BUT filtered data is finished so don't filter this day
-                    elif( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) == True ): #if this is true, orig data is downloaded but not converted to the faster format
+                    elif( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) == True ): #if this is true, orig data is downloaded but not converted to the faster format
                         TEC_dataAvail[i] = 6; #orig data is downloaded but not converted - BUT filtered data is finished so don't filter this day
                     else: #otherwise get data from download, since data is 1 - assume it exists on the site cause how else would the data have been filtered to start
                         TEC_dataAvail[i] = 5; #orig data needs to be downloaded - BUT filtered data is finished so don't filter this day
@@ -528,7 +528,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             
             if( os.path.isfile(TEC_dataFilePathUnfilt[i]) == True ): #if this is true, unfiltered data is already downloaded and converted
                 TEC_dataAvail[i] = 4; #unfiltered data is already downloaded and converted
-            elif( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig) == True ): #if this is true, orig data is downloaded but not converted to the faster format
+            elif( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)) == True ): #if this is true, orig data is downloaded but not converted to the faster format
                 TEC_dataAvail[i] = 3; #orig data is downloaded but not converted
             else: #otherwise get data from download, since data is 1 - assume it exists on the site cause how else would the data have been filtered to start
                 if( TEC_dataAvail[i] != 0 ): #prevent 0's from being escalated to 2's
@@ -603,14 +603,14 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             current_webFileNames = [web_fileNames[k] for k in np.where(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ))[0]][0]; #get the current web file name, because it's a list it is real oof
             current_web_fileLinks = [web_fileLinks[k] for k in np.where(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ))[0]][0]; #get the current web file link, because it's a list it is real oof
             current_webFileSize = np.asarray(urlopen(web_base_site+current_web_fileLinks).info()['Content-Length'],dtype=np.int64);
-            print("Downloading {} to \"{}\".\nFile size is {:.2f} GB. At {:.2f} MB/s ({:.2f} Mbps) expect it to take {:.2f} min.\nFrom site {}".format( current_webFileNames,settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]), current_webFileSize/(1024**3),current_webDownloadSpeed,current_webDownloadSpeed*8.0,(current_webFileSize/1024**2*(1/current_webDownloadSpeed))/60, web_base_site+current_web_fileLinks ));
+            print("Downloading {} to \"{}\".\nFile size is {:.2f} GB. At {:.2f} MB/s ({:.2f} Mbps) expect it to take {:.2f} min.\nFrom site {}".format( current_webFileNames,os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0])), current_webFileSize/(1024**3),current_webDownloadSpeed,current_webDownloadSpeed*8.0,(current_webFileSize/1024**2*(1/current_webDownloadSpeed))/60, web_base_site+current_web_fileLinks ));
             web_retryNum = 1; #prep the retry num
             web_retryWait = web_retryWaitSet[0]; #prep the retry wait period
             FLG_gotPage = False; #lets while exit
             while( ((web_maxRetry >= web_retryNum) | (web_maxRetry == -1)) & (FLG_gotPage == False) ):
                 try:
                     tic = time(); #for time testing
-                    urlretrieve(web_base_site+current_web_fileLinks,settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + current_webFileNames,reporthook=downloadProgress); #download the file in question to the data directory
+                    urlretrieve(web_base_site+current_web_fileLinks,os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), current_webFileNames),reporthook=downloadProgress); #download the file in question to the data directory
                     toc = time() - tic; #for time testing
                     FLG_gotPage = True; #exit the loop
                 except:
@@ -649,7 +649,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
         import psutil, joblib # these are here not at the top b/c some bad mojo with importing joblib was happening (says it was not imported, local var referenced before assignment)
         #--- estimate the memory needed to filter 1 day ---
         i = instances_toDo_where[0]; #start off with i=first one
-        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
+        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC)), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
             #--- deal with table format of file ---
             # List all groups
             TEC_fileKeys = list(TEC_fileOrig.keys()); #get the folder names in the hdf5 file
@@ -660,7 +660,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 #END IF
             #END FOR j
             if( TEC_fileKeys_dataIndex == -1 ): #ERROR CATCH
-                print('ERROR: NO \'Data\' folder found in the HDF5 file \"'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
+                print('ERROR: NO \'Data\' folder found in the HDF5 file \"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
                 sys.crash();
             #END IF
             TEC_fileDatalocale = list(TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex]]); #choose the data folder
@@ -671,7 +671,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 #END IF
             #END FOR j
             if( TEC_fileDatalocale_tableIndex == -1 ): #ERROR CATCH
-                print('ERROR: NO \'Data\'Table Layout\' folder found in the HDF5 file \"'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
+                print('ERROR: NO \'Data\'Table Layout\' folder found in the HDF5 file \"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
                 sys.crash();
             #END IF
             
@@ -775,7 +775,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             FLG_appender = False; #appender flag to activate appending magnetic coordinates (append avoided b/c causes h5py bug that prevents reading files until restart !even if python restarted!)
             while( ((file_maxRetry >= file_retryNum) | (file_maxRetry == -1)) & (FLG_gotRead == False) ): #deal with intermittant file read issues I had on an old comp, it tries
                 try:
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'r') as TEC_file:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'r') as TEC_file:
                         #----- Read the data types in -----
                         keyzNew = list(TEC_file.keys()); #get the saved keys
                         #----- Load in lat & long (or mlat & mlong if requested) -----
@@ -839,7 +839,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                         #END IF
                     #END WITH
                     if( FLG_appender == True ): #append sparingly because it apparently kills h5py's ability to read files if used to just read files (restart req'd)                    
-                        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'a') as TEC_file:
+                        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'a') as TEC_file:
                             #----- Read the data types in -----
                             keyzNew = list(TEC_file.keys()); #get the saved keys
                             #----- Load in lat & long (or mlat & mlong if requested) -----
@@ -852,7 +852,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                                     TEC_dataTemp_long = TEC_file.get('mlong')[()]; #get that dataset out
                                 else:
                                     tic_mag = time();
-                                    print('Warning in GRITI_import_TEC_Madrigal: coordType "mag" requested but mag coordinates have not been calculated for this day. Calculating and appending onto file '+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+\
+                                    print('Warning in GRITI_import_TEC_Madrigal: coordType "mag" requested but mag coordinates have not been calculated for this day. Calculating and appending onto file '+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i])+\
                                           '. Estimated time is '+textNice(np.round(tEst_mag,2))+' min on a good comp.');
                                     # import aacgmv2
                                     # import datetime
@@ -956,7 +956,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     #END IF
                     FLG_gotRead = True; #lets while loop exit
                 except OSError as errorText:
-                    print('Warning in GRITI_import_TEC_Madrigal: '+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i] +\
+                    print('Warning in GRITI_import_TEC_Madrigal: '+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]) +\
                           ' had an OSError when reading data. Try #'+str(file_retryNum)+'/'+str(file_maxRetry)+'. Error text follows:');
                     print(str(errorText));
                     time.sleep(0.1); #wait a tiny lil bit just in case
@@ -965,10 +965,10 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             #END WHILE
             if( FLG_gotRead == False ):
                 print("\n==============ERROR==============");
-                print(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i] +\
-                      ' failed to read. Renaming the file to "'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_corrupted" and crashing. Rerun code to generate new file.');
-                os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], \
-                          settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_corrupted'); #rename
+                print(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]) +\
+                      ' failed to read. Renaming the file to "'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i])+'_corrupted" and crashing. Rerun code to generate new file.');
+                os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), \
+                          os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i])+'_corrupted'); #rename
                 print('NOTE this may be an OS read error that can be fixed with a system restart. Not sure why it happens but you\'ll need to rename it back from _corrupted and restart your comp. Restarting python instance doesn\'t seem to cut it.');
                 sys.crash(); #donezo
             #END IF
@@ -1018,9 +1018,9 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
 def get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC):
     #los_20140227.001.h5 - example file name [001 means final data, 00p is custom for preliminary data]
     TEC_fileNameOrig_format = 'los_' + str(dateRange_full[i,0]) + str(dateRange_full[i,1]).zfill(2) + str(dateRange_full[i,2]).zfill(2) + '.*.h5'; #create expected file name format
-    TEC_fileNameOrig_avail = glob.glob(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig_format); #get available raw data
+    TEC_fileNameOrig_avail = glob.glob(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig_format)); #get available raw data
     if( len(TEC_fileNameOrig_avail) == 1 ):
-        TEC_fileNameOrig = TEC_fileNameOrig_avail[0][TEC_fileNameOrig_avail[0].rfind('\\')+1:]; #remove the list
+        TEC_fileNameOrig = os.path.basename(TEC_fileNameOrig_avail[0]); # old code I probably got it right: TEC_fileNameOrig_avail[0][TEC_fileNameOrig_avail[0].rfind('\\')+1:]; #remove the list
     elif( len(TEC_fileNameOrig_avail) > 1 ):
         if( strfind(TEC_fileNameOrig_avail,'.001.',opt=1) == 1 ): #preferred first
             TEC_fileNameOrig = 'los_' + str(dateRange_full[i,0]) + str(dateRange_full[i,1]).zfill(2) + str(dateRange_full[i,2]).zfill(2) + '.001.h5'; #create expected file name
@@ -1094,8 +1094,8 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
         #use the with thing because it prevents the file being "open in python" still in the event of a crash THERE IS NO WAY TO CLOSE A FILE?
         if( '.001.' in TEC_fileNameOrig ):
             # file reader for 001 default Madrigal format
-            with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
-                #TEC_fileOrig = h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r'); #read that file
+            with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
+                #TEC_fileOrig = h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r'); #read that file
             
                 # List all groups
                 TEC_fileKeys = list(TEC_fileOrig.keys()); #get the folder names in the hdf5 file
@@ -1106,7 +1106,7 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
                     #END IF
                 #END FOR j
                 if( TEC_fileKeys_dataIndex == -1 ): #ERROR CATCH
-                    print('ERROR: NO \'Data\' folder found in the HDF5 file \"'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
+                    print('ERROR: NO \'Data\' folder found in the HDF5 file \"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
                     sys.crash();
                 #END IF
                 TEC_fileDatalocale = list(TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex]]); #choose the data folder
@@ -1117,7 +1117,7 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
                     #END IF
                 #END FOR j
                 if( TEC_fileDatalocale_tableIndex == -1 ): #ERROR CATCH
-                    print('ERROR: NO \'Data\'Table Layout\' folder found in the HDF5 file \"'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
+                    print('ERROR: NO \'Data\'Table Layout\' folder found in the HDF5 file \"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
                     sys.crash();
                 #END IF
                 # TEC_fileData = TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex] + "/" + TEC_fileDatalocale[TEC_fileDatalocale_tableIndex]]; #import the data shape
@@ -1255,8 +1255,8 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
             del tempMonth, tempDay
         elif( '.00p.' in TEC_fileNameOrig ):
             # file reader for preliminary Madrigal format
-            with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
-                #TEC_fileOrig = h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig, 'r'); #read that file
+            with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r', rdcc_nbytes =500*1024*1024) as TEC_fileOrig:
+                #TEC_fileOrig = h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig), 'r'); #read that file
             
                 # List all groups
                 TEC_fileKeys = list(TEC_fileOrig.keys()); #get the folder names in the hdf5 file
@@ -1267,7 +1267,7 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
                     #END IF
                 #END FOR j
                 if( TEC_fileKeys_dataIndex == -1 ): #ERROR CATCH
-                    print('ERROR: NO \'data\' folder found in the HDF5 file \"'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
+                    print('ERROR: NO \'data\' folder found in the HDF5 file \"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)+'\"\nData structure not supported, exiting. Please update to support cause otherwise whomp whomp :(\n');
                     sys.crash();
                 #END IF
                 # TEC_fileData = TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex] + "/" + TEC_fileDatalocale[TEC_fileDatalocale_tableIndex]]; #import the data shape
@@ -1489,7 +1489,7 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
         #END FOR j
         #--- Write in the unfiltered data in a new faster format ---
         #use the with thing because it prevents the file being "open in python" still in the event of a crash THERE IS NO WAY TO CLOSE A FILE?
-        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'w', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:               
+        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'w', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:               
             for j in range(0,len(keyz)):
                 if( np.isscalar(unfilt_dict[keyz[j]]) == False ):
                     TEC_fileUnfilt.create_dataset(keyz[j], data=unfilt_dict[keyz[j]], chunks=h5pyChunkShape, compression='gzip', compression_opts=9, shuffle=True, fletcher32=True); #write that data , compression="gzip"
@@ -1507,7 +1507,7 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
             #END IF
         #END WITH
         if( FLG_deleteOrig == 1 ): #only delete if flag is on
-            os.remove(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileNameOrig); #delete the downloaded file now that we're done with it (save some space!)
+            os.remove(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_fileNameOrig)); #delete the downloaded file now that we're done with it (save some space!)
         #END IF
         del unfilt_dict; #clean the memory
         if( FLG_parallel == False ):

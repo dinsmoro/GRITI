@@ -209,71 +209,71 @@ def GRITI_movieMaker(data, dates, settings, FLG_parallelizer=True):
     #     # - pi brings it down to -pi<=angle<=pi to help with understanding what it is
     #     #***************MAKE THIS NOT EMPIRICAL SOMEDAY******************** CLOSE!
     # #END IF
-    if( 'stere' in settings['map']['projection name']):
+    # if( 'stere' in settings['map']['projection name']):
         #today is that day #***************MAKE THIS NOT EMPIRICAL SOMEDAY******************** CLOSE!
-        from Code.subfun_sunAlsoRises_location import sunAlsoRises_location
-        import aacgmv2
-        if( settings['movie']['movie type'] != 11 ):
-            sunSubSolar_loc = np.unique(data['TEC']['time unique']//86400); #reuse var
-            sunSubSolar_loc = np.vstack( (np.ones(sunSubSolar_loc.size, dtype=np.int32)*dates['date range zero hr dayNum'][0], sunSubSolar_loc) ).T; #stack em (assumes no year change, will need revamp)
-            sunSubSolar_loc = sunAlsoRises_location(dates['date range full dayNum'],timeIndexes=data['TEC']['time unique'],timeZone='UTC');
-            aacgmv2_alt = np.median(data['TEC']['pierceAlt']);
+    from Code.subfun_sunAlsoRises_location import sunAlsoRises_location
+    import aacgmv2
+    if( settings['movie']['movie type'] != 11 ):
+        sunSubSolar_loc = np.unique(data['TEC']['time unique']//86400); #reuse var
+        sunSubSolar_loc = np.vstack( (np.ones(sunSubSolar_loc.size, dtype=np.int32)*dates['date range zero hr dayNum'][0], sunSubSolar_loc) ).T; #stack em (assumes no year change, will need revamp)
+        sunSubSolar_loc = sunAlsoRises_location(dates['date range full dayNum'],timeIndexes=data['TEC']['time unique'],timeZone='UTC');
+        aacgmv2_alt = np.median(data['TEC']['pierceAlt']);
+    else:
+        sunSubSolar_loc = np.unique(data['AMPERE']['time unique']//86400); #reuse var
+        sunSubSolar_loc = np.vstack( (np.ones(sunSubSolar_loc.size, dtype=np.int32)*dates['date range zero hr dayNum'][0], sunSubSolar_loc) ).T; #stack em (assumes no year change, will need revamp)
+        sunSubSolar_loc = sunAlsoRises_location(sunSubSolar_loc, timeIndexes=data['AMPERE']['time unique'],timeZone='UTC');
+        if( 'altitude' in settings['AMPERE'] ):
+            aacgmv2_alt = settings['AMPERE']['altitude']; #use AMPERE altitude
         else:
-            sunSubSolar_loc = np.unique(data['AMPERE']['time unique']//86400); #reuse var
-            sunSubSolar_loc = np.vstack( (np.ones(sunSubSolar_loc.size, dtype=np.int32)*dates['date range zero hr dayNum'][0], sunSubSolar_loc) ).T; #stack em (assumes no year change, will need revamp)
-            sunSubSolar_loc = sunAlsoRises_location(sunSubSolar_loc, timeIndexes=data['AMPERE']['time unique'],timeZone='UTC');
-            if( 'altitude' in settings['AMPERE'] ):
-                aacgmv2_alt = settings['AMPERE']['altitude']; #use AMPERE altitude
-            else:
-                aacgmv2_alt = 120.; #default, great for auroral zone stuff (like field aligned currents)
-            #END IF
-        #END IF        
-        if( settings['map']['coord type'] == 'mag' ):
-            if( settings['movie']['movie type'] != 11 ):
-                tempTimesSec = data['TEC']['time unique']; #get it as a var
-            else:
-                tempTimesSec = data['AMPERE']['time unique']; #get it as a var
-            #END IF
-            time4mag_hr = np.int32(np.mod(tempTimesSec, 86400)//3600); #get hours
-            time4mag_min = np.int32(np.mod(tempTimesSec, 86400)//60-time4mag_hr*60); #get the minutes
-            time4mag_sec = np.int32(np.mod(tempTimesSec, 86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
-            sunSubSolar_loc['lat geo'] = np.copy(sunSubSolar_loc['lat']);
-            sunSubSolar_loc['long geo'] = np.copy(sunSubSolar_loc['long']);
-            for jj in range(0, tempTimesSec.size): #easier to loop for now
-                if( settings['movie']['movie type'] != 11 ):
-                    kk = np.where(np.int64(tempTimesSec[jj]/86400) == dates['date range full dayNum'][:,1])[0].item(); #get where the year is gonna be
-                    time4mag = datetime(dates['date range full'][kk,0],dates['date range full'][kk,1],dates['date range full'][kk,2], \
-                                                 hour = time4mag_hr[jj], minute = time4mag_min[jj], second = time4mag_sec[jj]); #date time object for aacgmv2
-                else:
-                    kk = np.where(np.int64(tempTimesSec[jj]/86400) == dates['date range full padded dayNum'][:,1])[0].item(); #get where the year is gonna be
-                    time4mag = datetime(dates['date range full padded'][kk,0],dates['date range full padded'][kk,1],dates['date range full padded'][kk,2], \
-                                                 hour = time4mag_hr[jj], minute = time4mag_min[jj], second = time4mag_sec[jj]); #date time object for aacgmv2
-                #END IF
-                #---nan result protection---
-                incrementor = 0; #increments
-                tempLat = np.nan; #set nan to start
-                tempLong = np.nan;
-                while( np.isnan(tempLat) | np.isnan(tempLong) ):
-                    tempAlt = aacgmv2_alt+incrementor*100;
-                    # if( tempAlt > 2000 ):
-                    #     tempTrace = True;
-                    # else:
-                    #     tempTrace = False;
-                    # #END IF
-                    [tempLat, tempLong, _] = aacgmv2.convert_latlon(sunSubSolar_loc['lat'][jj], sunSubSolar_loc['long geo'][jj], tempAlt, time4mag, method_code='G2A|ALLOWTRACE'); #converts from geographic to geomagnetic (AACGMv2)
-                    incrementor += 1; #increment
-                    if( incrementor > 40 ):
-                        break
-                    #END IF
-                #END WHILE
-                sunSubSolar_loc['lat'][jj] = tempLat; #record, this way we avoid NaNs (but get spammed, oh well)
-                sunSubSolar_loc['long'][jj] = tempLong;
-            #END FOR jj
+            aacgmv2_alt = 120.; #default, great for auroral zone stuff (like field aligned currents)
         #END IF
-        radRange_J2000 = (sunSubSolar_loc['long']-90)*np.pi/180; #convert to radians and adjust by 90
+    #END IF        
+    if( settings['map']['coord type'] == 'mag' ):
+        if( settings['movie']['movie type'] != 11 ):
+            tempTimesSec = data['TEC']['time unique']; #get it as a var
+        else:
+            tempTimesSec = data['AMPERE']['time unique']; #get it as a var
+        #END IF
+        time4mag_hr = np.int32(np.mod(tempTimesSec, 86400)//3600); #get hours
+        time4mag_min = np.int32(np.mod(tempTimesSec, 86400)//60-time4mag_hr*60); #get the minutes
+        time4mag_sec = np.int32(np.mod(tempTimesSec, 86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+        sunSubSolar_loc['lat geo'] = np.copy(sunSubSolar_loc['lat']);
+        sunSubSolar_loc['long geo'] = np.copy(sunSubSolar_loc['long']);
+        for jj in range(0, tempTimesSec.size): #easier to loop for now
+            if( settings['movie']['movie type'] != 11 ):
+                kk = np.where(np.int64(tempTimesSec[jj]/86400) == dates['date range full dayNum'][:,1])[0].item(); #get where the year is gonna be
+                time4mag = datetime(dates['date range full'][kk,0],dates['date range full'][kk,1],dates['date range full'][kk,2], \
+                                             hour = time4mag_hr[jj], minute = time4mag_min[jj], second = time4mag_sec[jj]); #date time object for aacgmv2
+            else:
+                kk = np.where(np.int64(tempTimesSec[jj]/86400) == dates['date range full padded dayNum'][:,1])[0].item(); #get where the year is gonna be
+                time4mag = datetime(dates['date range full padded'][kk,0],dates['date range full padded'][kk,1],dates['date range full padded'][kk,2], \
+                                             hour = time4mag_hr[jj], minute = time4mag_min[jj], second = time4mag_sec[jj]); #date time object for aacgmv2
+            #END IF
+            #---nan result protection---
+            incrementor = 0; #increments
+            tempLat = np.nan; #set nan to start
+            tempLong = np.nan;
+            while( np.isnan(tempLat) | np.isnan(tempLong) ):
+                tempAlt = aacgmv2_alt+incrementor*100;
+                # if( tempAlt > 2000 ):
+                #     tempTrace = True;
+                # else:
+                #     tempTrace = False;
+                # #END IF
+                [tempLat, tempLong, _] = aacgmv2.convert_latlon(sunSubSolar_loc['lat'][jj], sunSubSolar_loc['long geo'][jj], tempAlt, time4mag, method_code='G2A|ALLOWTRACE'); #converts from geographic to geomagnetic (AACGMv2)
+                incrementor += 1; #increment
+                if( incrementor > 40 ):
+                    break
+                #END IF
+            #END WHILE
+            sunSubSolar_loc['lat'][jj] = tempLat; #record, this way we avoid NaNs (but get spammed, oh well)
+            sunSubSolar_loc['long'][jj] = tempLong;
+        #END FOR jj
     #END IF
+    radRange_J2000 = (sunSubSolar_loc['long']-90)*np.pi/180; #convert to radians and adjust by 90
     settings['movie']['sun loc'] = sunSubSolar_loc;
     settings['movie']['sun loc']['long rad'] = radRange_J2000;
+    #END IF
     
     #----------------------PREP FOR MOVIE MAKING-------------------------------
     if( os.path.isdir(settings['movie']['save locale']) == 0 ): #check if TEC folder exists
@@ -456,18 +456,18 @@ def GRITI_movieMaker(data, dates, settings, FLG_parallelizer=True):
                         #END IF
                         
                         # Load everything into the list
-                        parallel_list.append([movie_data, dates, settings, movie_dict['fig offsets'], movie_dict['title offset']]);
+                        parallel_list.append([movie_data, dates, settings, movie_writer, movie_dict['fig offsets'], movie_dict['title offset']]);
                     #END FOR i
                                         
                     #------------------------Draw & Write Images------------------------------
                     # Parallel process the batch
                     if( FLG_parallelizer ):
-                        parallel_figs = parallel_arbiter(joblib.delayed(GRITI_movieMaker_subfun_imageWriter)(j, k, l, m, n) for j, k, l, m, n in parallel_list); #will this not destroy the world?
+                        parallel_figs = parallel_arbiter(joblib.delayed(GRITI_movieMaker_subfun_imageWriter)(*sublist) for sublist in parallel_list); #will this not destroy the world?
                     else:
                         #misnomer, for testing
                         parallel_figs = []; #prep
-                        for j, k, l, m, n in parallel_list:
-                            parallel_figs.append(GRITI_movieMaker_subfun_imageWriter(j, k, l, m, n)); #just regular
+                        for sublist in parallel_list:
+                            parallel_figs.append(GRITI_movieMaker_subfun_imageWriter(*sublist)); #just regular
                         #END FOR lots
                     #END IF                    
                     

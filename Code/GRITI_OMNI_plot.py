@@ -125,11 +125,11 @@ def GRITI_OMNI_plot(OMNI_data,OMNI_timeUnique,OMNI_dict,OMNI_dictPlot,OMNI_plotS
         plt.show(); #req to make plot show up
     else:
         try:
-            fig.savefig(settings_paths['fancyPlots']+'\\'+'OMNI_products'+'.png'); #save the figure
+            fig.savefig(os.path.join(settings_paths['fancyPlots'],'OMNI_products'+'.png')); #save the figure
             plt.close(); #close figure b/c it lurks apparently
             plt.ion(); #re-enable it for later stuff
         except PermissionError:
-            print('Error saving a FancyPlot(TM): PermissionError for the file '+settings_paths['fancyPlots']+'\\'+'OMNI_products'+'.png');
+            print('Error saving a FancyPlot(TM): PermissionError for the file '+os.path.join(settings_paths['fancyPlots'],'OMNI_products'+'.png'));
             plt.ion(); #re-enable it for later stuff
             plt.show(); #req to make plot show up
         #END TRY

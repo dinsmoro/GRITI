@@ -40,10 +40,10 @@ import os
 
 def GRITI_import_OMNI(dateRange_dayNum_full, settings_paths, OMNI_columns_wanted = [0,1,2,3,16,18,19,21,27,37,41], FLG_overwrite = 0):
     
-    if( os.path.isdir(settings_paths['data'] + '\\' + 'OMNI') == False ): #check if TEC folder exists
+    if( os.path.isdir(os.path.join(settings_paths['data'], 'OMNI')) == False ): #check if TEC folder exists
         #if not, make it
-        os.makedirs(settings_paths['data'] + '\\' + 'OMNI');
-        print('NOTA BENE: In GRITI_import_OMNI - Created OMNI directory: '+settings_paths['data'] + '\\' + 'OMNI'+'\n');
+        os.makedirs(os.path.join(settings_paths['data'], 'OMNI'));
+        print('NOTA BENE: In GRITI_import_OMNI - Created OMNI directory: '+os.path.join(settings_paths['data'], 'OMNI')+'\n');
     #END IF
     
     siteURL_base = 'https://spdf.gsfc.nasa.gov/pub/data/omni/high_res_omni/'; #base for Kp index, will tack on dates needed

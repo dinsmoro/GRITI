@@ -21,7 +21,7 @@ from Code.subfun_time_to_dateRange import subfun_time_to_dateRange
 from Code.subfun_dayNum_to_date import subfun_dayNum_to_date
 from Code.subfun_monthNum_to_word import subfun_monthNum_to_word
 
-def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_figOffsets, movie_title_yOffset):
+def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, movie_figOffsets, movie_title_yOffset):
     #-------------Multiple Movie Algs for Difference Scenarios-----------------
     #================================================================= MOVIE TYPE 0 =================================================================
     if( settings['movie']['movie type'] == 0 ): #moving gif implementation (scatter points)

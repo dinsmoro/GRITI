@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as tickr
 # import cartopy as cartopy #cartopy replaces basemap b/c it's updated
 import cartopy.crs as ccrs #cartopy replaces basemap b/c it's updated
-# import os
+import os
 import copy
 import datetime
 from Code.GRITI_movieMaker_subfun_dataGridder import GRITI_movieMaker_subfun_dataGridder
@@ -433,7 +433,7 @@ def GRITI_keo_plot_area(data_data, data_time, data_lat, data_long, data_timeUniq
         # plt.show(); #req to make plot show up
         pass; #it's not
     else:
-        fig.savefig(settings_paths['fancyPlots']+'\\'+settings_dataSpecific['keo data type']+'_keo_area'+settings_plot['save file type']); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['keo data type']+'_keo_area'+settings_plot['save file type'])); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF

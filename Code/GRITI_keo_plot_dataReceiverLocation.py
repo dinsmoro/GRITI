@@ -169,7 +169,7 @@ def GRITI_keo_plot_dataReceiverLocation(data_data, data_time, data_lat, data_lon
     if( FLG_fancyPlot == 0 ):
         plt.show(); #req to make plot show up
     else:
-        fig.savefig(settings_paths['fancyPlots']+'\\'+settings_dataSpecific['keo data type']+'_keo_dataReceiverLocation'+settings_plot['save file type']); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],settings_dataSpecific['keo data type']+'_keo_dataReceiverLocation'+settings_plot['save file type'])); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF

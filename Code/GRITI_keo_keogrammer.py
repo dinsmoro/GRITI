@@ -118,9 +118,9 @@ def GRITI_keo_keogrammer(data_data ,data_time, data_lat, data_long, data_timeUni
                             str(keo_N)+'_'+str(keo_45vsLatLong)+'_'+str(pplat_limd.size)+\
                             str(settings_dataSpecific['source to use'])+str(keo_dataVersion)+settings_map['coord type']+'_'+\
                             'rightexact-'+str(FLG_useRightExact); #make a big string to uniquely identify this keogram
-                if( os.path.isfile(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl') == 1 ):
+                if( os.path.isfile(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl')) == 1 ):
                     #if the data already exists, load it in
-                    with open(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl', 'rb') as keo_cacher:
+                    with open(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl'), 'rb') as keo_cacher:
                         keo = pickle.load(keo_cacher); #load in the data
                     #END WITH
                     FLG_cachedAvail = 1; #set the flag to cached data available
@@ -214,7 +214,7 @@ def GRITI_keo_keogrammer(data_data ,data_time, data_lat, data_long, data_timeUni
                 
                 #save the data
                 if( FLG_disableCache == 0 ):
-                    with open(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl', 'wb') as keo_cacher:
+                    with open(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl'), 'wb') as keo_cacher:
                         pickle.dump(keo, keo_cacher); #save that data
                     #END WITH
                 #END IF
@@ -370,7 +370,7 @@ def GRITI_keo_keogrammer(data_data ,data_time, data_lat, data_long, data_timeUni
                 
                 #save the data
                 if( FLG_disableCache == 0 ):
-                    with open(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl', 'wb') as keo_cacher:
+                    with open(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl'), 'wb') as keo_cacher:
                         pickle.dump(keo, keo_cacher); #save that data
                     #END WITH
                 #END IF
@@ -418,9 +418,9 @@ def GRITI_keo_keogrammer(data_data ,data_time, data_lat, data_long, data_timeUni
                 str(keo_N)+'_'+str(keo_45vsLatLong)+'_'+str(data_lat.size)+\
                 str(settings_dataSpecific['source to use'])+str(keo_dataVersion)+settings_map['coord type']+'_'+\
                 'raytrace-'+str(FLG_raytraceMethod)+'_'+str(FLG_raytraceExactSqrt); #make a big string to uniquely identify this keogram
-            if( os.path.isfile(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl') == 1 ):
+            if( os.path.isfile(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl')) == 1 ):
                 #if the data already exists, load it in
-                with open(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl', 'rb') as keo_cacher:
+                with open(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl'), 'rb') as keo_cacher:
                     keo = pickle.load(keo_cacher); #load in the data
                 #END WITH
                 FLG_cachedAvail = 1; #set the flag to cached data available
@@ -734,7 +734,7 @@ def GRITI_keo_keogrammer(data_data ,data_time, data_lat, data_long, data_timeUni
             #END IF
             #save the data
             if( FLG_disableCache == 0 ):
-                with open(settings_paths['cache']+'\\'+'keo_'+cachedName+'.pkl', 'wb') as keo_cacher:
+                with open(os.path.join(settings_paths['cache'],'keo_'+cachedName+'.pkl'), 'wb') as keo_cacher:
                     pickle.dump(keo, keo_cacher); #save that data
                 #END WITH
             #END IF

@@ -103,10 +103,10 @@ def GRITI_import_TEC_otherSources(dateRange_dayNum_full,dateRange_dayNum_zeroHr,
     
     dateRange_full = subfun_dayNum_to_date(dateRange_dayNum_full); #get the full date range
                                  
-    if( os.path.isdir(settings_paths['data'] + '\\' + folder_TEC) == 0 ): #check if TEC folder exists
+    if( os.path.isdir(os.path.join(settings_paths['data'], folder_TEC)) == 0 ): #check if TEC folder exists
         #if not, make it
-        os.makedirs(settings_paths['data'] + '\\' + folder_TEC);
-        print("NOTA BENE: Importing TEC Func - Created TEC directory: {}\n".format(settings_paths['data'] + '\\' + folder_TEC) );
+        os.makedirs(os.path.join(settings_paths['data'], folder_TEC));
+        print("NOTA BENE: Importing TEC Func - Created TEC directory: {}\n".format(os.path.join(settings_paths['data'], folder_TEC)) );
     #END IF
         
     dateRange_uniqueYears = np.unique(dateRange_dayNum_full[:,0]); #get the unique years involved
@@ -117,10 +117,10 @@ def GRITI_import_TEC_otherSources(dateRange_dayNum_full,dateRange_dayNum_zeroHr,
     #1 = note data is there, ready to use
     
     for i in range(0,len(dateRange_uniqueYears)): #loop to check if data folder for the year exists
-        if( os.path.isdir(settings_paths['data'] + '\\' + folder_TEC + '\\' + str(dateRange_uniqueYears[i]) ) == 0 ): #check if date folders exist
+        if( os.path.isdir(os.path.join(settings_paths['data'], folder_TEC, str(dateRange_uniqueYears[i])) ) == 0 ): #check if date folders exist
             #doesn't exist, gotta make it
-            os.makedirs(settings_paths['data'] + '\\' + folder_TEC + '\\' + str(dateRange_uniqueYears[i]) );
-            print("NOTA BENE: Importing TEC Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],settings_paths['data'] + '\\' + folder_TEC + '\\' + str(dateRange_uniqueYears[i]) ));
+            os.makedirs(os.path.join(settings_paths['data'], folder_TEC, str(dateRange_uniqueYears[i])) );
+            print("NOTA BENE: Importing TEC Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],os.path.join(settings_paths['data'], folder_TEC, str(dateRange_uniqueYears[i])) ));
         #END IF
     #END FOR
         
@@ -135,7 +135,7 @@ def GRITI_import_TEC_otherSources(dateRange_dayNum_full,dateRange_dayNum_zeroHr,
             TEC_fileName = TEC_fileName.replace('#MO', str(dateRange_full[j,1]).zfill(2) ); #replace any #MO with the current month
             TEC_fileName = TEC_fileName.replace('#DY', str(dateRange_full[j,2]).zfill(2) ); #replace any #DY with current day
             
-            TEC_dataAvail_perSource[j,i] = os.path.isfile(settings_paths['data'] + '\\' + folder_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileName); #record if data is there or not
+            TEC_dataAvail_perSource[j,i] = os.path.isfile(os.path.join(settings_paths['data'], folder_TEC, str(dateRange_full[i,0]), TEC_fileName)); #record if data is there or not
         #END FOR j
     #END FOR i
         
@@ -228,7 +228,7 @@ def GRITI_import_TEC_otherSources(dateRange_dayNum_full,dateRange_dayNum_zeroHr,
         #prep the name needed
         
         #use the with thing because it prevents the file being "open in python" still in the event of a crash THERE IS NO WAY TO CLOSE A FILE?
-        with h5py.File(settings_paths['data'] + '\\' + folder_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_fileName, 'r') as TEC_file:
+        with h5py.File(os.path.join(settings_paths['data'], folder_TEC, str(dateRange_full[i,0]), TEC_fileName), 'r') as TEC_file:
             #Read in the HDF5 file from the name list
             
             if( TEC_sourceIndex == 0 ): #supports file setup for source #0

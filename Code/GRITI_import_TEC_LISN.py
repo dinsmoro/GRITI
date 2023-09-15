@@ -244,10 +244,10 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     
     print("==============Importing TEC LISN Func - Starting==============");
     #==============Check if data already there==============
-    if( os.path.isdir(settings_paths['data'] + '\\' + paths_TEC) == 0 ): #check if TEC folder exists
+    if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC)) == 0 ): #check if TEC folder exists
         #if not, make it
-        os.makedirs(settings_paths['data'] + '\\' + paths_TEC);
-        print("NOTA BENE: Importing TEC Madrigal Func - Created TEC directory: {}\n".format(settings_paths['data'] + '\\' + paths_TEC) );
+        os.makedirs(os.path.join(settings_paths['data'], paths_TEC));
+        print("NOTA BENE: Importing TEC Madrigal Func - Created TEC directory: {}\n".format(os.path.join(settings_paths['data'], paths_TEC)) );
     #END IF
         
     dateRange_uniqueYears = np.unique(dateRange_dayNum_full[:,0]); #get the unique years involved
@@ -272,15 +272,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     TEC_dataFilePathUnfilt = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
     
     for i in range(0,len(dateRange_uniqueYears)): #loop to check if data folder for the year exists
-        if( os.path.isdir(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) ) == 0 ): #check if date folders exist
+        if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ) == 0 ): #check if date folders exist
             #doesn't exist, gotta make it
-            os.makedirs(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) );
-            print("NOTA BENE: Importing TEC Madrigal Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) ));
+            os.makedirs(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) );
+            print("NOTA BENE: Importing TEC Madrigal Func - Created TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ));
         #END IF
-        if( os.path.isdir(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) + '\\' + paths_TEC_rawData ) == 0 ): #check if date folders exist
+        if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i]), paths_TEC_rawData) ) == 0 ): #check if date folders exist
             #doesn't exist, gotta make it
-            os.makedirs(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) + '\\' + paths_TEC_rawData );
-            print("NOTA BENE: Importing TEC Madrigal Func - Created LISN raw data TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_uniqueYears[i]) + '\\' + paths_TEC_rawData ));
+            os.makedirs(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i]), paths_TEC_rawData) );
+            print("NOTA BENE: Importing TEC Madrigal Func - Created LISN raw data TEC subdirectory for year {}: {}\n".format(dateRange_uniqueYears[i],os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i]), paths_TEC_rawData) ));
         #END IF
     #END FOR
         
@@ -324,14 +324,14 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
                         TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                        if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                        if( os.path.isfile(os.path.join(settings_paths['data'],+ paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                             TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                         #END IF
                     #END FOR j
                 else:
                     #if online doesn't have the data - maybe local still does
                     web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-                    fileNames = os.listdir(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData ); #get the names of the files in the folder
+                    fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
                     
                     fileNames_GoodMask = np.zeros( len(fileNames) ); #a whitelist of good file names
                     for j in range(0,len(fileNames) ):
@@ -384,7 +384,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     with h5py.File(TEC_dataFilePathUnfilt[i], 'r') as testFile:
                         testFile.keys(); #tries to check out some stuff in the file
                     #END WITH
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'r') as TEC_fileUnfilt:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'r') as TEC_fileUnfilt:
                         TEC_unfilt_version = TEC_fileUnfilt.attrs['version']; #read the version
                     #END WITH
                     if( TEC_unfilt_version >= version_unfilt ):
@@ -410,7 +410,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
                         TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                        if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                        if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                             TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                         #END IF
                     #END FOR j
@@ -430,7 +430,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                 for j in range(0,web_fileNamesIndex.size):
                     TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                    if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                    if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                         TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                     #END IF
                 #END FOR j
@@ -445,7 +445,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             #END IF
             
         else:
-            with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'r') as TEC_file:
+            with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'r') as TEC_file:
                 TEC_version = TEC_file.attrs['version']; #read the version
             #END WITH
             if( TEC_version >= version_filt ):
@@ -454,10 +454,10 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 print("\n==============~Warning~==============");
                 print("The file {} uses version {} while version {} is the most current version. The file will be renamed with _oldV{} and remade with the new version of the algorithm.\n".format(TEC_dataFilePath[i], TEC_version , version_filt, TEC_version) );
                 #the filtered version is too old and needs to be redone
-                os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], \
-                        settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_oldV'+str(TEC_version).replace('.','p')); #rename
+                os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), \
+                        os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]+'_oldV'+str(TEC_version).replace('.','p'))); #rename
                 try:
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'r') as TEC_fileUnfilt:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'r') as TEC_fileUnfilt:
                         TEC_unfilt_version = TEC_fileUnfilt.attrs['version']; #read the version
                     #END WITH
                     if( TEC_unfilt_version >= version_unfilt ):
@@ -465,8 +465,8 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     else:
                         print("\n==============~Warning~==============");
                         print("The file {} uses version {} while version {} is the most current version. The file will be renamed with _oldV{} and remade with the new version of the algorithm.\n".format(TEC_dataFilePathUnfilt[i], TEC_unfilt_version , version_unfilt, TEC_unfilt_version) );
-                        os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], \
-                                  settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p')); #rename
+                        os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), \
+                                  os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]+'_oldV'+str(TEC_unfilt_version).replace('.','p'))); #rename
                         #force an OSError to use the rest of the algorithm - uses ***'s which can't be in file names
                         with h5py.File(TEC_dataFilePathUnfilt[i]+'.***notapossiblefile', 'r') as testFile:
                             testFile.keys(); #tries to check out some stuff in the file
@@ -493,7 +493,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
             for j in range(0,web_fileNamesIndex.size):
                 TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                     TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                 #END IF
             #END FOR j
@@ -519,7 +519,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
                         TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                        if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                        if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                             TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                         #END IF
                     #END FOR j
@@ -545,7 +545,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
                         TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                        if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                        if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                             TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                         #END IF
                     #END FOR j
@@ -571,7 +571,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
             for j in range(0,web_fileNamesIndex.size):
                 TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
-                if( os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0 ):
+                if( os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0 ):
                     TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local but it is online
                 #END IF
             #END FOR j
@@ -627,15 +627,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
             web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
             
-            print("Downloading {} LISN files for the current day to \"{}\".\nFrom site {}".format( web_fileNamesIndex.size, settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData, web_base_site ));
+            print("Downloading {} LISN files for the current day to \"{}\".\nFrom site {}".format( web_fileNamesIndex.size, os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData), web_base_site ));
             tic = time.time(); #for time testing
             estimatedUpdates = np.arange(np.int64(web_fileNamesIndex.size*.1),web_fileNamesIndex.size-np.int64(web_fileNamesIndex.size*.1),np.int64(web_fileNamesIndex.size*.1));
             for j in range(0,web_fileNamesIndex.size):
                 TEC_fileNameOrig = rendered_content[web_fileNamesIndex[j]-4:web_fileNamesIndex[j]+9]; #pull out the web file name
                 
-                if( (os.path.isfile(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig) == 0) | (FLG_overwrite == 2) ):
+                if( (os.path.isfile(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)) == 0) | (FLG_overwrite == 2) ):
                     #check to see if the data is local, if it isn't download - or if FLG_overwrite is set to 2
-                    urlretrieve(web_base_site+TEC_fileNameOrig, settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + TEC_fileNameOrig); #download the file in question to the data directory
+                    urlretrieve(web_base_site+TEC_fileNameOrig, os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, TEC_fileNameOrig)); #download the file in question to the data directory
                 #END IF
                 
                 if( np.any(j == estimatedUpdates) ):
@@ -680,7 +680,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             
             #READ the raw data
             web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-            fileNames = os.listdir(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData ); #get the names of the files in the folder
+            fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
             
             fileNames_GoodMask = np.zeros( len(fileNames) ); #a whitelist of good file names
             for j in range(0,len(fileNames) ):
@@ -702,7 +702,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             TEC_fileData_pierceAlt = 350; #km, import pierce point altitude - defined as a constant based on communications
             for j in range(0,fileNames_GoodMask.size ):
                 #Import raw LISN TEC data file
-                with open(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + fileNames_Good[j], 'r') as TEC_file: #open file pointer (with for safety cause life is hard apparently)
+                with open(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, fileNames_Good[j]), 'r') as TEC_file: #open file pointer (with for safety cause life is hard apparently)
                     TEC_raws = TEC_file.readlines(); #multiple headers of varying sizes make reading this real annoying
                 #END with
                 
@@ -764,7 +764,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 #END IF
                 
                 #read the file with pandas which is much faster than line by line then do some shennanigans to deal with mid-file PRN header lines
-                rawData = pd.read_csv(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + fileNames_Good[j],
+                rawData = pd.read_csv(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, fileNames_Good[j]),
                                 delim_whitespace=True, skipinitialspace=True, header=None, 
                                 names=['#','dayNum','hour','min','sec','vTEC','LT','elev','lat','long','sTEC','az'],
                                 dtype={'#':'object','dayNum':np.int64,'hour':np.int64,'min':np.float64,'sec':np.float64,
@@ -995,7 +995,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             #END FOR j
             #--- Write in the unfiltered data in a new faster format ---
             #use the with thing because it prevents the file being "open in python" still in the event of a crash THERE IS NO WAY TO CLOSE A FILE?
-            with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileNameUnfilt[i], 'w', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:               
+            with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileNameUnfilt[i]), 'w', rdcc_nbytes =500*1024*1024) as TEC_fileUnfilt:               
                 for j in range(0,len(keyz)):
                     if( np.isscalar(unfilt_dict[keyz[j]]) == False ):
                         TEC_fileUnfilt.create_dataset(keyz[j], data=unfilt_dict[keyz[j]], chunks=h5pyChunkShape, compression='gzip', compression_opts=9, shuffle=True, fletcher32=True); #write that data , compression="gzip"
@@ -1010,7 +1010,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             #END WITH
             if( FLG_deleteOrig == 1 ): #only delete if flag is on
                 for j in range(0,fileNames_GoodMask.size ):
-                    os.remove(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + paths_TEC_rawData + '\\' + fileNames_Good[j]); #delete the downloaded file now that we're done with it (save some space!)
+                    os.remove(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, fileNames_Good[j])); #delete the downloaded file now that we're done with it (save some space!)
                 #END FOR j
             #END IF           
             del unfilt_dict, TEC_fileData_pierceAlt; #clean the memory
@@ -1048,7 +1048,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             FLG_appender = False; #appender flag to activate appending magnetic coordinates (append avoided b/c causes h5py bug that prevents reading files until restart !even if python restarted!)
             while( ((file_maxRetry >= file_retryNum) | (file_maxRetry == -1)) & (FLG_gotRead == False) ): #deal with intermittant file read issues I had on an old comp, it tries
                 try:
-                    with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'r') as TEC_file:
+                    with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'r') as TEC_file:
                         #----- Read the data types in -----
                         keyzNew = list(TEC_file.keys()); #get the saved keys
                         #----- Load in lat & long (or mlat & mlong if requested) -----
@@ -1112,7 +1112,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                         #END IF
                     #END WITH
                     if( FLG_appender == True ): #append sparingly because it apparently kills h5py's ability to read files if used to just read files (restart req'd)           
-                        with h5py.File(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], 'a') as TEC_file:
+                        with h5py.File(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), 'a') as TEC_file:
                             #----- Read the data types in -----
                             keyzNew = list(TEC_file.keys()); #get the saved keys
                             #----- Load in lat & long (or mlat & mlong if requested) -----
@@ -1125,7 +1125,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                                     TEC_dataTemp_long = TEC_file.get('mlong')[()]; #get that dataset out
                                 else:
                                     tic_mag = time.time();
-                                    print('Warning in GRITI_import_TEC_Madrigal: coordType "mag" requested but mag coordinates have not been calculated for this day. Calculating and appending onto file '+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+\
+                                    print('Warning in GRITI_import_TEC_Madrigal: coordType "mag" requested but mag coordinates have not been calculated for this day. Calculating and appending onto file '+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i])+\
                                           '. Estimated time is '+textNice(np.round(tEst_mag,2))+' min on a good comp.');
                                     # import aacgmv2
                                     # import datetime
@@ -1229,7 +1229,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     #END IF
                     FLG_gotRead = True; #lets while loop exit
                 except OSError as errorText:
-                    print('Warning in GRITI_import_TEC_Madrigal: '+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i] +\
+                    print('Warning in GRITI_import_TEC_Madrigal: '+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]) +\
                           ' had an OSError when reading data. Try #'+str(file_retryNum)+'/'+str(file_maxRetry)+'. Error text follows:');
                     print(str(errorText));
                     time.sleep(0.1); #wait a tiny lil bit just in case
@@ -1238,10 +1238,10 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
             #END WHILE
             if( FLG_gotRead == False ):
                 print("\n==============ERROR==============");
-                print(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i] +\
-                      ' failed to read. Renaming the file to "'+settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_corrupted" and crashing. Rerun code to generate new file.');
-                os.rename(settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i], \
-                          settings_paths['data'] + '\\' + paths_TEC + '\\' + str(dateRange_full[i,0]) + '\\' + TEC_dataFileName[i]+'_corrupted'); #rename
+                print(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]) +\
+                      ' failed to read. Renaming the file to "'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i])+'_corrupted" and crashing. Rerun code to generate new file.');
+                os.rename(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]), \
+                          os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]+'_corrupted')); #rename
                 print('NOTE this may be an OS read error that can be fixed with a system restart. Not sure why it happens but you\'ll need to rename it back from _corrupted and restart your comp. Restarting python instance doesn\'t seem to cut it.');
                 sys.crash(); #donezo
             #END IF

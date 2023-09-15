@@ -386,7 +386,7 @@ def GRITI_AMPERE_integrator_plot_area(AMPERE_data, dates, settings_AMPERE, \
     
     figFitter(fig); #fit the fig fast
     if( FLG_fancyPlot != 0 ):
-        fig.savefig(settings_paths['fancyPlots']+'\\'+settings_AMPERE['data type']+'_integrate_area'+settings_plot['save file type']); #save the figure
+        fig.savefig(os.path.join(settings_paths['fancyPlots'],settings_AMPERE['data type']+'_integrate_area'+settings_plot['save file type'])); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF
