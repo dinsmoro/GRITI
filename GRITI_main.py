@@ -627,7 +627,7 @@ latLong_ref.append( [latMillstoneMISA,longMillstoneMISA] ); #record it in the mu
 # longMillstone = 37.5; #put at 54 deg E
 
 #==============TEC Data Options==============
-FLG_TEC_use = [2,3]; #0 uses all TEC sources and combines. 
+FLG_TEC_use = [2,]; #0 uses all TEC sources and combines. 
 #Can combine numbers bellow in an array like [2,3,5] to get just those data sources
 #1 - Pre-processed data (alternate to 2, will not combine with 2)
 #2 - Madrigal Database TEC (will not combine with 1)
