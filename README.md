@@ -38,7 +38,7 @@ In **GRITI_main_config.ini you must set paths and relevant login info** (if you 
 ## Installation
 To get the code from this repository, clone it using Git or click the green Code button at the top and "Download ZIP". All of the functions need to be in the same directory as **GRITI_main.py** but the data sources folder and other output folders can be set elsewhere in **GRITI_main_settings.ini**.
 
-**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, netCDF4, Numba, Cartopy, Joblib, aacgmv2, timezonefinder, pytz, and html2text.
+**GRITI** has dependencies on the following Python 3 packages: NumPy, Matplotlib, Scipy, h5py, netCDF4, Numba, Cartopy, Joblib, aacgmv2, timezonefinder, pytz, pandas, and html2text.
 
 [Anaconda](https://www.anaconda.com/products/individual), a Python 3 distribution that includes many useful scientific packages, comes with many of those needed packages automatically. It doesn't come with:
 - [aacgmv2](https://pypi.org/project/aacgmv2/) install with **pip** using `pip install aacgmv2`. On Windows you'll likely need to install Visual Studio Build Tools to get it to install; errors will tell you what to get.
