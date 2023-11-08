@@ -277,8 +277,8 @@ dateRange = np.array([[2017,3,14],[2017,3,16]],dtype="int16"); #Salih Paper
 # dateRange = np.array([[2017,3,15],[2017,3,15]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,13],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,12],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
-# # dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
-# # dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look
+dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
+dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look but smaller for testing
 # dateRange = np.array([[2018,3,28],[2018,4,7]],dtype="int16"); #dates are in int16 because they can be <- kinda calm
 # dateRange = np.array([[2018,4,27],[2018,5,4]],dtype="int16"); #dates are in int16 because they can be <- very calm period [no AMPERE data here yet...]
 # dateRange = np.array([[2019,5,17],[2019,5,21]],dtype="int16"); #dates are in int16 because they can be <- kinda calm, one SWPPE
@@ -326,7 +326,32 @@ folder.append(settings_config['paths']['fancyPlots']); #place to save data files
 #folder var structure: 0 = running folder, 1 = data folder, 2 = plots folder, 3 = fancyPlots folder
 ffmpegLocale = settings_config['paths']['ffmpeg']; #place where ffmpeg.exe is
 
+#--- Make sure empty config lines don't cause weird stuff ---
+if( settings_paths['data'] == '' ):
+    settings_paths['data'] = os.path.join(settings_paths['cwd'],'Data'); #stick it in the cwd so it doesn't go to wherever (seemingly \ on linux)
+    folder[1] = settings_paths['data']; #update
+    settings_config['paths']['data'] = settings_paths['data']; #update
+#END IF
+if( settings_paths['plots'] == '' ):
+    settings_paths['plots'] = os.path.join(settings_paths['cwd'],'Plots'); #stick it in the cwd so it doesn't go to wherever (seemingly \ on linux)
+    folder[2] = settings_paths['plots']; #update
+    settings_config['paths']['plots'] = settings_paths['plots']; #update
+#END IF
+if( settings_paths['fancyPlots'] == '' ):
+    settings_paths['fancyPlots'] = os.path.join(settings_paths['cwd'],'fancyPlots'); #stick it in the cwd so it doesn't go to wherever (seemingly \ on linux)
+    folder[3] = settings_paths['fancyPlots']; #update
+    settings_config['paths']['fancyPlots'] = settings_paths['fancyPlots']; #update
+#END IF
+if( settings_paths['cache'] == '' ):
+    settings_paths['cache'] = os.path.join(settings_paths['cwd'],'Cache'); #stick it in the cwd so it doesn't go to wherever (seemingly \ on linux)
+    settings_config['paths']['cache'] = settings_paths['cache']; #update
+#END IF
 #--- Ensure plots folder and fancy plots folder exists ---
+if( os.path.isdir(settings_paths['data']) == 0 ): #check if the folder exists
+    #if not, make it
+    os.makedirs(settings_paths['data']);
+    print('NOTA BENE: MAIN - Created data directory: '+settings_paths['data']+'\n');
+#END IF
 if( os.path.isdir(settings_paths['plots']) == 0 ): #check if the folder exists
     #if not, make it
     os.makedirs(settings_paths['plots']);
@@ -425,7 +450,7 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 
 # plotLatRange = [30,75]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
-plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing)
+plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing, avoids no data above 48 lat)
 plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
 
 # plotLatRange = [25,55]; #latitude limit for plotting EAST HALF OF USA/CANADA
@@ -440,8 +465,8 @@ plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANAD
 # plotLatRange = [-90,25]; #latitude limit for Up to Mexico & South America
 # plotLongRange = [-120,-20]; #longitude limit for Up to Mexico & South America
 
-plotLatRange = [-90,5]; #latitude limit for South America
-plotLongRange = [-100,-25]; #longitude limit for South America
+# plotLatRange = [-90,5]; #latitude limit for South America
+# plotLongRange = [-100,-25]; #longitude limit for South America
 
 # plotLatRange = [30,75]; #latitude limit for Europe
 # plotLongRange = [-15,40]; #longitude limit for Europe
@@ -494,8 +519,8 @@ plotLongRange = [-100,-25]; #longitude limit for South America
 # plotLongRange = [-2.47,25.50]; #!MAG! #good for AO down to AO magnetic conjugate in South America
 
 #SA Andes regions
-plotLatRange = [-18,-4]; # Peru Andes
-plotLongRange = [-85,-68]; # Peru Andes
+# plotLatRange = [-18,-4]; # Peru Andes
+# plotLongRange = [-85,-68]; # Peru Andes
 
 # plotLatRange = [-35,-18]; # Chile Andes
 # plotLongRange = [-72,-68]; # Chile Andes
@@ -681,7 +706,7 @@ settings_TEC = {
                            'angle':wave_angle, 'phase':wave_phase, 'amplitude':wave_amp, 'lat range':wave_latRange, 'long range':wave_longRange},
     'day num limit': 20, #number of days limit to activate justChecking mode 
     }; #prep some TEC settings
-#!!!-----0 for off, 1 for on-----!!!
+#!!! ----- 0 for off, 1 for on ----- !!!
 FLG_keo = 1; #averaging TEC in bands, needed for anything with _anyAngle
 FLG_keo_plot = 1; #averaging TEC in bands
 FLG_keo_plot_timeCutout = 0; #Uses the time cutout range defined above (if 'use local time' is True, the time cutout range is taken to be a UTC time STILL)
@@ -716,9 +741,9 @@ FLG_keo_timeMatch_n_HP_Scargle = 0; #Scargles the data
 FLG_keo_Scargle_FFT = 1; #0 for Scargle, 1 for FFT
 #FLG_keo_fullTime = 1; #0 for match to Zenith/MISA (norm), 1 for full time (will break stuff later I bet)
 #-----Settings for above plots-----
-keo_angle = 0; #deg, user defined angle
+keo_angle = 90; #deg, user defined angle
 keo_Width_orig = 360; #arcdeg, total width - not an angle in this instance [put 360 for 0/90/180/270 because the code will autotruncate that]
-keo_N = 50; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
+keo_N = 200; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
 keo_polarMode = 0; #0 for regular plotting, 1 for polar plotting of the averaging area
 keo_45vsLatLong = 1; #0 for longitude on xaxis on a 45 degree angle (or multiple of it), 1 for latitude on xaxis
 keo_Zoom = 5; #+/-# arcdeg around the Millstone Hill beam of choice, zoom for the time-cut plot
@@ -1203,7 +1228,7 @@ FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':[0*3600,24*3
 FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':time_cutout_range}; #use defined cutout range
 
 
-FLG_AMPERE_integrate_plot = 1; #plot AMPERE integrated across the northern and southern hemispheres vs time
+FLG_AMPERE_integrate_plot = 0; #plot AMPERE integrated across the northern and southern hemispheres vs time
 FLG_AMPERE_integrate_plot_highlightIMFSouth = True; #highlights IMF south (magnetic reconnection) times
 FLG_AMPERE_integrate_plot_highlightIMFSouth_type = 'Bz GSM'; #OMNI data type to use for negative == south
 FLG_AMPERE_integrate_area = 0; #plot scatter shot of the data
@@ -1399,9 +1424,9 @@ FLG_magicks = 0; #1 for on, 0 for off
 
 #==============Movie Snaps Options==============
 #-----0 for off, 1 for on-----
-FLG_enable_movieSnaps = 0; #1 for on, 0 for off 
+FLG_enable_movieSnaps = 1; #1 for on, 0 for off 
 #-----Settings for above plots-----
-snaps_type = 11; #see below, the numbering mimics movieType's numbering
+snaps_type = 1; #see below, the numbering mimics movieType's numbering
 #1 = stationary data points
 #5 = stationary data points + AMPERE data on same plot (no time average for TEC)
 #11 = ONLY AMPERE data
@@ -1409,30 +1434,35 @@ snaps_type = 11; #see below, the numbering mimics movieType's numbering
 
 snaps_auto = 2; #if 0, uses snaps_Times | 1 will generate them from snaps_auto & steps to take | 2 will generate from snaps_auto_start & _end
 #MAKE SURE THEY'RE EVEN!
-snaps_times = [ 16, 17, 18, 19 ]; #input some times in hrs for when to take snaps - best way is to make a movie, then choose the times
+snaps_times = [ 16*3600, 17*3600, 18*3600, 19*3600 ]; #sec, input some times in hrs for when to take snaps - best way is to make a movie, then choose the times
 
 #Otherwise will automatically generate
-snaps_auto_start = -16; #hr, time to start
-snaps_auto_start = -11; #hr, time to start
-#snaps_auto_start = -13.00; #hr, time to start
+snaps_auto_start = -16*3600; #sec, time to start
+snaps_auto_start = -11*3600; #sec, time to start
+#snaps_auto_start = -13.00*3600; #sec, time to start
 
-#snaps_auto_start = 18; #hr, time to start
-#snaps_auto_start = 20.25; #hr, time to start
+#snaps_auto_start = 18*3600; #sec, time to start
+#snaps_auto_start = 20.25*3600; #sec, time to start
 
-#snaps_auto_start = 24; #hr, time to start
+#snaps_auto_start = 24*3600; #sec, time to start
 
-# snaps_auto_start = 30; #hr, time to start
+# snaps_auto_start = 30*3600; #sec, time to start
 
-# snaps_auto_start = 13.50; #hr, time to start
+# snaps_auto_start = 13.50*3600; #sec, time to start
 
-snaps_auto_start = 21; #hr, time to start
+snaps_auto_start = 21*3600; #sec, time to start
 
-snaps_auto_start = 'auto'; #hr, time to start [-11, 20 min steps, 6 steps is nice too], 'auto' chooses the start time as the start edge automagically
-snaps_auto_step = 30; #min, time to step
+snaps_auto_start = 'auto'; #sec, time to start [-11*3600, 20 min steps, 6 steps is nice too], 'auto' chooses the start time as the start edge automagically
+snaps_auto_step = 30*60; #sec, time to step
 snaps_auto_stepsToTake = 12; #steps to take after the start
 
-snaps_auto_end = 'auto'; #hr, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically
-# snaps_auto_end = 24;
+snaps_auto_end = 'auto'; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically
+
+snaps_auto_start = 0; #sec, time to start [-11, 20 min steps, 6 steps is nice too], 'auto' chooses the start time as the start edge automagically
+snaps_auto_step = 30; #sec, time to step
+snaps_auto_end = 180; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically (does not include last time step! e.g., 0 to 90 at 30 step will yield 0, 30, 60 steps)
+
+# snaps_auto_end = 24; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically (does not include last time step! e.g., 0 to 90 at 30 step will yield 0, 30, 60 steps)
 #4-8 is a good limit of steps to take.
 snaps_dayNiteLine = 2; #0 for no dayNite line, 1 for dayNite line on, 2 for shading of nite time
 snaps_dayNiteText = 0; #0 for no dayNite text, 1 for dayNite text on
@@ -1442,7 +1472,7 @@ FLG_snaps_grid_spaces_auto = 1; #1 to automatically find it based off of the Lat
 #good for east-coast sized / japan
 #snaps_Grid_Lat_Size = 0.4; #degc, how long a avg square is in latitude, longitude will be calc'd based on figure size
 #good for europe sized
-snaps_Grid_Lat_Size = 2; #degc, how long a avg square is in latitude, longitude will be calc'd based on figure size
+snaps_Grid_Lat_Size = 1; #degc, how long a avg square is in latitude, longitude will be calc'd based on figure size
 #good for world
 #snaps_Grid_Lat_Spaces = 150; #how many spaces to break the latitude range up into (only for stationary data points)
 #snaps_Grid_Long_Spaces = 300; #how many spaces to break the longitude range up into (only for stationary data points)
@@ -1450,11 +1480,15 @@ snaps_Grid_Lat_Size = 2; #degc, how long a avg square is in latitude, longitude 
 snaps_Grid_Lat_Spaces = 40; #how many spaces to break the latitude range up into (only for stationary data points)
 snaps_Grid_Long_Spaces = 80; #how many spaces to break the longitude range up into (only for stationary data points)
 
+FLG_snaps_interpolate = True; # Interpolates gaps in each snap
+FLG_snaps_forceSinglePlot = True; # False batches multiple subplots into a single plot, True forces a single subplot per plot - useful for high time resolution imaging
+FLG_snaps_forceInteractive = True; # False does not show the snap plots and just saves them (higher resolution, better control, etc), True shows each snap plot (limited to monitor size) - best use is with "force single plot" above.
+
 #==============Movie Options==============
 #-----0 for off, 1 for on-----
-FLG_movieCreation_enable = 1; #1 for on, 0 for off 
+FLG_movieCreation_enable = 0; #1 for on, 0 for off 
 #-----Settings for above plots-----
-movieType = 1; #see below
+movieType = 0; #see below
 #0 = dTEC moving data points (Fastest, confusing to actually see what up)
 #1 = dTEC stationary data points
 #2 = dTEC stationary data points + Zenith ISR overlay on 2nd plot
@@ -3305,11 +3339,14 @@ if( (FLG_keo == 1) ):
     else:
         #keogram stitching code here, should result in the bare minimum of needed stuff
         from copy import deepcopy
+        from time import time
         dates_mirror = deepcopy(dates); #deepcopy time!
         dates_divvied = np.append(np.arange(0, dates['date range full dayNum'].shape[0], settings['TEC']['day num limit']), dates['date range full dayNum'].shape[0]);
         data_TEC_keo_holder = [None for i in range(0, dates_divvied.size-1)]; #preallocate
         data_TEC_timeUnique_holder = [None for i in range(0, dates_divvied.size-1)]; #preallocate
         data_TEC_timeUniqueAligned_holder = [None for i in range(0, dates_divvied.size-1)]; #preallocate
+        TEC_dataNum_total = 0; #count number of data pts involved
+        tic_keo = time();
         for i in range(0, dates_divvied.size-1):
             # set the date range to the defined limit so we only load in a limited amount of days at a time
             dates_mirror['date range full'] = dates['date range full'][dates_divvied[i]:dates_divvied[i+1]]; #get just a bit
@@ -3320,6 +3357,7 @@ if( (FLG_keo == 1) ):
             dates_mirror['date range dayNum'] = dates_mirror['date range full dayNum'][0::settings['TEC']['day num limit']-1,:]; #stride just right
 
             data, settings = GRITI_import_TEC_importer(data, dates_mirror, settings, FLG_timeToCheck=True); # load in just a bit
+            TEC_dataNum_total += data['TEC']['dTEC'].size;
             
             data_TEC_timeUnique_holder[i] = data['TEC']['time unique'].copy();
             data_TEC_timeUniqueAligned_holder[i] = data['TEC']['time unique aligned'].copy();
@@ -3332,6 +3370,8 @@ if( (FLG_keo == 1) ):
             #call the mecha function that runs the keo alg and makes a plot showing the averaging are
             gc.collect(); #call the collections
         #END FOR i
+        toc_keo = time() - tic_keo;
+        print('For '+str(dates['date range full dayNum'].shape[0])+' days, '+str(TEC_dataNum_total)+' data pts have been analyzed via keogram. Took '+str(toc_keo)+' sec/'+textNice(toc_keo/60)+' min.');
         #empty partial TEC memory
         TEC_del_size = data['TEC']['dTEC'].size; #get the size to delete b/c incomplete
         keyzzz = list(data['TEC'].keys()); #gott get it once
@@ -3586,7 +3626,7 @@ if( (FLG_keo_plot_noiseAllViews == 1) & (FLG_fancyPlot >= 1) & (plotLatRange == 
         TEC_timeUnique, data['TEC']['time'], data['TEC']['lat'], data['TEC']['long'], data['TEC']['dTEC'],
         TEC_plotLimValu, noise_background_mean, noise_background_stdev, avgPt_TECnoise_iterations,
         avgPt_pointRadius, keo_45vsLatLong, 'delta-vTEC [TECU]',
-        gif_Millstone_Marker, gif_Millstone_Marker_Color, gif_Millstone_Marker_Size,
+        settings_map['site marker type'], settings_map['site marker color'], settings_map['site marker size'],
         dataReject, dataRejectOrig, dataRejectLimit, dataRejectLimitOrig, dataRejectMax,
         Zenith_time, Zenith_height, Zenith_POPL_hp, MISA_time, MISA_height, MISA_POPL_hp,
         pointAltitude, avgPt_ISRavgAlt, settings_spectra['filter cutoff period'],
@@ -3948,14 +3988,15 @@ if( FLG_keo_stackerPlot == 1 ):
 
 #==============Analysis: automatic feature finder time==============
 if( FLG_keo_featureFinder >= 1 ):
+    #coded to true romance album by charli xcx, best song -> it's all fire (nuclear seasons obv)
     # sys.crash()
-    from scipy.signal import fftconvolve, gaussian, argrelextrema
+    from scipy.signal import argrelextrema
     from Code.GRITI_plotHelper_axisizerLatLong import GRITI_plotHelper_axisizerLatLong
     from Code.GRITI_plotHelper_axisizerTime import GRITI_plotHelper_axisizerTime
-    from Code.TAS import TAS
     from skimage.filters import gaussian
     from skimage.measure import LineModelND, ransac
     from numba import jit
+    from Code.subfun_textNice import textNice
     
     
     # #--- create uint8 version cause that's what opencv reqs apparently ---
@@ -4089,96 +4130,202 @@ if( FLG_keo_featureFinder >= 1 ):
         
         return close_array
     #END DEF
-            
-    #smooth it out
-    imgifiedSmoothed = gaussian(imgified, 5, truncate=4, mode='reflect');
     
-    # imgifiedSmoothed = imgified; #no smoothing - too jagged essentially
-    # --- ride peaks to discover extent ---
-    #get stats for cruising
-    stdev = np.nanstd(imgifiedSmoothed);
-    mean = 0; #ideally 0
-    stdev_ratio = 1; #within 100% of stdev is a feature
-    # imgified_maxVal = np.nanmax(imgifiedSmoothed);
-    # imgified_minVal = np.nanmin(imgifiedSmoothed);
-    num_pts_needed = np.int64(imgified.size*.0005); # 0.005% of size is needed at least
-    num_pts_max = np.int64(imgified.size*.05); # 0.5% of size is needed at max
-    
-    
-    temp = np.where((imgifiedSmoothed > mean+1.80*stdev) | (imgifiedSmoothed < mean-1.80*stdev)); #get pos and neg outliers
-    temp_sorted = np.argsort(-np.abs(imgifiedSmoothed[temp])); #let's get this sorted so it goes biggest down
-    temp = (temp[0][temp_sorted], temp[1][temp_sorted]); #rebuild the tuple but sorted, numpy doesn't dig the coords in a list instead of tuple at all
-    peaks_pos = list(temp); #get pos/neg outliers first in maxima order (big fish first idea)
-    #-- fill in via use extrema alg ot pick up anything else (it gets way too much but that's ok whatever) --
-    temp = argrelextrema(imgifiedSmoothed, np.greater, axis=0); #greater than axis 0 (time)
-    peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
-    peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
-    temp = argrelextrema(imgifiedSmoothed, np.less, axis=0); #less than axis 0 (time)
-    peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
-    peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
-    temp = argrelextrema(imgifiedSmoothed, np.greater, axis=1); #greater than axis 1 (geo)
-    peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
-    peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
-    temp = argrelextrema(imgifiedSmoothed, np.less, axis=1); #less than axis 1 (geo)
-    peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
-    peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
-    
-    # peaks_pos = [np.array( (3468,), dtype=np.int64), np.array( (110,), dtype=np.int64)]; #for testiung
-    x_vals = (data['TEC']['time unique']  - dateRange_dayNum_zeroHr[1]*86400)/3600; #I don't care here
-    y_vals = settings['TEC']['keo']['keo plot latlong chunks'][0:-1] + np.median(np.diff(settings['TEC']['keo']['keo plot latlong chunks']))/2; #gotta get the middles
-    img_shape = imgified.shape;
-    close_array = np.zeros(img_shape, dtype=np.bool_); #to cruise
-    close_arrayAll = np.zeros(img_shape, dtype=np.bool_); #to remember all found places
-    edger = np.zeros(4, dtype=np.bool_); #holds if edges are safe
+    #chunk it per day so edgy stuff doesn't ramp the stdev for chill days - don't think median/dist to median would fix enough
+    chunkr_dayEdges = np.arange(0, dates['date range full'].shape[0]+1)*86400 - dates['date range zero hr hour offset']*3600; #sec, times from 0 for new days
+    chunkr_chunks = np.empty( (chunkr_dayEdges.size-1, 2) , dtype=np.int64); #preallocate
+    for chunkr in range(0, chunkr_dayEdges.size-1):
+        chunkr_chunkBit = np.where( (data['TEC']['time unique aligned'] >= chunkr_dayEdges[chunkr]) & (data['TEC']['time unique aligned'] < chunkr_dayEdges[chunkr+1]) )[0]; #get the times involved
+        chunkr_chunks[chunkr, :] = (chunkr_chunkBit[0], chunkr_chunkBit[-1]+1); #insert the range of chunkz that cover a day, +1 so the colon stuff works right
+    #END FOR chunkr
     liner = []; #prep up
-    for i in range(0, peaks_pos[0].size):
-        if( close_arrayAll[peaks_pos[0][i], peaks_pos[1][i]] == False ):
-            close_array = close_array & False; #0 them all
-            close_array[peaks_pos[0][i], peaks_pos[1][i]] = True; #start the search
-            
-            #create array of possible related values
-            if( imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] > mean ):
-                # stdev_ratio = np.abs(imgified[peaks_pos[0][i], peaks_pos[1][i]]/imgified_maxVal); #estimate stdev_ratio based on distance to max value (closer to max gets a wider margin to work with)
-                close_arrayPossible = (imgifiedSmoothed >= (imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] - stdev*stdev_ratio)) & (~close_arrayAll); #possible values plus areas not already something
+    for chunkr in range(0, chunkr_chunks.shape[0]):
+        #Assemble the chunks
+        chunkr_rangeKeep = chunkr_chunks[chunkr, :]; # the range of chunks we actually want
+        chunkr_rangeKeep_timeUniqueAligned = data['TEC']['time unique aligned'][chunkr_rangeKeep[0]:chunkr_rangeKeep[-1]]; #sec, get the time uniques
+        chunkr_rangeKeep_timeUniqueAligned = np.array( (chunkr_rangeKeep_timeUniqueAligned[0]/3600, (chunkr_rangeKeep_timeUniqueAligned[-1]+data['TEC']['data rate'])/3600) ); #hr, get the min/max
+        if( chunkr_chunks.shape[0] != 1 ):
+            if( chunkr == 0 ):
+                chunkr_rangePad = np.array( (chunkr_chunks[chunkr, 0], chunkr_chunks[chunkr+1, -1]) ); #only can get forward
+            elif( chunkr == chunkr_chunks.shape[0]-1 ):
+                chunkr_rangePad = np.array( (chunkr_chunks[chunkr-1, 0], chunkr_chunks[chunkr, -1]) ); #only can get backwards
             else:
-                # stdev_ratio = np.abs(imgified[peaks_pos[0][i], peaks_pos[1][i]]/imgified_minVal); #estimate stdev_ratio based on distance to max value (closer to max gets a wider margin to work with)
-                close_arrayPossible = (imgifiedSmoothed <= (imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] + stdev*stdev_ratio)) & (~close_arrayAll); #possible values plus areas not already something
+                chunkr_rangePad = np.array( (chunkr_chunks[chunkr-1, 0], chunkr_chunks[chunkr+1, -1]) ); #can get both
             #END IF
-            
-            #check all sides over and over
-            close_array = checking_checkers_the_bear(peaks_pos[0][i], peaks_pos[1][i], edger, close_arrayPossible, close_array); #yeet
-            
-            #make sure pts are enough to care about
-            if( (close_array.sum() > num_pts_needed) & (close_array.sum() < num_pts_max) ):
-                #add to close_arrayAll
-                close_arrayAll[close_array] = True; #yeet it in
-                                        
-                # get pts involved
-                kj = np.where(close_array); #get where
-                time_out = x_vals[kj[0]]; #get the times associated with the locs
-                geo_out = y_vals[kj[1]]; #get the geos associated with the locs
-                
-                # get a good fit
-                model_robust, _ = ransac(np.column_stack((time_out,geo_out)), LineModelND, min_samples=2, residual_threshold=1, max_trials=1000);
-                
-                #fit to where
-                # polly = np.polynomial.polynomial.Polynomial.fit(time_out, geo_out, deg=1).convert().coef; #they borked this call, polyfit so much more straightforward [did not deal with outliers well enough at all sadly]
-                extent = np.array( ((np.min(time_out), np.max(time_out)), (np.min(geo_out), np.max(geo_out))) ); #(X = Time, Y = Geo)
-            
-                x = model_robust.predict_x(extent[1]);
-                y = extent[1];
-                m = np.diff(y)/np.diff(x); #they give the line ifno as model_robust.params as some weird stuff, so just do some basic math to get it into slope/intercept form
-                b = y[0] - m*x[0];
-                polly = np.array( (b, m) );
-            
-                liner.append({'line coeffs':polly, 'extent':extent, 'robust fit':model_robust}); #add on a dict so I don't forget what they mean
-            #END IF
+        else:
+            chunkr_rangePad = chunkr_rangeKeep; #samesies
         #END IF
-    #END FOR i
+        
+        #smooth it out, choose just a chunk to work with
+        imgifiedSmoothed = gaussian(imgified[chunkr_rangePad[0]:chunkr_rangePad[-1], :], 5, truncate=4, mode='reflect');
+        
+        # imgifiedSmoothed = imgified; #no smoothing - too jagged essentially
+        # --- ride peaks to discover extent ---
+        #get stats for cruising
+        stdev = np.nanstd(imgifiedSmoothed);
+        mean = 0; #ideally 0
+        stdev_ratio = 1; #within 100% of stdev is a feature
+        # imgified_maxVal = np.nanmax(imgifiedSmoothed);
+        # imgified_minVal = np.nanmin(imgifiedSmoothed);
+        num_pts_needed = np.int64(imgifiedSmoothed.size*.0005); # 0.005% of size is needed at least
+        num_pts_max = np.int64(imgifiedSmoothed.size*.05); # 0.5% of size is needed at max
+        
+        
+        temp = np.where((imgifiedSmoothed > mean+1.80*stdev) | (imgifiedSmoothed < mean-1.80*stdev)); #get pos and neg outliers
+        temp_sorted = np.argsort(-np.abs(imgifiedSmoothed[temp])); #let's get this sorted so it goes biggest down
+        temp = (temp[0][temp_sorted], temp[1][temp_sorted]); #rebuild the tuple but sorted, numpy doesn't dig the coords in a list instead of tuple at all
+        peaks_pos = list(temp); #get pos/neg outliers first in maxima order (big fish first idea)
+        #-- fill in via use extrema alg ot pick up anything else (it gets way too much but that's ok whatever) --
+        temp = argrelextrema(imgifiedSmoothed, np.greater, axis=0); #greater than axis 0 (time)
+        peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
+        peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
+        temp = argrelextrema(imgifiedSmoothed, np.less, axis=0); #less than axis 0 (time)
+        peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
+        peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
+        temp = argrelextrema(imgifiedSmoothed, np.greater, axis=1); #greater than axis 1 (geo)
+        peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
+        peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
+        temp = argrelextrema(imgifiedSmoothed, np.less, axis=1); #less than axis 1 (geo)
+        peaks_pos[0] = np.append(peaks_pos[0], temp[0]); #yeet
+        peaks_pos[1] = np.append(peaks_pos[1], temp[1]); #yeet
+        
+        # peaks_pos = [np.array( (3468,), dtype=np.int64), np.array( (110,), dtype=np.int64)]; #for testiung
+        x_vals = (data['TEC']['time unique'][chunkr_rangePad[0]:chunkr_rangePad[-1]]  - dateRange_dayNum_zeroHr[1]*86400)/3600; #I don't care here
+        y_vals = settings['TEC']['keo']['keo plot latlong chunks'][0:-1] + np.median(np.diff(settings['TEC']['keo']['keo plot latlong chunks']))/2; #gotta get the middles
+        img_shape = imgifiedSmoothed.shape;
+        close_array = np.zeros(img_shape, dtype=np.bool_); #to cruise
+        close_arrayAll = np.zeros(img_shape, dtype=np.bool_); #to remember all found places
+        edger = np.zeros(4, dtype=np.bool_); #holds if edges are safe
+        liner_chunkr = []; #prep up
+        stdev_ref = np.nanstd(data['TEC']['keo'][chunkr_rangePad[0]:chunkr_rangePad[-1], :])*.5;
+        for i in range(0, peaks_pos[0].size):
+            if( close_arrayAll[peaks_pos[0][i], peaks_pos[1][i]] == False ):
+                close_array = close_array & False; #0 them all
+                close_array[peaks_pos[0][i], peaks_pos[1][i]] = True; #start the search
+                
+                #create array of possible related values
+                if( imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] > mean ):
+                    # stdev_ratio = np.abs(imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]]/imgified_maxVal); #estimate stdev_ratio based on distance to max value (closer to max gets a wider margin to work with)
+                    close_arrayPossible = (imgifiedSmoothed >= (imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] - stdev*stdev_ratio)) & (~close_arrayAll); #possible values plus areas not already something
+                else:
+                    # stdev_ratio = np.abs(imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]]/imgified_minVal); #estimate stdev_ratio based on distance to max value (closer to max gets a wider margin to work with)
+                    close_arrayPossible = (imgifiedSmoothed <= (imgifiedSmoothed[peaks_pos[0][i], peaks_pos[1][i]] + stdev*stdev_ratio)) & (~close_arrayAll); #possible values plus areas not already something
+                #END IF
+                
+                #check all sides over and over
+                close_array = checking_checkers_the_bear(peaks_pos[0][i], peaks_pos[1][i], edger, close_arrayPossible, close_array); #yeet
+                
+                #make sure pts are enough to care about
+                if( (close_array.sum() > num_pts_needed) & (close_array.sum() < num_pts_max) ):
+                    #add to close_arrayAll
+                    close_arrayAll[close_array] = True; #yeet it in
+                                            
+                    # get pts involved
+                    kj = np.where(close_array); #get where
+                    time_out = x_vals[kj[0]]; #get the times associated with the locs
+                    geo_out = y_vals[kj[1]]; #get the geos associated with the locs
+                    # get a good fit
+                    model_robust, _ = ransac(np.column_stack((time_out,geo_out)), LineModelND, min_samples=2, residual_threshold=1, max_trials=1000);
+                    
+                    #fit to where
+                    # polly = np.polynomial.polynomial.Polynomial.fit(time_out, geo_out, deg=1).convert().coef; #they borked this call, polyfit so much more straightforward [did not deal with outliers well enough at all sadly]
+                    extent = np.array( ((np.min(time_out), np.max(time_out)), (np.min(geo_out), np.max(geo_out))) ); #(X = Time, Y = Geo)
+                
+                    x = model_robust.predict_x(extent[1]);
+                    if( x[0] == x[1] ):
+                        #avoid the vertical line issues by just giving it a nudge
+                        x = np.array( (x[0], x[0]+data['TEC']['data rate']/3600) ); #so it's not completely vertical
+                    #END IF
+                    y = extent[1];
+                    m = (np.diff(y)/np.diff(x)).item(); #they give the line ifno as model_robust.params as some weird stuff, so just do some basic math to get it into slope/intercept form
+                    b = (y[0] - m*x[0]).item();
+                    polly = np.array( (b, m) );
+                
+                    #identify polarity
+                    line_avg_value = np.nanmean(data['TEC']['keo'][chunkr_rangePad[0]:chunkr_rangePad[-1], :][kj]); #get avg
+                    if( line_avg_value > stdev_ref ): #assume mean of 0 b/c ideal
+                        polarity = 1; # 1 is positive
+                    elif( line_avg_value < -stdev_ref ):
+                        polarity = -1; # -1 is negative
+                    else:
+                        polarity = 1; # 0 is idk
+                    #END IF
+                    
+                    #estimate wave width in time, this value should be consistent even if the wave is angled heavily
+                    uniq_geo = np.unique(kj[1]);
+                    width_times = np.empty(uniq_geo.size, np.float64)*np.nan; #preallocate
+                    for jj in range(0, uniq_geo.size):
+                        jk = uniq_geo[jj] == kj[1]; #get where the geos occur
+                        if( jk.sum() > 2 ):
+                            times_at_uniq_geo = kj[0][jk]; #apply that to the times
+                            geo_where_it_be = settings['TEC']['keo']['keo plot latlong chunks'][uniq_geo[jj]]; #get the geo where it at
+                            timeActual_where_it_be = 3600*(geo_where_it_be - b)/m; #sec, I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear I love linear 
+                            time_where_it_be = np.where( np.min(np.abs(data['TEC']['time unique aligned'][chunkr_rangePad[0]:chunkr_rangePad[-1]] - timeActual_where_it_be)) == np.abs(data['TEC']['time unique aligned'][chunkr_rangePad[0]:chunkr_rangePad[-1]].astype(np.float64) - timeActual_where_it_be))[0][0];
+                            timesActual_at_uniq_geo = data['TEC']['time unique aligned'][chunkr_rangePad[0]:chunkr_rangePad[-1]][times_at_uniq_geo]; #these are actually the times, not hte indices that lead to the times
+                            #--- this effort is to get consectuive times, in case it got wide and split apart or soemthing (not observed, but could happen if ambiguous) ---
+                            times_at_uniq_geo_diff = np.diff(times_at_uniq_geo); #get the diff
+                            times_at_uniq_geo_diff[ times_at_uniq_geo_diff > 1 ] = 0; #yeet
+                            times_at_uniq_geo_diff = times_at_uniq_geo_diff.astype(np.bool_); #the alg needs bool, so give it bool
+                            # times_at_uniq_geo_diff_lens = np.diff(np.where(np.concatenate(([times_at_uniq_geo_diff[0]], times_at_uniq_geo_diff[:-1] != times_at_uniq_geo_diff[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
+                            if( times_at_uniq_geo_diff.sum() != 0 ):
+                                times_at_uniq_geo_diff_where = np.where(np.concatenate(([times_at_uniq_geo_diff[0]], times_at_uniq_geo_diff[:-1] != times_at_uniq_geo_diff[1:])))[0][::2];
+                                #--- this chooesest length that includes the line, better and easier ---
+                                close_rator = np.empty(times_at_uniq_geo_diff_where.size, dtype=np.float64);
+                                for gg in range(0, times_at_uniq_geo_diff_where.size):
+                                    if( (times_at_uniq_geo_diff_where.size > 1) & ((gg+1) < times_at_uniq_geo_diff_where.size) ):
+                                        timesActual_at_uniq_geo_perChoose = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[gg]:times_at_uniq_geo_diff_where[gg+1]]; #get a consecutive selection
+                                    elif( (times_at_uniq_geo_diff_where.size > 1) & ((gg+1) >= times_at_uniq_geo_diff_where.size)  ):
+                                        timesActual_at_uniq_geo_perChoose = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[gg]:]; #get a consecutive selection (to the end)
+                                    else:
+                                        timesActual_at_uniq_geo_perChoose = timesActual_at_uniq_geo;
+                                    #END IF
+                                    close_rator[gg] = np.min(np.abs(timesActual_at_uniq_geo_perChoose - timeActual_where_it_be)); #rate closeness
+                                #END FOR gg
+                                times_at_uniq_geo_diff_choose = np.where(close_rator == np.min(close_rator))[0][0]; #get the minimum
+                                #--- this choosest longest length of time ---
+                                # times_at_uniq_geo_diff_choose = np.where(times_at_uniq_geo_diff_lens == times_at_uniq_geo_diff_lens.max())[0]; #see what lengths are the longest, investigate if more than 1
+                                # if( times_at_uniq_geo_diff_choose.size > 1 ):
+                                #     #guessed this can happen no test, hope it work if it ever do
+                                #     close_rator = np.empty(times_at_uniq_geo_diff_choose.size, dtype=np.float64);
+                                #     for gg in range(0, times_at_uniq_geo_diff_choose.size):
+                                #         if( times_at_uniq_geo_diff_choose[gg]+1 <= times_at_uniq_geo_diff_where.size ):
+                                #             timesActual_at_uniq_geo_perChoose = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose[gg]]:times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose[gg]+1]]; #get a consecutive selection
+                                #         elif( times_at_uniq_geo_diff_choose[gg]+1 > times_at_uniq_geo_diff_where.size ):
+                                #             timesActual_at_uniq_geo_perChoose = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose[gg]]:]; #get a consecutive selection (to the end)
+                                #         #END IF
+                                #         close_rator[gg] = np.min(np.abs(timesActual_at_uniq_geo_perChoose - timeActual_where_it_be)); #rate closeness
+                                #     #END FOR gg
+                                #     times_at_uniq_geo_diff_choose = times_at_uniq_geo_diff_choose[close_rator == np.min(close_rator)]; #get the closest one as the chosen one
+                                # else:
+                                #     times_at_uniq_geo_diff_choose = times_at_uniq_geo_diff_choose[0]; #just get the one
+                                # #END IF
+                                #prune timesActual_at_uniq_geo to the chosen segment if there's more than one
+                                if( (times_at_uniq_geo_diff_where.size > 1) & (times_at_uniq_geo_diff_choose+1 < times_at_uniq_geo_diff_where.size) ):
+                                    timesActual_at_uniq_geo = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose]:times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose+1]]; #get a consecutive selection
+                                elif( (times_at_uniq_geo_diff_where.size > 1) & (times_at_uniq_geo_diff_choose+1 > times_at_uniq_geo_diff_where.size) ):
+                                    timesActual_at_uniq_geo = timesActual_at_uniq_geo[times_at_uniq_geo_diff_where[times_at_uniq_geo_diff_choose]:]; #get a consecutive selection (to the end)
+                                #END IF
+                                #--- now can calc that width with the chosen time span for the current geo ---
+                                width_times[jj] = np.max(timesActual_at_uniq_geo) - np.min(timesActual_at_uniq_geo); #sec
+                            #END IF
+                        #END IF
+                    #END FOR jj
+                    waveWidth = np.nanmean(width_times); #sec, get the mean (few data pts so just divide I guess)
+                    
+                    liner_chunkr.append({'line coeffs':polly, 'extent':extent, 'robust fit':model_robust, 'polarity':polarity, 'time width':waveWidth}); #add on a dict so I don't forget what they mean
+                #END IF
+            #END IF
+        #END FOR i
+        for i in range(0, len(liner_chunkr)):
+            if( (np.min(liner_chunkr[i]['extent'][0, :]) >= chunkr_rangeKeep_timeUniqueAligned[0]) & (np.min(liner_chunkr[i]['extent'][0, :]) < chunkr_rangeKeep_timeUniqueAligned[-1]) ):
+                liner.append(liner_chunkr[i]); #append if it's within the day we want to keep (yea, maybe doing extra work, but worth it!)
+            #END IF
+        #END FOR i
+    #END FOR chunkr
     
     # imgified[close_array] = np.nan
     
-    #--- plot ---
+    #--- plot with the lines drawn on ---
     fig, ax = plt.subplots(nrows=1, ncols=1); #use instead of fig because it inits an axis too (I think I dunno)
     ax = [ax]; #wrap into list for ez later
     figManager = fig.canvas.manager; #req to maximize
@@ -4194,11 +4341,6 @@ if( FLG_keo_featureFinder >= 1 ):
     for i in range(0, len(liner)):
         ax[0].plot( liner[i]['extent'][0], (liner[i]['line coeffs'][0] + liner[i]['line coeffs'][1]*liner[i]['extent'][0][0], liner[i]['line coeffs'][0] + liner[i]['line coeffs'][1]*liner[i]['extent'][0][1]), linewidth=3, linestyle='--', c='xkcd:white');
     #END FOR i
-
-    # #draw lines found on
-    # for i in range(0, len(liner)):
-    #     ax[0].plot( liner[i]['extent'][0], liner[i]['robust fit'].predict_y(liner[i]['extent'][0]), linewidth=3, c='xkcd:white');
-    # #END FOR i
 
     cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
     cbar.set_label(settings['TEC']['keo']['keo labels']+settings['TEC']['keo']['keo units']); #tabel the colorbar
@@ -4241,6 +4383,45 @@ if( FLG_keo_featureFinder >= 1 ):
     #END IF
     GRITI_plotHelper_axisizerLatLong(settings['TEC']['keo']['keo plot latlong chunks'],ax=ax[0],axDir='y',tickNumGoal=17);
     timezAxisTicks, timezAxisLims = GRITI_plotHelper_axisizerTime((data['TEC']['time unique']-dateRange_dayNum_zeroHr[1]*86400)/3600,ax=ax[0]); #automagic time ticks here
+    
+    #Now drawing line of interest
+    if( (settings_map['coord type'] == 'geo') & ('keo coord type' in settings['TEC']['keo']) ): #pull a switcheroo if needed
+        if( settings['TEC']['keo']['keo coord type'] == 'mag' ):
+            import copy
+            import datetime
+            from Code.subfun_convertToMag import convert_to_mag
+            
+            if( 'pierceAlt' in settings['TEC']['keo'] ):
+                keo_alt = settings['TEC']['keo']['pierceAlt'];
+            else:
+                keo_alt = 120.; #default, great for auroral zone stuff (like field aligned currents)
+            #END IF
+            timeIndex = np.where( np.abs(data['time ref'][0] - data['TEC']['time unique']) == np.min(np.abs(data['time ref'][0] - data['TEC']['time unique'])) )[0][0]; #get an index where there's a lot of data
+            kk = np.where(np.int64(data['TEC']['time unique'][timeIndex]/86400) == dates['date range full dayNum'][:,1])[0].item(); #get where the year is gonna be
+            time4mag_hr = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//3600); #get hours
+            time4mag_min = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//60-time4mag_hr*60); #get the minutes
+            time4mag_sec = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+            time4mag = datetime.datetime(dates['date range full'][kk,0],dates['date range full'][kk,1],dates['date range full'][kk,2], \
+                                         hour = time4mag_hr, minute = time4mag_min, second = time4mag_sec); #date time object for aacgmv2    
+            
+            avgPt_coords = copy.deepcopy(avgPt_coords); #copy big time
+            [avgPt_coords[0,0], avgPt_coords[0,1]] = convert_to_mag(avgPt_coords[0,0], avgPt_coords[0,1], keo_alt, time4mag); #convert
+        #END IF
+    #END IF
+    if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
+        if( (np.min(plotLongRange) <= avgPt_coords[0,1]) & (np.max(plotLongRange) >= avgPt_coords[0,1]) ): #only plot if it's in the long range specified
+            ax[0].plot( np.linspace(np.min((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),np.max((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),2,endpoint=True) , #X time hr
+                    np.ones(2)*avgPt_coords[0,1] , #Y latitude OR longitude arcdeg
+                    c='xkcd:black',linewidth= settings_plot['line width']['smoller']); #plots a point with a black line
+        #END IF
+    else: #else latitude
+        if( (np.min(plotLatRange) <= avgPt_coords[0,0]) & (np.max(plotLatRange) >= avgPt_coords[0,0]) ): #only plot if it's in the lat range specified
+            ax[0].plot( np.linspace(np.min((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),np.max((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),2,endpoint=True) , #X time hr
+                    np.ones(2)*avgPt_coords[0,0] , #Y latitude OR longitude arcdeg
+                    c='xkcd:black',linewidth= settings_plot['line width']['smoller']); #plots a point with a black line
+        #END IF
+    #END IF
+    
     figFitter(fig); #fit the fig fast
     plt.show()
         
@@ -4250,17 +4431,98 @@ if( FLG_keo_featureFinder >= 1 ):
 
     kCompare = subfun_comparator(FLG_keo_featureFinder_ignore[1], data, dates=dates); #get when is bad
 
-    #prune 
-    nogoodtimes = data['TEC']['time unique aligned'][kCompare]/3600; #get em to ditch
+    #----- prune ----- 
+    #figure out the reference latitude
+    if( (settings_map['coord type'] == 'geo') & ('keo coord type' in settings['TEC']['keo']) ): #pull a switcheroo if needed
+        if( settings['TEC']['keo']['keo coord type'] == 'mag' ):
+            import copy
+            import datetime
+            from Code.subfun_convertToMag import convert_to_mag
+            
+            if( 'pierceAlt' in settings['TEC']['keo'] ):
+                keo_alt = settings['TEC']['keo']['pierceAlt'];
+            else:
+                keo_alt = 120.; #default, great for auroral zone stuff (like field aligned currents)
+            #END IF
+            timeIndex = np.where( np.abs(data['time ref'][0] - data['TEC']['time unique']) == np.min(np.abs(data['time ref'][0] - data['TEC']['time unique'])) )[0][0]; #get an index where there's a lot of data
+            kk = np.where(np.int64(data['TEC']['time unique'][timeIndex]/86400) == dates['date range full dayNum'][:,1])[0].item(); #get where the year is gonna be
+            time4mag_hr = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//3600); #get hours
+            time4mag_min = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//60-time4mag_hr*60); #get the minutes
+            time4mag_sec = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+            time4mag = datetime.datetime(dates['date range full'][kk,0],dates['date range full'][kk,1],dates['date range full'][kk,2], \
+                                         hour = time4mag_hr, minute = time4mag_min, second = time4mag_sec); #date time object for aacgmv2    
+            
+            avgPt_coords = copy.deepcopy(avgPt_coords); #copy big time
+            [avgPt_coords[0,0], avgPt_coords[0,1]] = convert_to_mag(avgPt_coords[0,0], avgPt_coords[0,1], keo_alt, time4mag); #convert
+        #END IF
+    #END IF
+    if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
+        geoRef = avgPt_coords[0,1];
+        #END IF
+    else: #else latitude
+        geoRef = avgPt_coords[0,0];
+        #END IF
+    #END IF
+    nogoodtimes = data['TEC']['time unique aligned'][kCompare]; #get em to ditch
+    nogoodtimes_diff = np.diff(nogoodtimes).astype(np.int32)//data['TEC']['data rate']; #get the diff, pad w/ data rate at the start
+    nogoodtimes_diff[ nogoodtimes_diff > 1 ] = 0; #yeet
+    nogoodtimes_diff = nogoodtimes_diff.astype(np.bool_);
+    # nogoodtimes_diff_lens = np.diff(np.where(np.concatenate(([nogoodtimes_diff[0]], nogoodtimes_diff[:-1] != nogoodtimes_diff[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
+    nogoodtimes_diff_where = np.where(np.concatenate(([nogoodtimes_diff[0]], nogoodtimes_diff[:-1] != nogoodtimes_diff[1:])))[0][::2];
+    nogoodtimes = nogoodtimes/3600; #hr, convert to hr from sec
+    nogoodtimes_startStop = np.empty( (nogoodtimes_diff_where.size, 2), dtype=np.float64); #hr, preallocate
+    for gg in range(0, nogoodtimes_diff_where.size):
+        if( (nogoodtimes_diff_where.size > 1) & ((gg+1) < nogoodtimes_diff_where.size) ):
+            nogoodtimes_toCompareTo = nogoodtimes[nogoodtimes_diff_where[gg]:nogoodtimes_diff_where[gg+1]]; #get a consecutive selection
+        elif( (nogoodtimes_diff_where.size > 1) & ((gg+1) >= nogoodtimes_diff_where.size)  ):
+            nogoodtimes_toCompareTo = nogoodtimes[nogoodtimes_diff_where[gg]:]; #get a consecutive selection (to the end)
+        else:
+            nogoodtimes_toCompareTo = nogoodtimes;
+        #END IF
+        nogoodtimes_startStop[gg,0] = np.min(nogoodtimes_toCompareTo); #hr, start time
+        nogoodtimes_startStop[gg,1] = np.max(nogoodtimes_toCompareTo); #hr, end time
+    #END FOR gg
+    startTimes = np.empty(len(liner), dtype=np.int64);
     for i in range(len(liner)-1, -1, -1): #backwards bc python
-        extent_real = np.array( ( (np.min(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1], \
-                                  (np.max(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]) );
-        k = np.any( (np.min(extent_real) <= nogoodtimes) & (np.max(extent_real) >= nogoodtimes) );
-        # k = np.any( (np.min(liner[i]['extent'][0]) <= nogoodtimes) & (np.max(liner[i]['extent'][0]) >= nogoodtimes) );
+        #due to how the recorded time extent and geographic extent are based on the widest amounts of data pts involved in a line - the time oft too wide for the effective line itself
+        estimated_extent = (liner[i]['line coeffs'][0] + liner[i]['line coeffs'][1]*liner[i]['extent'][0][0], liner[i]['line coeffs'][0] + liner[i]['line coeffs'][1]*liner[i]['extent'][0][1]); #this causes the geographic extent to go far past the plot range on occasion
+        #catch overshoot and then fix the time that caused it
+        if( (np.min(estimated_extent) < np.min(settings['TEC']['keo']['keo plot latlong chunks'])) | (np.max(estimated_extent) > np.max(settings['TEC']['keo']['keo plot latlong chunks'])) ):
+            if( np.min(estimated_extent) < np.min(settings['TEC']['keo']['keo plot latlong chunks']) ):
+                # liner[i]['extent'][0][np.where(np.min(liner[i]['extent'][1]) == liner[i]['extent'][1])[0].item()] = (np.min(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #recalc the new time associated with the limited geo extent
+                liner[i]['extent'][0][np.where(np.min(estimated_extent) == estimated_extent)[0].item()] = (np.min(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #recalc the new time associated with the limited geo extent
+                liner[i]['extent'][1][np.where(np.min(estimated_extent) == estimated_extent)[0].item()] = np.min(settings['TEC']['keo']['keo plot latlong chunks']); #lower this one too
+            #END IF
+            if( np.max(estimated_extent) > np.max(settings['TEC']['keo']['keo plot latlong chunks']) ):
+                liner[i]['extent'][0][np.where(np.max(estimated_extent) == estimated_extent)[0].item()] = (np.max(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #recalc the new time associated with the limited geo extent
+                liner[i]['extent'][1][np.where(np.max(estimated_extent) == estimated_extent)[0].item()] = np.max(settings['TEC']['keo']['keo plot latlong chunks']); #lower this one too
+            #END IF
+        #END IF
+        
+        #make sure the geographic extents match the time extents
+        liner[i]['extent'][1][np.where(np.min(liner[i]['extent'][0]) == liner[i]['extent'][0])[0].item()] = liner[i]['line coeffs'][1]*liner[i]['extent'][0][np.where(np.min(liner[i]['extent'][0]) == liner[i]['extent'][0])[0].item()] + liner[i]['line coeffs'][0]; #make sure everything is solid b/c it didn't ahve to be in order earlier
+        liner[i]['extent'][1][np.where(np.max(liner[i]['extent'][0]) == liner[i]['extent'][0])[0].item()] = liner[i]['line coeffs'][1]*liner[i]['extent'][0][np.where(np.max(liner[i]['extent'][0]) == liner[i]['extent'][0])[0].item()] + liner[i]['line coeffs'][0]; #make sure everything is solid b/c it didn't ahve to be in order earlier        
+        
+        #bad approach, want pruning based off of (time at reference geo value [black line in keograms]) - (wave width in time)/2 b/c this'll nuke very slow waves
+        #I went for not using the wave width - since the thing should be ideally good whatevs
+        # k = np.any( (np.min(liner[i]['extent'][0]) <= nogoodtimes) & (np.max(liner[i]['extent'][0]) >= nogoodtimes) ); #make sure they don't overlap with no good times(TM)
+        time_at_geoRef = (geoRef - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, get time at geoRef
+        
+        k = np.any( ((nogoodtimes_startStop[:,0] <= time_at_geoRef) & (nogoodtimes_startStop[:,1] >= time_at_geoRef)) | \
+                    ((nogoodtimes_startStop[:,0] <= (time_at_geoRef -  liner[i]['time width']/7200)) & (nogoodtimes_startStop[:,1] >= (time_at_geoRef -  liner[i]['time width']/7200))) | \
+                    ((np.min(liner[i]['extent'][0,:]) >= nogoodtimes_startStop[:,0]) & (np.max(liner[i]['extent'][0,:]) <= nogoodtimes_startStop[:,1])) ); #hr, calc it one shot\
+                        
         if( k == True ):
             liner.pop(i); #yeet
         #END IF
     #END FOR i
+    startTimes = np.empty(len(liner), dtype=np.float64);
+    for i in range(0, len(liner)): #do this after the pruning so it's only the lines we want
+        startTimes[i] = np.min(np.array( ( (np.max(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1], \
+                                        (np.min(settings['TEC']['keo']['keo plot latlong chunks']) - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]) )); #get the real stop/start times
+    #END FOR i
+    startTimes_sortedIndxr = np.argsort(startTimes); #sort it
+    liner = [liner[i] for i in startTimes_sortedIndxr]; #apply the sorting
     
     fig, ax = plt.subplots(nrows=1, ncols=1); #use instead of fig because it inits an axis too (I think I dunno)
     ax = [ax]; #wrap into list for ez later
@@ -4288,16 +4550,16 @@ if( FLG_keo_featureFinder >= 1 ):
     pltr_time = np.delete(pltr_time,k,axis=0); #delete em
 
     k = np.isclose(np.diff(pltr_time), np.median(np.diff(data['TEC']['time unique']))); #find contiguous time bits
-    pltr_time = (pltr_time - dateRange_dayNum_zeroHr[1]*86400)/3600; #for plottin, adjust to hrs
+    pltr_time_hrs = (pltr_time - dateRange_dayNum_zeroHr[1]*86400)/3600; #for plottin, adjust to hrs
     kj = np.where(~k)[0]+1; #add 1 for index b/c diff
     if(kj[0] != 0):
         kj = np.insert(kj, 0, 0); #insert 0
     #END IF
-    if(kj[-1] != (pltr_time.size-1) ):
-        kj = np.append(kj, pltr_time.size-1); #insert end size
+    if(kj[-1] != (pltr_time_hrs.size-1) ):
+        kj = np.append(kj, pltr_time_hrs.size-1); #insert end size
     #END IF
     for j in range(0,kj.size-1):
-        ax[0].axvspan(pltr_time[kj[j]], pltr_time[kj[j+1]-1], ymin=0, ymax=1, alpha=0.45, edgecolor='none', facecolor='xkcd:brick red');
+        ax[0].axvspan(pltr_time_hrs[kj[j]], pltr_time_hrs[kj[j+1]-1], ymin=0, ymax=1, alpha=0.45, edgecolor='none', facecolor='xkcd:brick red');
     #END FOR j
 
     cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
@@ -4341,10 +4603,146 @@ if( FLG_keo_featureFinder >= 1 ):
     #END IF
     GRITI_plotHelper_axisizerLatLong(settings['TEC']['keo']['keo plot latlong chunks'],ax=ax[0],axDir='y',tickNumGoal=17);
     timezAxisTicks, timezAxisLims = GRITI_plotHelper_axisizerTime((data['TEC']['time unique']-dateRange_dayNum_zeroHr[1]*86400)/3600,ax=ax[0]); #automagic time ticks here
+    
+    #Now drawing line of interest
+    if( (settings_map['coord type'] == 'geo') & ('keo coord type' in settings['TEC']['keo']) ): #pull a switcheroo if needed
+        if( settings['TEC']['keo']['keo coord type'] == 'mag' ):
+            import copy
+            import datetime
+            from Code.subfun_convertToMag import convert_to_mag
+            
+            if( 'pierceAlt' in settings['TEC']['keo'] ):
+                keo_alt = settings['TEC']['keo']['pierceAlt'];
+            else:
+                keo_alt = 120.; #default, great for auroral zone stuff (like field aligned currents)
+            #END IF
+            timeIndex = np.where( np.abs(data['time ref'][0] - data['TEC']['time unique']) == np.min(np.abs(data['time ref'][0] - data['TEC']['time unique'])) )[0][0]; #get an index where there's a lot of data
+            kk = np.where(np.int64(data['TEC']['time unique'][timeIndex]/86400) == dates['date range full dayNum'][:,1])[0].item(); #get where the year is gonna be
+            time4mag_hr = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//3600); #get hours
+            time4mag_min = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)//60-time4mag_hr*60); #get the minutes
+            time4mag_sec = np.int32(np.mod(data['TEC']['time unique'][timeIndex],86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+            time4mag = datetime.datetime(dates['date range full'][kk,0],dates['date range full'][kk,1],dates['date range full'][kk,2], \
+                                         hour = time4mag_hr, minute = time4mag_min, second = time4mag_sec); #date time object for aacgmv2    
+            
+            avgPt_coords = copy.deepcopy(avgPt_coords); #copy big time
+            [avgPt_coords[0,0], avgPt_coords[0,1]] = convert_to_mag(avgPt_coords[0,0], avgPt_coords[0,1], keo_alt, time4mag); #convert
+        #END IF
+    #END IF
+    if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
+        if( (np.min(plotLongRange) <= avgPt_coords[0,1]) & (np.max(plotLongRange) >= avgPt_coords[0,1]) ): #only plot if it's in the long range specified
+            ax[0].plot( np.linspace(np.min((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),np.max((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),2,endpoint=True) , #X time hr
+                    np.ones(2)*avgPt_coords[0,1] , #Y latitude OR longitude arcdeg
+                    c='xkcd:black',linewidth= settings_plot['line width']['smoller']); #plots a point with a black line
+        #END IF
+    else: #else latitude
+        if( (np.min(plotLatRange) <= avgPt_coords[0,0]) & (np.max(plotLatRange) >= avgPt_coords[0,0]) ): #only plot if it's in the lat range specified
+            ax[0].plot( np.linspace(np.min((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),np.max((data['time ref'] - dateRange_dayNum_zeroHr[1]*86400)/3600),2,endpoint=True) , #X time hr
+                    np.ones(2)*avgPt_coords[0,0] , #Y latitude OR longitude arcdeg
+                    c='xkcd:black',linewidth= settings_plot['line width']['smoller']); #plots a point with a black line
+        #END IF
+    #END IF
+    
     figFitter(fig); #fit the fig fast
     plt.show()
     
-    sys.crash()
+    
+    kCompare_len = np.diff(np.where(np.concatenate(([kCompare[0]], kCompare[:-1] != kCompare[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
+    timez_nogood = np.sum(kCompare_len*data['TEC']['data rate']); #sec, total of no good time spans
+    timez_total = dates['date range full'].shape[0]*86400; #sec in the number of days involved
+    timez_good = timez_total - timez_nogood; #sec, you can see how I got here
+    
+    liner_stats = {
+        'start time':np.empty( len(liner) , dtype=np.float64), #hr
+        'start geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
+        'end time':np.empty( len(liner) , dtype=np.float64), #hr
+        'end geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
+        'ref time':np.empty( len(liner) , dtype=np.float64), #hr
+        'wave speed':np.empty( len(liner) , dtype=np.float64), #km/hr
+        'wave angle':np.empty( len(liner) , dtype=np.float64), #deg
+        'wave width':np.empty( len(liner) , dtype=np.float64), #hr, width in time
+        'wave polarity':np.empty( len(liner) , dtype=np.int64), #-1 for negative, 0 for undetermined, 1 for positive
+        'reach ref lat':np.zeros( len(liner) , dtype=np.bool_),
+        }; #stats go in the form [time start, time end, wave speed]
+    for i in range(0, len(liner)):
+        if( (settings['TEC']['keo']['keo plot latlong name'] == 'Latitude') & np.isclose(settings['TEC']['keo']['keo angle'], 90) ):
+            liner_stats['wave speed'][i] = -np.deg2rad(liner[i]['line coeffs'][1])*settings['map']['Re']; #km/hr, assume southward is positive b/c it's the usual
+        else:
+            print('I didn\'t code this caus I\'m cruisin rn');
+            sys.crash()
+        #END IF
+        
+        liner_stats['start time'][i] = np.min(liner[i]['extent'][0]);
+        liner_stats['start geo'][i] = liner[i]['extent'][1][np.where(liner_stats['start time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
+        liner_stats['end time'][i] = np.max(liner[i]['extent'][0]);
+        liner_stats['end geo'][i] = liner[i]['extent'][1][np.where(liner_stats['end time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
+        if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
+            liner_stats['ref time'][i] = (avgPt_coords[0,1] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
+        else: #else latitude
+            liner_stats['ref time'][i] = (avgPt_coords[0,0] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
+        #END IF
+        
+        vectorComp_geo = np.min(settings['TEC']['keo']['keo plot latlong chunks']) - np.max(settings['TEC']['keo']['keo plot latlong chunks']);
+        vectorComp_time = liner_stats['end time'][i]-liner_stats['start time'][i];
+        liner_stats['wave angle'][i] = np.rad2deg(np.arccos( (vectorComp_geo*-1 +  vectorComp_time*0)/np.sqrt(vectorComp_geo**2 + vectorComp_time**2) ));
+        liner_stats['wave width'][i] = liner[i]['time width']/3600; #hr, yoink
+        liner_stats['wave polarity'][i] = liner[i]['polarity']; #yoink
+    #END FOR i
+    
+    #--- identify how long is covered by activity ---
+    timz_total =  dates['date range full'].shape[0]*24; #hr in the number of days involved
+    timz_blocked = np.sum(np.diff(nogoodtimes_startStop,axis=1)); #hr, time blocked by actibity
+    timz_possible = timz_total - timz_blocked; #hr, time that can possibly filled wqith activiti
+    # timz_activity = np.sum(liner_stats['wave width']); #hr, sum up the wave widths - don't really care when they are since above code mostly took care of that stuff [didn't cover ooverlap]
+    
+    timz_activity = 0; #hr, prep - designed to not double count overlaping lines (which could happen I guess)
+    liner_stats_ref_start = liner_stats['ref time'] - liner_stats['wave width']/2;
+    liner_stats_ref_end = liner_stats['ref time'] + liner_stats['wave width']/2;
+    krr = np.argsort(liner_stats_ref_start); #ensure this stuff is sorted by the ref time start
+    if( np.any(krr != np.arange(0, liner_stats_ref_start.size)) ): #the alg relies on reliable order, so ensure it
+        liner_stats_ref_start = liner_stats_ref_start[krr]; #sort
+        liner_stats_ref_end = liner_stats_ref_end[krr]; #sort
+    #END IF
+    for i in range(0, len(liner)):
+        checkerzDaEdge = np.where(liner_stats_ref_end[i] > liner_stats_ref_start[i+1:])[0]; #find edges that are problematic
+        if( checkerzDaEdge.size > 0 ):
+            liner_stats_ref_end[i] = liner_stats_ref_start[i+1:][checkerzDaEdge[0]]; #restrict the end time to the one it bumps into
+        #END IF
+        
+        timz_activity += liner_stats_ref_end[i] - liner_stats_ref_start[i]; #hr total it up
+    #END FOR i
+    timz_empty = timz_possible - timz_activity; #hr, not filled with some sort of identified wave
+    
+    # #--- create sets of lines (e.g., identify related waves and group them), out of scope just want to count right now ---
+    # liner_sets = []; #set of lines, who knows how many
+    # delta_time_limit = 2; #hrs, time limit for related waves
+    # delta_angle_limit = 1; #deg, wave angle limit for related waves
+    # i = 0; #keep track of where we're at
+    # j = 0; #use to advance
+    # while( i < len(liner) ):
+    #     if( i+1 < len(liner) ):
+    #         delta_time = liner_stats['start time'][i+j+1]-liner_stats['start time'][i+j];
+    #         while( (delta_time < 2) ): #limit the possible related time range to 2 hrs
+    #             j += 1 #increment
+    #         #END WHILE
+    #     #END IF
+        
+        
+    #     i += j #add it on at the end
+    #     j = 0; #reset
+    # #END WHILING AWAY THE TIME
+    
+    # liner_timeForSCIPS = 5;
+
+    # liner_sets = {
+        
+    #     }; #assembles sets of lines
+
+    # np.sum(liner_stats['end time'] - liner_stats['start time'])
+    
+    print('Keogram Feature Finder Results:');
+    print('Total Hrs: '+textNice(np.round(timz_total,2))+' | Blocked by Activity Hrs: '+textNice(np.round(timz_blocked,2))+'\nPoss. SCIPS Activity Hrs: '+textNice(np.round(timz_activity,2))+' | No Features Detected Hrs: '+textNice(np.round(timz_empty,2)));
+    print('Total features detected outside of the blocked activity zones: '+str(len(liner)));
+    print('Percentage of non-activity time occupied by possible SCIPS activity: '+textNice(np.round(timz_activity/timz_possible*100,2))+'%😎');
 #END IF
 
 #==============Analysis: delta-vTEC Double Keo w/ AMPERE==============
@@ -4400,8 +4798,8 @@ if( FLG_doubleKeo >= 1 ):
         #     GRITI_TEC_keo(doubleKeo_latLong[i][0],doubleKeo_latLong[i][1],TEC_timeUnique,\
         #         TEC_plotLimValu,'jet',data['TEC']['dTEC'],data['TEC']['time'],data['TEC']['lat'],data['TEC']['long'],data['time ref'],doubleKeo_angle_orig[i], \
         #         doubleKeo_N[i],doubleKeo_width_orig[i],doubleKeo_45vsLatLong[i],avgPt_coords,geoMap_projectionStyle,\
-        #         dateRange_dayNum_zeroHr,plotLatRange_autoTick,plotLongRange_autoTick,plotLongRange_autoTick_Crunched, gif_Millstone_Marker, gif_Millstone_Marker_Color, \
-        #         gif_Millstone_Marker_Size,FONT_titleFM,FONT_axisTick,FONT_axisTickFM,FONT_axisLabelFM,BasemapFixDir,\
+        #         dateRange_dayNum_zeroHr,plotLatRange_autoTick,plotLongRange_autoTick,plotLongRange_autoTick_Crunched, settings_map['site marker type'], settings_map['site marker color'], \
+        #         settings_map['site marker size'],FONT_titleFM,FONT_axisTick,FONT_axisTickFM,FONT_axisLabelFM,BasemapFixDir,\
         #         'delta-vTEC','delta-vTEC [TECU]',FLG_fancyPlot,PLOT_lineWidth, folder, journal_width_2C,journal_height_max,journal_dpi,\
         #         keo_polarMode=0,FLG_disablePlot=2);
         #         #call the mecha function that runs the keo alg and makes a plot showing the averaging are
@@ -7040,8 +7438,8 @@ if( FLG_doubleKeo_TECnMag == 1 ):
         GRITI_keo_keogrammer(dates,settings,doubleKeo_TECnMag_TEC_latLong[0],doubleKeo_TECnMag_TEC_latLong[1],TEC_timeUnique,\
             TEC_plotLimValu,doubleKeo_TECnMag_TEC_colorMap,data['TEC']['dTEC'],data['TEC']['time'],data['TEC']['lat'],data['TEC']['long'],time_Ref,doubleKeo_TECnMag_TEC_angleOrig, \
             doubleKeo_TECnMag_TEC_N,doubleKeo_TECnMag_TEC_widthOrig,doubleKeo_TECnMag_TEC_45vsLatLong,avgPt_coords,geoMap_projectionStyle,\
-            dateRange_dayNum_zeroHr,plotLatRange_autoTick,plotLongRange_autoTick,plotLongRange_autoTick_Crunched, gif_Millstone_Marker, gif_Millstone_Marker_Color, \
-            gif_Millstone_Marker_Size,FONT_titleFM,FONT_axisTick,FONT_axisTickFM,FONT_axisLabelFM,BasemapFixDir,\
+            dateRange_dayNum_zeroHr,plotLatRange_autoTick,plotLongRange_autoTick,plotLongRange_autoTick_Crunched, settings_map['site marker type'], settings_map['site marker color'], \
+            settings_map['site marker size'],FONT_titleFM,FONT_axisTick,FONT_axisTickFM,FONT_axisLabelFM,BasemapFixDir,\
             doubleKeo_TECnMag_TEC_dataName,doubleKeo_TECnMag_TEC_dataName_wUnits,FLG_fancyPlot,PLOT_lineWidth, folder, journal_width_2C,journal_height_max,journal_dpi,\
             keo_polarMode=0,FLG_disablePlot=2);
             #call the mecha function that runs the keo alg and makes a plot showing the averaging are
@@ -7649,11 +8047,11 @@ if( FLG_avgPt == 1 ): #average delta-vTEC around avgPt_coords in a radius of avg
         temp_mapCoords = geoMap( pointRadiusAngular*np.cos(np.arange(0,2*np.pi+np.pi/50,np.pi/50)) + avgPt_coords[i,1], pointRadiusAngular*np.sin(np.arange(0,2*np.pi+np.pi/50,np.pi/50)) + avgPt_coords[i,0] ); #convert to the geographic map coords
         ax.plot( temp_mapCoords[0],  #X longitude arcdeg
             temp_mapCoords[1],  #Y latitude arcdeg
-            c=gif_Millstone_Marker_Color,linewidth=4);
+            c=settings_map['site marker color'],linewidth=4);
                 
         #plot a * where the averaging center is
         temp_mapCoords = geoMap(avgPt_coords[i,1],avgPt_coords[i,0]); #convert the lat/long arcdeg to the current map coordinates
-        ax.plot(temp_mapCoords[0],temp_mapCoords[1],marker=gif_Millstone_Marker, color='xkcd:red orange', markersize=gif_Millstone_Marker_Size, zorder=50);
+        ax.plot(temp_mapCoords[0],temp_mapCoords[1],marker=settings_map['site marker type'], color='xkcd:red orange', markersize=settings_map['site marker size'], zorder=50);
            
         figFitter(fig); #fit that fig fast
     #END FOR i
@@ -9149,7 +9547,7 @@ if( (FLG_avgPt_HP_timeMatch_POPLnTECNOISE_CPSD_cutOut == 1) & (FLG_fancyPlot == 
     #final plot adjusting stuff
     fig.subplots_adjust(left = 0.075, right = 0.977, top = 0.990, bottom = 0.085); #sets padding to small numbers for minimal white space
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
-    fig.savefig(folder[3]+'\\avgPt_HP_timeMatch&POPL&TECNOISE_CPSD_cutOut.png'); #save the figure
+    fig.savefig( os.path.join(folder[3],'avgPt_HP_timeMatch&POPL&TECNOISE_CPSD_cutOut.png') ); #save the figure
     plt.close(); #close figure b/c it lurks apparently
     plt.ion(); #re-enable it for later stuff
     warnings.filterwarnings("default", category=RuntimeWarning); #silences warnings about NaNs used in a logical comparisons #yolo
@@ -9327,7 +9725,7 @@ if( (FLG_avgPt_HP_timeMatch_POPLnTECNOISE_FFT_cutOut == 1) & (FLG_fancyPlot == 1
     #final plot adjusting stuff
     fig.subplots_adjust(left = 0.075, right = 0.977, top = 0.990, bottom = 0.085); #sets padding to small numbers for minimal white space
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
-    fig.savefig(folder[3]+'\\avgPt_HP_timeMatch&POPL&TECNOISE_FFT_cutOut.png'); #save the figure
+    fig.savefig( os.path.join(folder[3],'avgPt_HP_timeMatch&POPL&TECNOISE_FFT_cutOut.png') ); #save the figure
     plt.close(); #close figure b/c it lurks apparently
     plt.ion(); #re-enable it for later stuff
     warnings.filterwarnings("default", category=RuntimeWarning); #silences warnings about NaNs used in a logical comparisons #yolo
@@ -14287,6 +14685,10 @@ if( FLG_enable_movieSnaps  == 1 ):
     from Code.GRITI_plotHelper_area_init import GRITI_plotHelper_area_init
     from Code.GRITI_plotHelper_axisizerLatLong import GRITI_plotHelper_axisizerLatLong
     from Code.subfun_figFitter import figFitter
+    if( FLG_snaps_interpolate == True ):
+        from Code.subfun_rbf_interp import rbf_interp, distance_calc_identical
+        from scipy.linalg import lu_factor, lu_solve
+    #END IF
     
     #----------------------GENERAL PREP-----------------------------
     if( settings_plot['save file type'].lower() != '.pdf' ):
@@ -14297,33 +14699,48 @@ if( FLG_enable_movieSnaps  == 1 ):
     
     #----------------------PRIME THE SNAP SHOT TIMES-----------------------------
     if( snaps_auto_start == 'auto' ):
-        snaps_auto_start = dateRange_zeroHr_hrBounds[0]; #automatically set it to the minimum hour bounds
+        snaps_auto_start = dateRange_zeroHr_hrBounds[0]*3600; #automatically set it to the minimum hour bounds
     #END IF
     if( snaps_auto_end == 'auto' ):
-        snaps_auto_end = dateRange_zeroHr_hrBounds[-1]; #automatically set it to the maximum hour bounds
+        snaps_auto_end = dateRange_zeroHr_hrBounds[-1]*3600; #automatically set it to the maximum hour bounds
     #END IF
     if( snaps_auto == 0 ): #use manually defined snap_times
-        snaps_times = np.array( snaps_times ); #convert to useful form, makes it bulky to have it declared like this tho
+        snaps_timesSec = np.array( snaps_times ); #convert to useful form, makes it bulky to have it declared like this tho
     elif( snaps_auto == 1 ): #otherwise auto make snap_times
-        snaps_times = np.arange(0,snaps_auto_stepsToTake)*snaps_auto_step/60+snaps_auto_start; #make snap_times automagically
+        snaps_timesSec = np.arange(0,snaps_auto_stepsToTake)*snaps_auto_step+snaps_auto_start; #sec, make snap_times automagically
     elif( snaps_auto == 2 ):
-        snaps_auto_stepsToTake = np.round((snaps_auto_end - snaps_auto_start)/(snaps_auto_step/60)); #calculate stepsToTake based off of _end automagically
-        snaps_times = np.arange(0,snaps_auto_stepsToTake)*snaps_auto_step/60+snaps_auto_start; #make snap_times automagically
+        snaps_auto_stepsToTake = np.int64(np.round((snaps_auto_end - snaps_auto_start)/(snaps_auto_step))); #sec, calculate stepsToTake based off of _end automagically
+        snaps_timesSec = np.arange(0,snaps_auto_stepsToTake)*snaps_auto_step+snaps_auto_start; #sec, make snap_times automagically
     #END IF
-    snaps_timesDays = snaps_times/24+dateRange_dayNum_zeroHr[1]; #days, convert to days for comparison with stuff
-    snaps_timesSec = snaps_times*3600+dateRange_dayNum_zeroHr[1]*86400; #sec, convert to sec for comparison with stuff
+    snaps_timesDays = snaps_timesSec/86400+dateRange_dayNum_zeroHr[1]; #days, convert to days for comparison with stuff
+    # snaps_timesSec = snaps_times*3600+dateRange_dayNum_zeroHr[1]*86400; #sec, convert to sec for comparison with stuff
+    snaps_times = snaps_timesSec/3600; #hr, create hour one for backwards compatibility
+    snaps_timesSec += dateRange_dayNum_zeroHr[1]*86400; #sec, add on the zero day for comparison with stuff
     
     #----------------------CHOOSE THE CORRECT ARRANGEMENT-----------------------------
-    snaps_supported_plotsPerPlot = np.array((4, 6, 9, 12));
+    snaps_supported_plotsPerPlot = np.array((1, 4, 6, 9, 12));
     snaps_optimal_plotsPerPlot = np.where( np.mod(snaps_timesDays.size/snaps_supported_plotsPerPlot,1) == np.min(np.mod(snaps_timesDays.size/snaps_supported_plotsPerPlot,1)))[0];
     # snaps_optimal_plotsPerPlot = snaps_optimal_plotsPerPlot[snaps_optimal_plotsPerPlot.size//2]; #choose middle option
     snaps_optimal_plotsPerPlot = snaps_optimal_plotsPerPlot[-1]; #choose last (densist) option
     snaps_chosen_plotsPerPlot = snaps_supported_plotsPerPlot[snaps_optimal_plotsPerPlot]; #choose a size
+    if( FLG_snaps_forceSinglePlot == True ):
+        snaps_chosen_plotsPerPlot = 1; #set 1, hope it just works
+    # END IF
     snaps_chosen_plotNum = np.int64(np.ceil(snaps_times.size/snaps_chosen_plotsPerPlot)); #calc the number of plots needed
     snaps_chosen_plotsPerPlot_vect = np.arange(0,snaps_times.size+snaps_chosen_plotsPerPlot,snaps_chosen_plotsPerPlot);
     
     #----------------------PRIME TTHE SNAP SHOT ARRANGEMENT-----------------------------
-    if( snaps_chosen_plotsPerPlot == 4 ):
+    if( snaps_chosen_plotsPerPlot == 1 ):
+        snaps_rows = 1; #set pre-determined row/col stuff
+        snaps_cols = 1;
+        
+        snaps_left = 0.045; #for the figure to adjust its sizing
+        snaps_right = 0.945;
+        snaps_top = 0.96;
+        snaps_bottom = 0.035;  
+        snaps_hspace = 0.135; 
+        snaps_wspace = 0.265;
+    elif( snaps_chosen_plotsPerPlot == 4 ):
         snaps_rows = 2; #set pre-determined row/col stuff
         snaps_cols = 2;
         
@@ -14543,7 +14960,7 @@ if( FLG_enable_movieSnaps  == 1 ):
     for snpz in range(0,snaps_chosen_plotNum): #start making multiple pictures
         #fire up the figure
         
-        FLG_fancyPlot_curr = 1; #manually turn on here for now
+        FLG_fancyPlot_curr = np.logical_not(FLG_snaps_forceInteractive); #use flag now cool
         
         # #Prime the plot
         if( FLG_fancyPlot_curr == 0 ):
@@ -14603,9 +15020,10 @@ if( FLG_enable_movieSnaps  == 1 ):
             snaps_times_currSec = snaps_timesSec[snaps_chosen_plotsPerPlot_vect[snpz]:snaps_chosen_plotsPerPlot_vect[snpz+1]]; #pull out the current snaps_times
             #-------------------------Start Making Pictures------------------------
             for i in range(0,snaps_chosen_plotsPerPlot):
+                itot = i + snaps_chosen_plotsPerPlot*snpz; #total counter
                 if( i+1 <= snaps_times_curr.size ): #this if statement allows for empty subplots if things didn't divide evenly
                     #------------Make human readable time-------------
-                    if( np.int64(np.round(np.abs(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)-np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)))*60,2)) == 0 ):
+                    if( ( (snaps_auto in [1,2]) & (np.mod(snaps_auto_step,60) == 0) ) & (np.int64(np.round(np.abs(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)-np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)))*60,2)) == 0) ):
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60))).zfill(2); #create a human-readable time, no seconds
                     else:
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60))).zfill(2)+':'+\
@@ -14623,6 +15041,15 @@ if( FLG_enable_movieSnaps  == 1 ):
                                 
                     gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,gif_Grid_Lat,gif_Grid_Long,snaps_Grid_Lat_Spaces,snaps_Grid_Long_Spaces,gif_Grid_Lat_Delta,gif_Grid_Long_Delta,dataRejectOrig,dataRejectLimitOrig,dataRejectMax);
                     #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                    
+                    if( FLG_snaps_interpolate == True ):
+                        gif_Grid_nan = np.isnan(gif_Grid); #getem
+                        if( gif_Grid_nan.sum() > 0 ):
+                            gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(gif_Grid_Lat*np.pi/180, gif_Grid_Long*np.pi/180); #get a meshgrid in radians
+                            gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                               lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                        #END IF
+                    #END IF
                     
                     #----------------------------Tack on Title-------------------------
                     # string_title = 'Time =  '+'{0:.2f}'.format(np.round(snaps_times_curr[i],2))+\
@@ -14665,10 +15092,26 @@ if( FLG_enable_movieSnaps  == 1 ):
                     
                     ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading
                     
+                    if(geoMap_projectionStyle_polar == 1): # Can draw on the sun, otherwise live with nighttime shading
+                        if( snaps_sunPos == 1 ):
+                            if( FLG_sunSpin == 0):
+                                x = (1.05*0.5*np.cos((sunSubSolar_loc['long'][itot]-90)*np.pi/180))+0.5; #geoMap coordinate 
+                                y = (1.05*0.5*np.sin((sunSubSolar_loc['long'][itot]-90)*np.pi/180))+0.5; #geoMap coordinate 
+                                #hSun = ax.text(x,y,'SUN\N{DEGREE SIGN}',transform=ax.transAxes,horizontalalignment='center',verticalalignment='center',fontproperties=FONT_axisTickFM);
+                                circleSun = plt.Circle((x, y), radius=0.015, color='xkcd:sun yellow', clip_on=False,transform=ax[snaps_rowsArray[i],snaps_colsArray[i]].transAxes); #make a sun figure
+                                hSun = ax[snaps_rowsArray[i],snaps_colsArray[i]].add_artist(circleSun); #plot the sun
+                            else:
+                                #this does not work in cartopy!! so don't
+                                hSun = ax[snaps_rowsArray[i],snaps_colsArray[i]].set_theta_offset((sunSubSolar_loc['long'][itot]-90)*np.pi/180); #turn the whole plot so top is where the sun is
+                                #I'm not sure if I can get this working easily - not a lot of optons.
+                            #END IF
+                        #END IF
+                    #END IF
+                        
                     #Now drawing point of interest
                     # Millstone_latLongMapped = geoMap(longMillstone,latMillstone); #convert the lat/long arcdeg to the current map coordinates
                     if( (latMillstone <= np.max(plotLatRange)) & (latMillstone >= np.min(plotLatRange)) & (longMillstone <= np.max(plotLongRange)) & (longMillstone >= np.min(plotLongRange)) ):
-                        imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=gif_Millstone_Marker, color=gif_Millstone_Marker_Color, markersize=gif_Millstone_Marker_Size, zorder=550); #plot this, 50 always on top
+                        imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=settings_map['site marker type'], color=settings_map['site marker color'], markersize=settings_map['site marker size'], zorder=550); #plot this, 50 always on top
                     #END IF
                     
                     if(geoMap_projectionStyle_polar == 0):
@@ -14703,7 +15146,7 @@ if( FLG_enable_movieSnaps  == 1 ):
             #-------------------------Start Making Pictures------------------------
             for i in range(0,snaps_chosen_plotsPerPlot):     
                 #------------Make human readable time-------------
-                if( np.int64(np.round(np.abs(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)-np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)))*60,2)) == 0 ):
+                if( ( (snaps_auto in [1,2]) & (np.mod(snaps_auto_step,60) == 0) ) & (np.int64(np.round(np.abs(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)-np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)))*60,2)) == 0) ):
                     snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60))).zfill(2); #create a human-readable time, no seconds
                 else:
                     snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60))).zfill(2)+':'+\
@@ -14724,6 +15167,15 @@ if( FLG_enable_movieSnaps  == 1 ):
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,gif_Grid_Lat,gif_Grid_Long,snaps_Grid_Lat_Spaces,snaps_Grid_Long_Spaces,gif_Grid_Lat_Delta,gif_Grid_Long_Delta,dataRejectOrig,dataRejectLimitOrig,dataRejectMax);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( FLG_snaps_interpolate == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(gif_Grid_Lat*np.pi/180, gif_Grid_Long*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 # string_title = 'Time =  '+'{0:.2f}'.format(np.round(snaps_times_curr[i],2))+\
@@ -14803,9 +15255,9 @@ if( FLG_enable_movieSnaps  == 1 ):
                 #Do the AMPERE plotting
                 # AMPERE_latLongMapped = geoMap(AMPERE_long_portion,AMPERE_lat_portion); #convert the lat/long arcdeg to the current map coordinates
                 if( ~np.any(np.isinf(AMPERE_plotLimValu)) ):
-                    imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_long_portion,AMPERE_lat_portion,s=gif_Scatter_Point_Size_AMPERE,c=AMPERE_data_portion,cmap=AMPERE_colorMap, transform=cartopy.crs.PlateCarree(), vmin=np.min(AMPERE_plotLimValu), vmax=np.max(AMPERE_plotLimValu), zorder=151);
+                    imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_long_portion,AMPERE_lat_portion,s=settings_map['AMPERE scatter size'],c=AMPERE_data_portion,cmap=AMPERE_colorMap, transform=cartopy.crs.PlateCarree(), vmin=np.min(AMPERE_plotLimValu), vmax=np.max(AMPERE_plotLimValu), zorder=151);
                 else:
-                    imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_long_portion,AMPERE_lat_portion,s=gif_Scatter_Point_Size_AMPERE,c=AMPERE_data_portion,cmap=AMPERE_colorMap, transform=cartopy.crs.PlateCarree(), zorder=151);
+                    imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_long_portion,AMPERE_lat_portion,s=settings_map['AMPERE scatter size'],c=AMPERE_data_portion,cmap=AMPERE_colorMap, transform=cartopy.crs.PlateCarree(), zorder=151);
                 #END IF
                 ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading
                 
@@ -14825,7 +15277,7 @@ if( FLG_enable_movieSnaps  == 1 ):
     #             #Do the AMPERE plotting
     #             AMPERE_colorMap = ListedColormap( np.hstack(( np.array( ( (np.linspace(1,0.492063492063492,128)),(np.linspace(1,0.507936507936508,128)),(np.linspace(1,1,128)) ) ) , np.array( ( (np.linspace(0.492063492063492,1,128)) , (np.linspace(0.507936507936508,0,128)) , (np.linspace(1,1,128)) ) ) )).T ); #white to purpleblue to pink (based off of 'cool')
     #             AMPERE_latLongMapped = geoMap(AMPERE_long_portion,AMPERE_lat_portion); #convert the lat/long arcdeg to the current map coordinates
-    #             imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_latLongMapped[0],AMPERE_latLongMapped[1],s=gif_Scatter_Point_Size_AMPERE,c=AMPERE_data_portion,cmap=AMPERE_colorMap, vmin=np.min(AMPERE_plotLimValu), vmax=np.max(AMPERE_plotLimValu), zorder=7);
+    #             imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_latLongMapped[0],AMPERE_latLongMapped[1],s=settings_map['AMPERE scatter size'],c=AMPERE_data_portion,cmap=AMPERE_colorMap, vmin=np.min(AMPERE_plotLimValu), vmax=np.max(AMPERE_plotLimValu), zorder=7);
     #             if( snaps_colsArray[i] == np.min(snaps_colsArray) ): #only plot the label on the left side
     #                 cbar2 = fig.colorbar(imAMP, cax=cax2, orientation='vertical'); #create a colorbar using the prev. defined cax
     #     #                cbar2.ax.set_yticklabels(np.linspace(np.min(AMPERE_plotLimValu),np.max(AMPERE_plotLimValu),5)); #create useful tick marks
@@ -14886,9 +15338,9 @@ if( FLG_enable_movieSnaps  == 1 ):
                 
                 #Now drawing point of interest
                 # Millstone_latLongMapped = geoMap(longMillstone,latMillstone); #convert the lat/long arcdeg to the current map coordinates
-                # imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(Millstone_latLongMapped[0],Millstone_latLongMapped[1],marker=gif_Millstone_Marker, color=gif_Millstone_Marker_Color, markersize=gif_Millstone_Marker_Size, zorder=50); #plot this, 50 always on top
+                # imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(Millstone_latLongMapped[0],Millstone_latLongMapped[1],marker=settings_map['site marker type'], color=settings_map['site marker color'], markersize=settings_map['site marker size'], zorder=50); #plot this, 50 always on top
                 if( (latMillstone <= np.max(plotLatRange)) & (latMillstone >= np.min(plotLatRange)) & (longMillstone <= np.max(plotLongRange)) & (longMillstone >= np.min(plotLongRange)) ):
-                    imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=gif_Millstone_Marker, color=gif_Millstone_Marker_Color, markersize=gif_Millstone_Marker_Size, zorder=550); #plot this, 50 always on top
+                    imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=settings_map['site marker type'], color=settings_map['site marker color'], markersize=settings_map['site marker size'], zorder=550); #plot this, 50 always on top
                 #END IF
                 
                 if(geoMap_projectionStyle_polar == 0):
@@ -14970,14 +15422,14 @@ if( FLG_enable_movieSnaps  == 1 ):
                 itot = i + snaps_chosen_plotsPerPlot*snpz; #total counter
                 #------------Make human readable time-------------
                 if( snaps_type == 11 ):
-                    if( np.int64(np.round(np.abs(np.round(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60),8)-np.int64(np.round(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60),8)))*60,2)) == 0 ):
+                    if( ( (snaps_auto in [1,2]) & (np.mod(snaps_auto_step,60) == 0) ) & (np.int64(np.round(np.abs(np.round(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60),8)-np.int64(np.round(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60),8)))*60,2)) == 0) ):
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.round(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60),8))).zfill(2); #create a human-readable time, no seconds
                     else:
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60))).zfill(2)+':'+\
                             str( np.int64(np.round(np.abs(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)-np.int64(np.abs((snaps_times_curr[i]-np.int64(snaps_times_curr[i]))*60)))*60,2)) ).zfill(2); #create a human-readable time
                     #END IF
                 elif( snaps_type == 12 ):
-                    if( np.int64(np.round(np.abs(np.round(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60),8)-np.int64(np.round(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60),8)))*60,2)) == 0 ):
+                    if( ( (snaps_auto in [1,2]) & (np.mod(snaps_auto_step,60) == 0) ) & (np.int64(np.round(np.abs(np.round(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60),8)-np.int64(np.round(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60),8)))*60,2)) == 0) ):
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i+1])).zfill(2)+':'+str(np.int64(np.round(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60),8))).zfill(2); #create a human-readable time, no seconds
                     else:
                         snaps_timeReadable = str(np.int64(snaps_times_curr[i+1])).zfill(2)+':'+str(np.int64(np.abs((snaps_times_curr[i+1]-np.int64(snaps_times_curr[i+1]))*60))).zfill(2)+':'+\
@@ -15008,6 +15460,15 @@ if( FLG_enable_movieSnaps  == 1 ):
                 elif( snaps_type == 12 ):
                     #actually need to avg here b/c we're avging across time
                     gif_Grid = GRITI_movieMaker_subfun_dataGridder(AMPERE_lat_portion,AMPERE_long_portion,AMPERE_data_portion,gif_Grid_Lat,gif_Grid_Long,gif_Grid_Lat.size-1,gif_Grid_Long.size-1,AMPERE_lat_delta,AMPERE_long_delta,dataRejectOrig,101,dataRejectMax).T; #101 disables the data rejection stuff b/c AMPERE doesn't need it
+                #END IF
+                
+                if( FLG_snaps_interpolate == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(gif_Grid_Lat*np.pi/180, gif_Grid_Long*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
                 #END IF
                                 
                 #----------------------------Tack on Title-------------------------
@@ -15329,7 +15790,7 @@ if( FLG_enable_movieSnaps  == 1 ):
                 #Now drawing point of interest
                 # Millstone_latLongMapped = geoMap(longMillstone,latMillstone); #convert the lat/long arcdeg to the current map coordinates
                 if( (latMillstone <= np.max(plotLatRange)) & (latMillstone >= np.min(plotLatRange)) & (longMillstone <= np.max(plotLongRange)) & (longMillstone >= np.min(plotLongRange)) ):
-                    imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=gif_Millstone_Marker, color=snaps_color_pt, markersize=gif_Millstone_Marker_Size, transform=cartopy.crs.PlateCarree(), zorder=550); #plot this, 50 always on top
+                    imMillstone = ax[snaps_rowsArray[i],snaps_colsArray[i]].plot(longMillstone,latMillstone,marker=settings_map['site marker type'], color=snaps_color_pt, markersize=settings_map['site marker size'], transform=cartopy.crs.PlateCarree(), zorder=550); #plot this, 50 always on top
                 #END IF
                 
                 if(geoMap_projectionStyle_polar == 0):
@@ -15378,13 +15839,13 @@ if( FLG_enable_movieSnaps  == 1 ):
         #END IF
         if( snpz == 0 ):
             fig.subplots_adjust(wspace = snaps_wspace, hspace = snaps_hspace);
-            figFitter(fig); #fit that fig fast
+            figFitter(fig, returnOffsets=False); #fit that fig fast (not sure why I didn't use returnOffsets=True but trusting my earlier self
             offsets = np.float64(np.array( (fig.subplotpars.left, fig.subplotpars.right, fig.subplotpars.bottom, fig.subplotpars.top) )); #get the current offsets
         else:
             fig.subplots_adjust(left = offsets[0], right = offsets[1], top = offsets[3], bottom = offsets[2], wspace = snaps_wspace);
         #END IF
         if( (snaps_chosen_plotNum > 1) & (FLG_fancyPlot_curr >= 1) ):
-            fig.savefig(settings['paths']['plots']+'\\snaps_type'+str(snaps_type)+'_'+str(snpz+1)+settings['plot']['save file type']); #save the figure
+            fig.savefig( os.path.join(settings['paths']['plots'],'snaps_type'+str(snaps_type)+'_'+str(snpz+1)+settings['plot']['save file type']) ); #save the figure
             plt.close(); #cleans up fancy plot after saving
         #END IF
     #END FOR snpz
