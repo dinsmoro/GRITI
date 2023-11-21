@@ -47,6 +47,7 @@ def subfun_dateORdayNum_to_fullRange(dateRange):
     #     dateRange_yearRange = dateRange(1,0); #set the year range as one year
     else:
         dateRange_yearRange = np.arange(dateRange[0,0],dateRange[1,0]+1,1,dtype="int16") #get the full year range from min to max
+        dateRange_dayNum_full = [None for i in range(0, len(dateRange_yearRange) )]; #preallocate
         for i in range(0, len(dateRange_yearRange) ):
             #Leap Year Detection
             if np.mod(dateRange_yearRange[i],4) == 0: #leap year
@@ -54,38 +55,25 @@ def subfun_dateORdayNum_to_fullRange(dateRange):
                 if (np.mod(dateRange_yearRange[i],100) == 0) and (np.mod(dateRange_yearRange[i],400) != 0):
                     #NO LEAP YEAR
                     #Leap Year Skipped Detected - next will be 2100
-                    if np.isscalar(dateRange_dayNum_full) == 1: #see if date range is being used a temp var or not
-                        dateRange_dayNum_full = np.hstack( [np.tile(dateRange_yearRange[i],(365,1)) , np.reshape(np.arange(1,365+1,1,dtype="int16"),(-1,1))] ); #create the date range if not it yet
-                    else:
-                        dateRange_dayNum_full = np.vstack( [dateRange_dayNum_full, np.hstack( [np.tile(dateRange_yearRange[i],(365,1)) , np.reshape(np.arange(1,365+1,1,dtype="int16"),(-1,1))] ) ] ); #if exists, tack on
-                    #END IF
+                    daysInYear = 365;
                 else:
                     #Leap Year Confirmed (2000,2004,2008,2012,2016,2020...)
-                    if np.isscalar(dateRange_dayNum_full) == 1: #see if date range is being used a temp var or not
-                        dateRange_dayNum_full = np.hstack( [np.tile(dateRange_yearRange[i],(366,1)), np.reshape(np.arange(1,366+1,1,dtype="int16"),(-1,1))] ); #create the date range if not it yet
-                    else:
-                        dateRange_dayNum_full = np.vstack( [dateRange_dayNum_full, np.hstack( [np.tile(dateRange_yearRange[i],(366,1)) , np.reshape(np.arange(1,366+1,1,dtype="int16"),(-1,1))] ) ] ); #if exists, tack on
-                    #END IF
+                    daysInYear = 364;
                 #END IF
             else: #no leap year if this
                 #no leap year
-                if np.isscalar(dateRange_dayNum_full) == 1: #see if date range is being used a temp var or not
-                    dateRange_dayNum_full = np.hstack( [np.tile(dateRange_yearRange[i],(365,1)) , np.reshape(np.arange(1,365+1,1,dtype="int16"),(-1,1))] ); #create the date range if not it yet
-                else:
-                    
-                    dateRange_dayNum_full = np.vstack( [dateRange_dayNum_full, np.hstack( [np.tile(dateRange_yearRange[i],(365,1)) , np.reshape(np.arange(1,365+1,1,dtype="int16"),(-1,1))] ) ] ); #if exists, tack on
-                #END IF
+                daysInYear = 365;
             #END IF 
-       #END FOR loop per year
-       
-        #dateRange_dayNum_full = np.vstack( (dateRange_dayNum_full,np.hstack( (np.reshape(np.arange(1,dateRange[1,1]+1,1,dtype="int16"), (-1,1)),np.tile(dateRange[1,0],(dateRange[1,1] - 1 +1,1))) )) );
-        #I cut this later, didn't need to make this
-        
-        dateRange_dayNum = subfun_date_to_dayNum(dateRange); #convert
-        
-        dateRange_dayNum_full_min = np.where( (dateRange_dayNum_full[:,1] == dateRange_dayNum[0,1]) & (dateRange_dayNum_full[:,0] == dateRange_dayNum[0,0]) )[0].item(); #get the min day to start on
-        dateRange_dayNum_full_max = np.where( (dateRange_dayNum_full[:,1] == dateRange_dayNum[1,1]) & (dateRange_dayNum_full[:,0] == dateRange_dayNum[1,0]) )[0].item(); #get the max day to start on
-        dateRange_dayNum_full = dateRange_dayNum_full[dateRange_dayNum_full_min:dateRange_dayNum_full_max+1, : ]; #cut out the extra
+            
+            if(i == 0 ): # start year - go to end
+                dateRange_dayNum_full[i] = np.hstack( [np.tile(dateRange_yearRange[i],(daysInYear-dateRange[0,1]+1,1)) , np.reshape(np.arange(dateRange[0,1],daysInYear+1,1,dtype="int16"),(-1,1))] ); #start of date to the end of the year
+            elif( i == (len(dateRange_yearRange)-1) ): # end year - go to date
+                dateRange_dayNum_full[i] = np.hstack( [np.tile(dateRange_yearRange[i],(dateRange[1,1],1)) , np.reshape(np.arange(1,dateRange[1,1]+1,1,dtype="int16"),(-1,1))] ); #start of year to the end date
+            else: # a full year covered, go start to end of that year
+                dateRange_dayNum_full[i] = np.hstack( [np.tile(dateRange_yearRange[i],(daysInYear,1)) , np.reshape(np.arange(1,daysInYear+1,1,dtype="int16"),(-1,1))] ); #create full date range from min/max days since within same year
+            #END IF
+        # END FOR i loop per year
+        dateRange_dayNum_full = np.vstack(dateRange_dayNum_full); #stack em together
     #END IF
         
     dateRange_full = subfun_dayNum_to_date(dateRange_dayNum_full); #convert all the day number dates to Yr/M/D dates
