@@ -5,7 +5,7 @@
 
 import numpy as np
 import os, glob, sys
-from time import time
+from time import time, sleep as timesleep
 from urllib.request import urlopen, urlretrieve
 import html2text
 from Code.subfun_strstr import strstr
@@ -74,6 +74,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     #1.1 9/14/2020 - fixed hour 24/minute 60 handling (before ignored, now adjusted to +1 day/+1 hour)
     #2.0 4/9/2021 - moved from monolithic data bloc to slices of data
     #3.0 2/8/2022 - added support for GNSS satellite type (uses RINEX formating | G: GPS, R: GLONASS, S: SBAS Payload, E: Galileo, C: BeiDou, J: QZSS, I: NavIC)
+    #3.1 11/21/2023 - added unixEpoch (ut1_unix in Madrigal files) as a thing saved, will increase file size a bit, did not update version above because it'll cause everything to be recreated
     
     version_filt = GRITI_import_TEC_support_filterVersion(); #filtered algorithm version
     #1 10/8/2019 - initial algorithm
@@ -185,7 +186,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     # locIntUnfilt_min = 4; #index where minute timestamp is
     # #5 = Second timestamp [secs]
     # locIntUnfilt_sec = 5; #index where second timestamp is
-    locIntUnfilt_size = 6; #size of the int variable
+    locIntUnfilt_size = 7; #size of the int variable
     
     #Float Layout
     #0 = current time in day format [days] - does not support years
@@ -241,11 +242,11 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     #6 = orig data is downloaded but not converted (3) - BUT filtered data is finished so don't filter this day (for supporting other days to be filtered)
     #7 = unfiltered data is already downloaded and converted (4) - BUT filtered data is finished so don't filter this day (for supporting other days to be filtered)
     
-    TEC_dataPath = ["{}\{}\{}".format(a_, b_, c_) for a_, b_, c_ in zip([settings_paths['data']]*TEC_dataAmnt, [paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)) ) ]; #get the base path where data will be in
+    TEC_dataPath = [os.path.join(a_, b_, c_) for a_, b_, c_ in zip([settings_paths['data']]*TEC_dataAmnt, [paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)) ) ]; #get the base path where data will be in
     TEC_dataFileName = ["{}_{}_{}{}".format(a_, b_, c_, d_) for a_, b_, c_, d_ in zip([paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)),np.ndarray.tolist(dateRange_dayNum_full[:,1].astype(str)),[paths_fileEnding]*TEC_dataAmnt ) ]; #get the expected filenames
     TEC_dataFileNameUnfilt = ["{}_{}_{}_unfilt{}".format(a_, b_, c_, d_) for a_, b_, c_, d_ in zip([paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)),np.ndarray.tolist(dateRange_dayNum_full[:,1].astype(str)),[paths_fileEnding]*TEC_dataAmnt ) ]; #get the expected filenames for unfiltered data (if stopped mid filtering)
-    TEC_dataFilePath = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileName ) ]; #get the full path right to the expected files
-    TEC_dataFilePathUnfilt = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
+    TEC_dataFilePath = [os.path.join(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileName ) ]; #get the full path right to the expected files
+    TEC_dataFilePathUnfilt = [os.path.join(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
     
     for i in range(0,len(dateRange_uniqueYears)): #loop to check if data folder for the year exists
         if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ) == 0 ): #check if date folders exist
@@ -287,7 +288,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                             FLG_webWork = False; #flag for web no work
                             sys.stdout.write('\rNo web access for Madrigal data avail search. Try #{}/{}, will wait {} sec until next try\t'.format(web_retryNum,web_maxRetry,web_retryWait)); #report
                             sys.stdout.flush();
-                            time.sleep(web_retryWait);
+                            timesleep(web_retryWait);
                             web_retryNum += 1; #increment try
                             if( web_retryWait < web_retryWaitSet[1] ):
                                 web_retryWait += web_retryWaitSet[2]; #increment by amount
@@ -505,7 +506,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 #END IF
                 
             else: #not first or last day, so look forward and back
-                if( ( ((TEC_dataAvail[i+1] != 1) & (TEC_dataAvail[i+1] != -2)) | ((TEC_dataAvail[i-1] != 1) & (TEC_dataAvail[i+1] != -2)) ) & (TEC_dataAvail[i] == 1) ):  #if the day before or the day after need to be filtered, and the current day is finished, change the signage
+                if( ( ((TEC_dataAvail[i+1] != 1) & (TEC_dataAvail[i+1] != -2)) | ((TEC_dataAvail[i-1] != 1) & (TEC_dataAvail[i-1] != -2)) ) & (TEC_dataAvail[i] == 1) ):  #if the day before or the day after need to be filtered, and the current day is finished, change the signage
                 # if( ( (TEC_dataAvail[i+1] != 1) | (TEC_dataAvail[i-1] != 1) ) & (TEC_dataAvail[i] == 1) ): #if the day before or the day after need to be filtered, and the current day is finished, change the signage
                     TEC_fileNameOrig = get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC); #call function that deals with various raw data names and which are preferred if there's multiple types    
                     
@@ -579,13 +580,16 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 page = urlopen(web_fileSearch); #get raw HTML
                 html_content = page.read(); #read off the HTML from whatever the page holder is
                 charset = page.headers.get_content_charset(); #get the charset from the page holder, w/o it doesn't work
+                if( charset is None ):
+                    charset = 'utf-8'; #assume utf-8
+                #END IF
                 html_content = html_content.decode(charset); #"decode" the HTML content so it's legible
                 rendered_content = html2text.html2text(html_content); #render the HTML like webpage would and get the real stuff
                 #print("{}".format(rendered_content)); #print for debug
-                web_fileNamesIndex = strstr(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
-                web_fileNotNamesIndex = strstr(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
-                web_fileLinksIndex = strstr(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
-                web_fileLinksEndIndex = strstr(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
+                web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                web_fileNotNamesIndex = strstrNB(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
+                web_fileLinksIndex = strstrNB(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
+                web_fileLinksEndIndex = strstrNB(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
             
                 web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
                 
@@ -597,7 +601,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
                     web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
                 #END FOR
-                web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
+                web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
             #END IF
                     
             current_webFileNames = [web_fileNames[k] for k in np.where(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ))[0]][0]; #get the current web file name, because it's a list it is real oof
@@ -617,7 +621,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     print('\n'); #print a new line
                     sys.stdout.write('\rDownload failed for some reason ¯\_(ツ)_/¯. Try #{}/{}, will wait {} sec\t'.format(web_retryNum,web_maxRetry,web_retryWait)); #report
                     sys.stdout.flush();
-                    time.sleep(web_retryWait);
+                    timesleep(web_retryWait);
                     web_retryNum += 1; #increment try
                     if( web_retryWait < web_retryWaitSet[1] ):
                         web_retryWait += web_retryWaitSet[2]; #increment by amount
@@ -725,6 +729,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     TEC_dataAvail[instances_toDo_where[i]] = parallel_results[i][0]; #1st one is data avail value, 2nd doesn't matter for parallel
                 #END FOR i
                 del parallel_results #save some mem
+                print('\nTime to convert '+str(instances_toDo_where.size)+' days in parallel took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end   
             except Exception as err:
                 print('WARNING IN GRITI_import_TEC_Madrigal: ERROR detected in parallelization attempt. Trying non-parallelization. Error message here:\n'+str(err)); #report something went bad, hopefully it was joblib
                 tic = time();
@@ -737,8 +742,8 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                      TEC_dataAvail[instances_toDo_where[i]] = raw2unfilt_results[0]; #1st one is new data avail value
                      current_timePerVect = raw2unfilt_results[1]; #2nd one is new current_timePerVect
                 #END FOR i
+                print('\nTime to convert '+str(instances_toDo_where.size)+' days in series took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end   
             #END TRYING
-            print('\nTime to convert '+str(instances_toDo_where.size)+' days in series took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end   
         else:
             # no need to parallelize if just 1 instance can run
             for i in range(0,instances_toDo_where.size):
@@ -959,7 +964,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     print('Warning in GRITI_import_TEC_Madrigal: '+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), TEC_dataFileName[i]) +\
                           ' had an OSError when reading data. Try #'+str(file_retryNum)+'/'+str(file_maxRetry)+'. Error text follows:');
                     print(str(errorText));
-                    time.sleep(0.1); #wait a tiny lil bit just in case
+                    timesleep(0.1); #wait a tiny lil bit just in case
                     file_retryNum += 1; #increment try
                 #END TRY
             #END WHILE
@@ -1078,7 +1083,6 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
     #this as a function supports parallelizing (which is really needed since the Madrigal format data comes in is hamstrung by poor chunk sizing so nothing is maxed out while reading except one thread or something) ---
     #-----CONVERT THE DATA TO FASTER FORMAT-----
     if( (TEC_dataAvail[i] == 3) | (TEC_dataAvail[i] == 6) ): #3 means data was downloaded but needs to be converted (6 means data was downloaded but needs to be converted, but the current day is filtered and finished already)
-        
         TEC_fileNameOrig = get_TEC_fileNameOrig(dateRange_full, i, settings_paths, paths_TEC); #call function that deals with various raw data names and which are preferred if there's multiple types            
         
         dataVectMax = locIntUnfilt_size+locFloatUnfilt_size+locStringUnfilt_size+2; #total number of data vectors to import, order: int / float / string
@@ -1149,6 +1153,12 @@ def GRITI_import_TEC_Madrigal_raw2unfilt(i, TEC_dataAvail, dateRange_full, dateR
                 dataVectCntr += 1; #increment
                 if( FLG_parallel == False ):
                     sys.stdout.write("\rData vector satType {}/{} & {} min\t\t\t\t".format(dataVectCntr,dataVectMax,np.round((time()-tic)/60,2))); #report
+                    sys.stdout.flush();
+                #END IF
+                unfilt_dict['unixEpoch'] = np.round(TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex] + "/" + TEC_fileDatalocale[TEC_fileDatalocale_tableIndex]][:,'ut1_unix'].astype("float64")).astype('int64'); #import unix epoch it's stored as a float so round it to be ?safe? then integer it
+                dataVectCntr += 1; #increment
+                if( FLG_parallel == False ):
+                    sys.stdout.write("\rData vector unixEpoch {}/{} & {} min\t\t\t\t".format(dataVectCntr,dataVectMax,np.round((time()-tic)/60,2))); #report
                     sys.stdout.flush();
                 #END IF
                 unfilt_dict['year'] = TEC_fileOrig[TEC_fileKeys[TEC_fileKeys_dataIndex] + "/" + TEC_fileDatalocale[TEC_fileDatalocale_tableIndex]][:,'year'].astype("int16"); #import year

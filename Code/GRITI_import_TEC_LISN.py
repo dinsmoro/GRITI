@@ -44,6 +44,9 @@ from Code.subfun_textNice import textNice
 #from Code.subfun_downloadProgress import downloadProgress
 import h5py
 import pandas as pd
+from glob import glob
+import subprocess
+from shutil import unpack_archive, move as shutil_move #backup in case 7zip no go go
 #from Code.subfun_date_to_dayNum import subfun_date_to_dayNum
 from Code.subfun_addADay import subfun_addADay
 from Code.subfun_dayNum_to_date import subfun_dayNum_to_date
@@ -116,6 +119,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     
     #==============Unpack==============
     dateRange_dayNum_full = dates['date range full dayNum']; #unpack
+    dateRange_day_full_padded = dates['date range full padded']; #unpack
     dateRange_dayNum_zeroHr = dates['date range zero hr dayNum']; #unpack
     settings_paths = settings['paths']; #unpack
     settings_config = settings['config']; #unpack
@@ -265,11 +269,11 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     #6 = orig data is downloaded but not converted (3) - BUT filtered data is finished so don't filter this day (for supporting other days to be filtered)
     #7 = unfiltered data is already downloaded and converted (4) - BUT filtered data is finished so don't filter this day (for supporting other days to be filtered)
     
-    TEC_dataPath = ["{}\{}\{}".format(a_, b_, c_) for a_, b_, c_ in zip([settings_paths['data']]*TEC_dataAmnt, [paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)) ) ]; #get the base path where data will be in
+    TEC_dataPath = [os.path.join(a_, b_, c_) for a_, b_, c_ in zip([settings_paths['data']]*TEC_dataAmnt, [paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)) ) ]; #get the base path where data will be in
     TEC_dataFileName = ["{}_{}_{}{}".format(a_, b_, c_, d_) for a_, b_, c_, d_ in zip([paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)),np.ndarray.tolist(dateRange_dayNum_full[:,1].astype(str)),[paths_fileEnding]*TEC_dataAmnt ) ]; #get the expected filenames
     TEC_dataFileNameUnfilt = ["{}_{}_{}_unfilt{}".format(a_, b_, c_, d_) for a_, b_, c_, d_ in zip([paths_TEC]*TEC_dataAmnt,np.ndarray.tolist(dateRange_dayNum_full[:,0].astype(str)),np.ndarray.tolist(dateRange_dayNum_full[:,1].astype(str)),[paths_fileEnding]*TEC_dataAmnt ) ]; #get the expected filenames for unfiltered data (if stopped mid filtering)
-    TEC_dataFilePath = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileName ) ]; #get the full path right to the expected files
-    TEC_dataFilePathUnfilt = ["{}\{}".format(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
+    TEC_dataFilePath = [os.path.join(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileName ) ]; #get the full path right to the expected files
+    TEC_dataFilePathUnfilt = [os.path.join(a_, b_) for a_, b_ in zip(TEC_dataPath,TEC_dataFileNameUnfilt ) ]; #get the full path right to the expected files that are unfiltered
     
     for i in range(0,len(dateRange_uniqueYears)): #loop to check if data folder for the year exists
         if( os.path.isdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_uniqueYears[i])) ) == 0 ): #check if date folders exist
@@ -317,8 +321,16 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                         rendered_content = ''; #make a string that's empty
                 #END TRY
                 
-                web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for
-                web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                # web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for
+                web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                
+                web_fileNamesIndex = np.array(()); #prep
+                for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                    web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                    if( web_fileNamesIndex_temp.size > 0 ):
+                        web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                    #END IF
+                #END IF
                 
                 if( web_fileNamesIndex.size > 0 ):
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
@@ -330,23 +342,31 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     #END FOR j
                 else:
                     #if online doesn't have the data - maybe local still does
-                    web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-                    fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
+                    web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                    # fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
+                    filePaths = glob(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, '*'))
+                    fileNames = [];
+                    for j in range(0, len(filePaths)):
+                        fileNames.append(os.path.basename(filePaths[j]))
+                    #END FOR j
                     
-                    fileNames_GoodMask = np.zeros( len(fileNames) ); #a whitelist of good file names
+                    fileNames_GoodMask = np.zeros( len(fileNames) ,dtype=np.bool_ ); #a list of good file names
                     for j in range(0,len(fileNames) ):
-                        fileNames_Index = strstr(fileNames[j],web_fileNames_dateString); #find if the string is in the file name (if empty, it's not)
-                        
-                        if( fileNames_Index.size != 0 ):
-                            #it's a useful file as its name matches the expected date string
-                            fileNames_GoodMask[j] = 1; #note it's a good file
-                        #END IF
+                        for jk in range(0, len(web_fileNames_dateStrings)):
+                            fileNames_Index = strstr(fileNames[j],web_fileNames_dateStrings[jk]); #find if the string is in the file name (if empty, it's not)
+                            
+                            if( fileNames_Index.size != 0 ):
+                                #it's a useful file as its name matches the expected date string
+                                fileNames_GoodMask[j] = 1; #note it's a good file
+                            #END IF
+                        #END FOR jk
                     #END FOR j
                     if( np.sum(fileNames_GoodMask) > 0 ):
+                        # fileNames_compressed = np.zeros( len(fileNames), dtype=np.bool_ ); #a list of compressed files, make a list of these for years
                         TEC_fileNameOrig_isThere = 1; #set the flag to 1 if a file is local
                     else:
                         TEC_fileNameOrig_isThere = 0; #set the flag to 0 if a file isn't local
-                    #END IF                    
+                    #END IF               
                 #END IF
                                 
                 #Check if the data for the date requested is locally available and up to date
@@ -404,8 +424,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     print("Data wasn't converted to standardized format & naming scheme for {} and will be reconverted. Deleting partial file as well.\n".format(TEC_dataFilePathUnfilt[i]) );
                     os.remove(TEC_dataFilePathUnfilt[i]); #delete partially downloaded file to avoid conflicts
                     
-                    web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for
-                    web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                    web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                    
+                    web_fileNamesIndex = np.array(()); #prep
+                    for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                        web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                        if( web_fileNamesIndex_temp.size > 0 ):
+                            web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                        #END IF
+                    #END IF
                     
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
@@ -424,8 +451,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     #END IF
                 #END TRYING
             else: #otherwise orig data downloaded but not converted to standard (fast) format
-                web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for
-                web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                
+                web_fileNamesIndex = np.array(()); #prep
+                for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                    web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                    if( web_fileNamesIndex_temp.size > 0 ):
+                        web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                    #END IF
+                #END IF
             
                 TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                 for j in range(0,web_fileNamesIndex.size):
@@ -487,8 +521,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
         i = dateRange_dayNum_full[:,0].size-1; #set this so I don't have to change anything in my codes
         #find the last one (it's a padded day) - do this first since we want it done before the middle days are compared
         if( (TEC_dataAvail[i] == 1) & (TEC_dataAvail[i-1] != 1) ): #if a padded day happens to be downloaded, force the raw data to be downloaded as it's only for filtering (as long as the prev day isn't also finished - then day isn't needed)
-            web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-            web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+            web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+            
+            web_fileNamesIndex = np.array(()); #prep
+            for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                if( web_fileNamesIndex_temp.size > 0 ):
+                    web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                #END IF
+            #END IF
             
             TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
             for j in range(0,web_fileNamesIndex.size):
@@ -513,8 +554,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
         for i in range(0,dateRange_dayNum_full[:,0].size-1): #loop to logic check data choices - doesn't do last cause we did that first
             if( i == 0 ): #find the first one (it's a padded day)
                 if( (TEC_dataAvail[i] == 1) & (TEC_dataAvail[i+1] != 1) ): #if a padded day happens to be downloaded, force the raw data to be downloaded as it's only for filtering (as long as the next day isn't also finished - then day isn't needed)                  
-                    web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-                    web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                    web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                    
+                    web_fileNamesIndex = np.array(()); #prep
+                    for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                        web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                        if( web_fileNamesIndex_temp.size > 0 ):
+                            web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                        #END IF
+                    #END IF
                     
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
@@ -539,8 +587,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 
             else: #not first or last day, so look forward and back
                 if( ( ((TEC_dataAvail[i+1] != 1) & (TEC_dataAvail[i+1] != -2)) | ((TEC_dataAvail[i-1] != 1) & (TEC_dataAvail[i+1] != -2)) ) & (TEC_dataAvail[i] == 1) ): #if the day before or the day after need to be filtered, and the current day is finished, change the signage                   
-                    web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-                    web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                    web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+                    
+                    web_fileNamesIndex = np.array(()); #prep
+                    for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                        web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                        if( web_fileNamesIndex_temp.size > 0 ):
+                            web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                        #END IF
+                    #END IF
                     
                     TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
                     for j in range(0,web_fileNamesIndex.size):
@@ -565,8 +620,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     elif( FLG_overwrite == 1 ): #FLG_overwrite == 1 flag is on to overwrite all finished data, so just adjust 1's to 2/3/4 depending on what is downloaded
         
         for i in range(0,dateRange_dayNum_full[:,0].size): #loop to check if any data exists - data will not be downloaded yet!           
-            web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-            web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+            web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+            
+            web_fileNamesIndex = np.array(()); #prep
+            for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                if( web_fileNamesIndex_temp.size > 0 ):
+                    web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                #END IF
+            #END IF
             
             TEC_fileNameOrig_isThere = 1; #prep the flag at 1, goes to 0 if a file that's online isn't local
             for j in range(0,web_fileNamesIndex.size):
@@ -624,8 +686,15 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
     #                #basically, if within the same year only need to get this once for the whole year's data availiability
     #                FLG_newYr = dateRange_full[i,0]; #set it so the flag works good
             
-            web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-            web_fileNamesIndex = strstr(rendered_content,web_fileNames_dateString); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+            web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+            
+            web_fileNamesIndex = np.array(()); #prep
+            for jk in range(0, len(web_fileNames_dateStrings)): # I am coding fast, it's gettin shoddy
+                web_fileNamesIndex_temp = strstr(rendered_content,web_fileNames_dateStrings[jk]); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                if( web_fileNamesIndex_temp.size > 0 ):
+                    web_fileNamesIndex = web_fileNamesIndex_temp; #record it
+                #END IF
+            #END IF
             
             print("Downloading {} LISN files for the current day to \"{}\".\nFrom site {}".format( web_fileNamesIndex.size, os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData), web_base_site ));
             tic = time.time(); #for time testing
@@ -679,26 +748,84 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 }; #prep a dict to hold the data as it's read in (lists expand better than numpy arrays)
             
             #READ the raw data
-            web_fileNames_dateString = str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3); #make the date string to look for 
-            fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
+            web_fileNames_dateStrings = [str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_dayNum_full[i,1]).zfill(3), str(dateRange_dayNum_full[i,0])[2:]+str(dateRange_day_full_padded[i,1]).zfill(2)+str(dateRange_day_full_padded[i,2]).zfill(2)]; #make the date string to look for 
+            # fileNames = os.listdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) ); #get the names of the files in the folder
+            filePaths = glob(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData, '*'))
+            fileNames = [];
+            for j in range(0, len(filePaths)):
+                fileNames.append(os.path.basename(filePaths[j]))
+            #END FOR j
             
-            fileNames_GoodMask = np.zeros( len(fileNames) ); #a whitelist of good file names
+            fileNames_GoodMask = np.zeros( len(fileNames), dtype=np.bool_ ); #a list of good file names
+            fileNames_compressed = np.zeros( len(fileNames), dtype=np.bool_ ); #a list of compressed files
             for j in range(0,len(fileNames) ):
-                fileNames_Index = strstr(fileNames[j],web_fileNames_dateString); #find if the string is in the file name (if empty, it's not)
-                
-                if( fileNames_Index.size != 0 ):
-                    #it's a useful file as its name matches the expected date string
-                    fileNames_GoodMask[j] = 1; #note it's a good file
-                #END IF
+                for jk in range(0, len(web_fileNames_dateStrings)):
+                    fileNames_Index = strstr(fileNames[j],web_fileNames_dateStrings[jk]); #find if the string is in the file name (if empty, it's not)
+                    
+                    if( fileNames_Index.size != 0 ):
+                        #it's a useful file as its name matches the expected date string
+                        fileNames_GoodMask[j] = 1; #note it's a good file
+                        
+                        # make sure it's unzipped
+                        if( (fileNames[j][fileNames[j].rfind('.'):] == '.gz') | \
+                            (fileNames[j][fileNames[j].rfind('.'):] == '.7z') | \
+                            (fileNames[j][fileNames[j].rfind('.'):] == '.zip') ):
+                            #must unzip if so
+                            try:
+                                subprocess.run('"'+settings_paths['7zip']+'"'+' e '+'"'+ \
+                                               filePaths[j]+'"' \
+                                               ' -o"'+os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData)+'"'); #call 7z to extract
+                            except Exception as err:
+                                if( fileNames[j][fileNames[j].rfind('.'):] != '.7z' ):
+                                    try:
+                                        unpack_archive( filePaths[j], os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData) );
+                                    except Exception as err2:
+                                        print('ERROR in GRITI_import_TEC_LISN: 7zip filed to run. Here is 7zip-related error:\n'+str(err)+'\n THEN shutil.unpack_archive failed to ruin (bjorked file? never seent before so idk). Crashing, sorry. Here is that error:\n'+str(err2));
+                                        #import sys
+                                        sys.crash();
+                                    #END TRYING
+                                else:
+                                    import importlib
+                                    if( importlib.find_loader('py7zr') ):
+                                        import py7zr
+                                        curr_dir = os.getcwd(); #prep to revert
+                                        os.chdir(os.path.join(settings_paths['data'], paths_TEC, str(dateRange_full[i,0]), paths_TEC_rawData)); #gotta move it cause can't tell it where to go?????
+                                        with py7zr.SevenZipFile(filePaths[j], mode='r') as archive:
+                                            archive.extractall(); #yoink em all
+                                        #END WITH
+                                        os.chdir(curr_dir); #reset to original, easier than moving the file b/c I'd have to figure out the file name or something idk
+                                    else:
+                                        print('ERROR in GRITI_import_TEC_LISN: 7zip path of "'+settings_paths['7zip']+'" crashes. Maybe 7zip isn\'t there, maybe something else. py7zr also not installed. Crashing because file ending is .7z and needs 7zip. Here is the error:\n'+str(err));
+                                        #import sys
+                                        sys.crash();
+                                    #END IF
+                                #END IF
+                            #END TRYING
+                            
+                            #do some housekeeping
+                            fileNames_compressed[j] = 1; #it is compressed
+                            fileNames[j] = fileNames[j][:fileNames[j].rfind('.')]; #remove the end zipped bit
+                            filePaths[j] = filePaths[j][:filePaths[j].rfind('.')]; #remove the end zipped bit
+                        #END IF
+                    #END IF
+                #END FOR jk
             #END FOR j
             fileNames_GoodMask = np.where( fileNames_GoodMask == 1 )[0]; #convert to indexes
             
             fileNames_Good = []; #prep a list
-            for j in range(0,fileNames_GoodMask.size ):
+            filePaths_Good = []; #prep a list
+            fileNames_compressed_Good = np.zeros(fileNames_GoodMask.size, dtype=np.bool_); #prep a list
+            for j in range(0, fileNames_GoodMask.size ):
                 fileNames_Good.append(fileNames[fileNames_GoodMask[j]]); #append the good names
+                filePaths_Good.append(filePaths[fileNames_GoodMask[j]]); #append the good names
+                fileNames_compressed_Good[j] = fileNames_compressed[fileNames_GoodMask[j]]; #append the good names
             #END FOR j
                         
-            estimatedUpdates = np.arange(np.int64(fileNames_GoodMask.size*.1),fileNames_GoodMask.size-np.int64(fileNames_GoodMask.size*.1),np.int64(fileNames_GoodMask.size*.1));
+            if( fileNames_GoodMask.size > 9 ):
+                estimatedUpdates = np.arange(np.int64(fileNames_GoodMask.size*.1),fileNames_GoodMask.size-np.int64(fileNames_GoodMask.size*.1),np.int64(fileNames_GoodMask.size*.1));
+            else:
+                estimatedUpdates = np.arange(0, fileNames_GoodMask.size, 2); #too pts to make the code above go so just wing it for now
+            #END IF
             TEC_fileData_pierceAlt = 350; #km, import pierce point altitude - defined as a constant based on communications
             for j in range(0,fileNames_GoodMask.size ):
                 #Import raw LISN TEC data file
@@ -732,16 +859,16 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                     #in this instance one of the location numbers happened to have the year in it, so choose the last one
                     dateLine = dateLine[-1];
                 #END IF
-                dateLine = TEC_raws[np.asscalar(dateLine)].split(' '); #split by a space
+                dateLine = TEC_raws[dateLine.item()].split(' '); #split by a space
                 dateLine = list(filter(None, dateLine)); #remote empty entries (that were just a space)
                 dateLine_slashes = np.where(strfind(dateLine,'\\') == 1)[0]; #get the index of strings with \'s in them from \n or \r
                 if( dateLine_slashes.size == 1 ):
-                    dateLine_slashesIndex = strstr(dateLine[np.asscalar(dateLine_slashes)],'\\'); #get the index of where the \ occurs in the string
-                    dateLine[np.asscalar(dateLine_slashes)] = dateLine[np.asscalar(dateLine_slashes)][0:np.asscalar(dateLine_slashesIndex)]; #delete the \
+                    dateLine_slashesIndex = strstr(dateLine[dateLine_slashes.item()],'\\'); #get the index of where the \ occurs in the string
+                    dateLine[dateLine_slashes.item()] = dateLine[dateLine_slashes.item()][0:dateLine_slashesIndex.item()]; #delete the \
                 elif( dateLine_slashes.size > 1 ):
                     for k in range(0, dateLine_slashes.size):
                         dateLine_slashesIndex = strstr(dateLine[dateLine_slashes[k]],'\\'); #get the index of where the \ occurs in the string
-                        dateLine[dateLine_slashes[k]] = dateLine[dateLine_slashes[k]][0:np.asscalar(dateLine_slashesIndex)]; #delete the \
+                        dateLine[dateLine_slashes[k]] = dateLine[dateLine_slashes[k]][0:dateLine_slashesIndex.item()]; #delete the \
                     #END FOR k
                 #END IF
                 if( dateLine[0] != str(dateRange_full[i,0]) ):
@@ -821,7 +948,7 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 #         #found a PRN delcaration line, time to record it
                 #         current_PRN = TEC_raws[k].split(' '); #split by space
                 #         current_PRN = list(filter(None, current_PRN)); #remote empty entries (that were just a space)
-                #         current_PRN = np.int16(current_PRN[ np.asscalar(np.where(strfind(current_PRN, 'PRN') == 1)[0]) + 1 ]); #pulls out the current PRN based on finding where the phrase 'PRN' is and then getting the number right after that
+                #         current_PRN = np.int16(current_PRN[ np.where(strfind(current_PRN, 'PRN') == 1)[0].item() + 1 ]); #pulls out the current PRN based on finding where the phrase 'PRN' is and then getting the number right after that
                 #     else:
                 #         #format the line for being able to use it
                 #         current_line = TEC_raws[k].split(' '); #split by space
@@ -829,12 +956,12 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 #         #run code to remove \'s
                 #         current_slashes = np.where(strfind(current_line,'\\') == 1)[0]; #get the index of strings with \'s in them from \n or \r
                 #         if( current_slashes.size == 1 ):
-                #             current_slashesIndex = strstr(current_line[np.asscalar(current_slashes)],'\\'); #get the index of where the \ occurs in the string
-                #             current_line[np.asscalar(current_slashes)] = current_line[np.asscalar(current_slashes)][0:np.asscalar(current_slashesIndex)]; #delete the \
+                #             current_slashesIndex = strstr(current_line[current_slashes.item()],'\\'); #get the index of where the \ occurs in the string
+                #             current_line[current_slashes.item()] = current_line[current_slashes.item()][0:current_slashesIndex.item()]; #delete the \
                 #         elif( current_slashes.size > 1 ):
                 #             for k in range(0, current_slashes.size):
                 #                 current_slashesIndex = strstr(current_line[current_slashes[k]],'\\'); #get the index of where the \ occurs in the string
-                #                 current_line[current_slashes[k]] = current_line[current_slashes[k]][0:np.asscalar(current_slashesIndex)]; #delete the \
+                #                 current_line[current_slashes[k]] = current_line[current_slashes[k]][0:current_slashesIndex.item()]; #delete the \
                 #             #END FOR k
                 #         #END IF
                 #         if( len(current_line) != 12 ):
@@ -888,13 +1015,20 @@ def GRITI_import_TEC_LISN(dates, settings, FLG_justChecking=False):
                 unfilt_dict['sTECerr'].append(np.zeros( num_dataEntries,dtype=dataType_str)*np.nan); #preallocate as nan
                 unfilt_dict['vTEC'].append(temp_vTEC);
                 unfilt_dict['site'].append(temp_site);
-                            
+                        
+                # Remove unzipped files if they were zipped before
+                if( fileNames_compressed_Good[j] ):
+                    os.remove(filePaths_Good[j]); #delete the file, the zipped version is still there
+                #END IF
+                
                 if( np.any(j == estimatedUpdates) ):
                     #write an update approximately every 10%
                     sys.stdout.write("\rParsed "+str(j+1)+"/"+str(fileNames_GoodMask.size)+" ("+str(np.round((j+1)/fileNames_GoodMask.size*100))+"% finished) ETA is "+str(np.round( ((time.time() - tic)/60)/((j+1)/fileNames_GoodMask.size) - ((time.time() - tic)/60),2))+" min          " );
                     sys.stdout.flush();
                 #END IF
             #END FOR j
+            
+            
             #Collapse lists into a vector
             keyz = list(unfilt_dict.keys()); #get the current keys
             for j in range(0,len(keyz)):
