@@ -1,7 +1,7 @@
-#8b503459569d1505560191b614e39403357c9bce68a28ae15a01700b47aae0c888a8a51f3779cce626892184be3565f5207cc09f4cef1cf8c97613e0fbf87963
+#8777e25fc1e33a8b23dd3b8ae0cae99a65d45f20f5cd8e174fcd02a89292f463bab0e1cc24c4d65c2dbb3d13f03e75791b89b62baf7b8c18938a4c98a1badcbd
 import time
 from matplotlib import _pylab_helpers
-def pause(interval):
+def pause(interval: float) -> None:
     """
     Run the GUI event loop for *interval* seconds.
 

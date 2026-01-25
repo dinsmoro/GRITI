@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.ticker as tick
 from Code.subfun_figFitter import figFitter
+from os import path as ospath
 
 def GRITI_TEC_keo_fancyPlot_TEC(vTECChunked_anyAngleAvg,TEC_timeUnique,TEC_plotLimValu, \
         colorMap,plotLatRange,plotLongRange,latMillstone,longMillstone,dateRange_dayNum_zeroHr,time_Ref,latLong_ref, \
@@ -150,7 +151,7 @@ def GRITI_TEC_keo_fancyPlot_TEC(vTECChunked_anyAngleAvg,TEC_timeUnique,TEC_plotL
     #     fig.subplots_adjust(left = 0.060, right = 0.9178, top = 0.980, bottom = 0.085); #sets padding to small numbers for minimal white space
     # #END IF
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
-    fig.savefig(folder[3]+'\TEC_avgKeo.png'); #save the figure
+    fig.savefig(ospath.join(folder[3],'TEC_avgKeo.png')); #save the figure
     plt.close(); #close figure b/c it lurks apparently
     plt.ion(); #re-enable it for later stuff
        

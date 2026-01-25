@@ -21,8 +21,18 @@ from Code.subfun_time_to_dateRange import subfun_time_to_dateRange
 from Code.subfun_dayNum_to_date import subfun_dayNum_to_date
 from Code.subfun_monthNum_to_word import subfun_monthNum_to_word
 
-def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, movie_figOffsets, movie_title_yOffset):
+def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_figOffsets, movie_title_yOffset):
     #-------------Multiple Movie Algs for Difference Scenarios-----------------
+    if( 'interpolation' in settings['movie'] ): #safety 1st
+        if( settings['movie']['interpolation'] == True ):
+            from Code.subfun_rbf_interp import rbf_interp, distance_calc_identical
+            from scipy.linalg import lu_factor, lu_solve
+        #END IF
+    else:
+        settings['movie']['interpolation'] = False; # helps later
+    #END IF
+    
+    
     #================================================================= MOVIE TYPE 0 =================================================================
     if( settings['movie']['movie type'] == 0 ): #moving gif implementation (scatter points)
         
@@ -164,210 +174,200 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
         #END FOR i
     #================================================================= MOVIE TYPE 1 =================================================================
     elif(settings['movie']['movie type'] == 1): #stationary data points (through averaging)
+        
+        # time alignment
+        dateNow_dayNum = subfun_time_to_dateRange(data['TEC']['time unique'], dates_zeroHr = dates['date range zero hr'], FLG_timesWRTzeroHr = False, options = 0)[0]; #get the date the starting time index is on
+        dateNow = subfun_dayNum_to_date(dateNow_dayNum)[0]; #convert to date from dayNum
+        
+        dateNow_secInDay = data['TEC']['time unique'] - np.int64(dateNow_dayNum[1])*86400; #get seconds in the day
+        dateNow_hour = dateNow_secInDay//3600; #hours that fit in
+        dateNow_min = (dateNow_secInDay - dateNow_hour*3600)//60; #minutes that fit in
+        dateNow_sec = dateNow_secInDay - dateNow_min*60 - dateNow_hour*3600; #left over seconds
+                
+        time4mag = datetime(dateNow[0], dateNow[1], dateNow[2],\
+            hour = dateNow_hour, minute = dateNow_min, second = dateNow_sec); #date time object for aacgmv2  
+    
+        # create the frame
+        movie_dict = GRITI_movieMaker_subfun_figMaker(data, settings, time4mag, movie_figOffsets=movie_figOffsets);
+        fig = movie_dict['fig']; #unpack
+        ax = movie_dict['ax'];
+        cax = movie_dict['cax'];
+        
+        #pre-calc what can be
+        pltHelprX_TEC, pltHelprY_TEC = np.meshgrid( settings['movie']['grid long'], settings['movie']['grid lat']); #helps the pcolor work
+
+        if( 'stere' in settings['map']['projection name'] ):
+            if( settings['movie']['spin'] != 0):
+                #this is a constant sun since the plot is continually spun to match
+                x = (1.05*0.5*np.cos(np.pi/2))+0.5; #geoMap coordinate 
+                y = (1.05*0.5*np.sin(np.pi/2))+0.5; #geoMap coordinate 
+                circleSun = plt.Circle((x, y), radius=0.015, color='xkcd:sun yellow', clip_on=False,transform=ax.transAxes); #make a sun figure
+                hSunStatic = ax.add_artist(circleSun); #plot the sun
+            #END IF
+        #END 
+        
         if( np.isscalar(settings['TEC']['plot lim']) == 1 ):
             gif_TEC_plotLimValu = np.array( (-settings['TEC']['plot lim'],settings['TEC']['plot lim']) ); #make it a vector
         else:
             gif_TEC_plotLimValu = settings['TEC']['plot lim']; #keep it the same
         #END IF
-    
-        with movie_writer.saving(movie_dict['fig'], movie_name, settings['movie']['fig PPI']): #figure to save, file name, and PPI (DPI in documentation)
         
-            #-------------------------Start Making Pictures------------------------
-            for i in range(0,data['TEC']['time unique'].size):
+        gif_Grid = GRITI_movieMaker_subfun_dataGridder( data['TEC']['lat'], data['TEC']['long'], data['TEC']['dTEC'],settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
+        #call a numba'd function that makes the movie quicker by crunching the numbers gooder
         
-                #----------------Corral the data to the right place----------------
-                k =  np.where( data['TEC']['time'] == data['TEC']['time unique'][i])[0]; #gets during a time period
-                vTEC_portion = data['TEC']['dTEC'][k]; #pull out the vTEC now
-                pplat_portion = data['TEC']['lat'][k]; #get the pplat (pierce-point lat) at the time required
-                pplong_portion = data['TEC']['long'][k]; #get the pplong (pierce-point long) at the time required
-                            
-                gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
-                #call a numba'd function that makes the movie quicker by crunching the numbers gooder
-                
-                #----------------------------Tack on Title-------------------------
-                string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
-                    ', 0 UT on '+dates['date range zero hr month name']+' '+str(dates['date range zero hr'][2])+', '+str(dates['date range zero hr dayNum'][0]); #create mecha title
-                
-                ax.set_title(string_title,fontproperties=settings['plot']['font title FM']); #set the title, properties always needed
-                    
-                #-------------------Starting the Plotting--------------------------
-                if( i == 0 ): #first run preps axes, color bars, etc.
-                                   
-                    #Do the TEC plotting
-                    pltHelprX, pltHelprY = np.meshgrid( settings['movie']['grid long'], settings['movie']['grid lat']); #helps the pcolor work
-                    TEC_latLongMapped = geoMap(pltHelprX,pltHelprY); #convert the lat/long arcdeg to the current map coordinates
-                    imTEC = ax.pcolormesh(TEC_latLongMapped[0], TEC_latLongMapped[1],  gif_Grid.T ,vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']),cmap=settings['TEC']['colormap'],zorder=5); # pseudocolor plot "stretched" to the grid
-                    cbar = movie_dict['fig'].colorbar(imTEC, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
-                    cax.yaxis.set_major_formatter(FormatStrFormatter('%.2f')); #force a rounded format
-                    cbar.set_label(settings['TEC']['name']+settings['TEC']['units']); #tabel the colorbar
-                    cbar.ax.tick_params(labelsize=settings['plot']['font axis tick']);
-                    cbar.mappable.set_clim(vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']));
-                    cax.yaxis.set_ticks(np.linspace(np.min(settings['TEC']['plot lim']),np.max(settings['TEC']['plot lim']),6)); #create useful tick marks
+        if( settings['movie']['interpolation'] == True ):
+            gif_Grid_nan = np.isnan(gif_Grid); #getem
+            if( gif_Grid_nan.sum() > 0 ):
+                gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                   lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+            #END IF
+        #END IF
     
-                    if( settings['movie']['day nite line'] == 1 ):
-                        movie_dict['fig'].canvas.flush_events(); #this is req. to get get_window_extent() to get the current window size
-                        #Plot the sunrise/sunset terminators
-                        dayNite_temp = np.abs(dayNite_sunrise - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunrise locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
-                        hLgd_FLG_day = np.sum(dayNite_temp); #plotting flag, shows when legend is active
-                        #constants will use all the time - only for plotting of day/nite line so minor importance
-                        #this stuff makes the text angle plotted mostly correct most of the time
-                        bboxFig = movie_dict['fig'].get_window_extent().transformed(movie_dict['fig'].dpi_scale_trans.inverted()); #get the entire figure dimensions
-                        bboxAx0 = ax.get_window_extent().transformed(movie_dict['fig'].dpi_scale_trans.inverted()); #get the plot dimensions
-    #                    plot_ratio = (bboxAx0.width/bboxAx0.height)/( (bboxAx0.width/bboxAx0.height)/(bboxmovie_dict['fig'].width/bboxmovie_dict['fig'].height) )**2; #get the plot ratio, will use it to fix up the angle
-                        plot_ratio = (bboxAx0.width/bboxAx0.height); #get the plot ratio, will use it to fix up the angle
-                        dayNite_textRotationLenOrig = 35; #length to go up and down the sunrise/sunset line to estimate an angle
-                        dayNite_savgolFiltLenOrig = 101; #set it as a constant to start off
-                        dayNite_textLatAbs = (np.max(settings['map']['lat range'])-np.min(settings['map']['lat range']))*.9 + np.min(settings['map']['lat range']); #calc like 80% of the max latitude
-                        if( hLgd_FLG_day > 0 ): #only do work if it is there
-                            #calc all that day/nite stuff in one function to keep it from getting cluttered
-                            dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(0,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
-                            dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
-                            imDayNite_day = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='g',linewidth=1.75,zorder=6); #plots a line to show the sunrise time
-                            if( settings['movie']['day nite text'] == 1 ):
-                                dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
-                                textDayNite_day = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunrise", rotation=dayNite_textRotation, color='g', fontsize=settings['plot']['font axis tick'], zorder=6);
-                            #END IF
-                        #END IF
-                        
-                        dayNite_temp = np.abs(dayNite_sunset - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunset locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
-                        hLgd_FLG_nite = np.sum(dayNite_temp); #plotting flag, shows when legend is active
-                        if( hLgd_FLG_nite > 0 ): #only do work if it is there
-                            #calc all that day/nite stuff in one function to keep it from getting cluttered
-                            dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(1,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
-                            dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
-                            imDayNite_nite = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='b',linewidth=1.75,zorder=6); #plots a line to show the sunset time
-                            if( settings['movie']['day nite text'] == 1 ):
-                                dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
-                                textDayNite_nite = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunset", rotation=dayNite_textRotation, color='b', fontsize=settings['plot']['font axis tick'], zorder=6);
-                            #EMD IF
-                        #END IF
-                    elif( settings['movie']['day nite line'] == 2 ):
-                        dayNite_currentDay = subfun_dayNum_to_date( np.array((dates['date range zero hr dayNum'][0],np.int64(data['TEC']['time unique'][i]/86400)),ndmin=2))[0]; #get the current yr/month/day
-                        dayNite_currentHr = np.int64((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24); #hr, get the current hour
-                        dayNite_currentMin = np.int64( ((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24 - dayNite_currentHr)*60); #min, get the current min
-                        dayNite_currentSec = np.int64( (((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24 - dayNite_currentHr)*60 - dayNite_currentMin)*60); #min, get the current min
-                        dayNite_currentTime = datetime(dayNite_currentDay[0], dayNite_currentDay[1], dayNite_currentDay[2], dayNite_currentHr, dayNite_currentMin,dayNite_currentSec);
-                        dayNite_shade = geoMap.nightshade(dayNite_currentTime, color='k', delta=0.25, alpha=0.25, ax=ax, zorder=2);
-                    #END IF
-                    
-                    if( 'stere' in settings['map']['projection name'] ):
-                        if( settings['movie']['spin'] == 0):
-#                            x = (1.05*0.5*np.sin(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-#                            y = (1.05*0.5*np.cos(settings['movie']['sun loc'][i]+np.pi))+0.5; #geoMap coordinate 
-                            x = (1.05*0.5*np.cos(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-                            y = (1.05*0.5*np.sin(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-                            #hSun = ax.text(x,y,'SUN\N{DEGREE SIGN}',transform=ax.transAxes,horizontalalignment='center',verticalalignment='center',fontproperties=settings['plot']['font axis tick FM']);
-                            circleSun = plt.Circle((x, y), radius=0.015, color='xkcd:sun yellow', clip_on=False,transform=ax.transAxes); #make a sun figure
-                            hSun = ax.add_artist(circleSun); #plot the sun
-                        else:
-                            hSun = ax.set_theta_offset(settings['movie']['sun loc'][i]); #turn the whole plot so top is where the sun is
-                            #I'm not sure if I can get this working easily - not a lot of optons.
-                        #END IF
-                    #END IF
-                    
-                    #Now drawing line of interest
-    #                imMillstone = plot(fig1Axes,settings['map']['site coords'][0,1],settings['map']['site coords'][0,0],settings['map']['site marker type'],'Color',settings['map']['site marker color'],'MarkerSize',settings['map']['site marker size']); #plots a point with a red big *
-                    
-                    Millstone_latLongMapped = geoMap(settings['map']['site coords'][0,1],settings['map']['site coords'][0,0]); #convert the lat/long arcdeg to the current map coordinates
-                    imMillstone = ax.plot(Millstone_latLongMapped[0],Millstone_latLongMapped[1],marker=settings['map']['site marker type'], color=settings['map']['site marker color'], markersize=settings['map']['site marker size'], zorder=50); #plot this, 50 always on top
-                    
-                    figFitter(fig); #make sure everything is fit well
-                else:
-                    #Just plotting now - prep done, hopefully speeds it!
-                    #Do the TEC plotting
-                    pltHelprX, pltHelprY = np.meshgrid( settings['movie']['grid long'], settings['movie']['grid lat']); #helps the pcolor work
-                    TEC_latLongMapped = geoMap(pltHelprX,pltHelprY); #convert the lat/long arcdeg to the current map coordinates
-                    imTEC = ax.pcolormesh(TEC_latLongMapped[0], TEC_latLongMapped[1],  gif_Grid.T ,vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']),cmap=settings['TEC']['colormap'],zorder=5); # pseudocolor plot "stretched" to the grid
+        #-------------------------Start Making Pictures------------------------
+        
+        #----------------------------Tack on Title-------------------------
+        curr_time_mod = np.mod(data['TEC']['time unique'],86400);
+        curr_time_date = subfun_dayNum_to_date((dates['date range zero hr dayNum'][0],data['TEC']['time unique']//86400))[0]; #if year changes needs overhaul everywhere
+        string_title = '{0:.2f}'.format(np.round((data['TEC']['time unique']-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
+            ', 0 UT on '+dates['date range zero hr month name']+' '+str(dates['date range zero hr'][2])+', '+str(dates['date range zero hr dayNum'][0])+\
+            ' | ('+str(curr_time_date[0])+'/'+str(curr_time_date[1])+'/'+str(curr_time_date[2])+', '+str(curr_time_mod//3600).zfill(2)+\
+            ':'+str((curr_time_mod-curr_time_mod//3600*3600)//60).zfill(2)+':'+str(curr_time_mod-(curr_time_mod-curr_time_mod//3600*3600)//60*60-curr_time_mod//3600*3600).zfill(2)+')'; #create mecha title
+        
+        ax.set_title(string_title,fontproperties=settings['plot']['font title FM'],y=movie_title_yOffset); #set the title, properties always needed
+            
+        #-------------------Starting the Plotting--------------------------
+                           
+        #Do the TEC plotting
+        #Do the TEC plotting
+        imTEC = ax.pcolormesh(pltHelprX_TEC, pltHelprY_TEC,  gif_Grid.T ,vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']),cmap='jet',zorder=8, transform=cartopy.crs.PlateCarree()); # pseudocolor plot "stretched" to the grid
+        cbar = movie_dict['fig'].colorbar(imTEC, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
+        cax.yaxis.set_ticks(np.linspace(np.min(settings['TEC']['plot lim']),np.max(settings['TEC']['plot lim']),5)); #create useful tick marks
+        cax.yaxis.set_major_formatter(FormatStrFormatter('%.2f')); #force a rounded format
+        cbar.set_label(settings['TEC']['name']+settings['TEC']['units']); #tabel the colorbar
+        for tick in cbar.ax.yaxis.get_major_ticks(): #if only I could apply the font manager directly
+            tick.label2.set_fontproperties(settings['plot']['font axis tick FM']); #yee
+        #END FOR tick
+        cbar.mappable.set_clim(vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']));
+
+        if( settings['movie']['day nite line'] == 1 ):
+            print('not supported sorry bring it back if you want it ')
+            # movie_dict['fig'].canvas.flush_events(); #this is req. to get get_window_extent() to get the current window size
+            # #Plot the sunrise/sunset terminators
+            # dayNite_temp = np.abs(dayNite_sunrise - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunrise locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
+            # hLgd_FLG_day = np.sum(dayNite_temp); #plotting flag, shows when legend is active
+            # #constants will use all the time - only for plotting of day/nite line so minor importance
+            # #this stuff makes the text angle plotted mostly correct most of the time
+            # bboxFig = movie_dict['fig'].get_window_extent().transformed(movie_dict['fig'].dpi_scale_trans.inverted()); #get the entire figure dimensions
+            # bboxAx0 = ax.get_window_extent().transformed(movie_dict['fig'].dpi_scale_trans.inverted()); #get the plot dimensions
+            # # plot_ratio = (bboxAx0.width/bboxAx0.height)/( (bboxAx0.width/bboxAx0.height)/(bboxmovie_dict['fig'].width/bboxmovie_dict['fig'].height) )**2; #get the plot ratio, will use it to fix up the angle
+            # plot_ratio = (bboxAx0.width/bboxAx0.height); #get the plot ratio, will use it to fix up the angle
+            # dayNite_textRotationLenOrig = 35; #length to go up and down the sunrise/sunset line to estimate an angle
+            # dayNite_savgolFiltLenOrig = 101; #set it as a constant to start off
+            # dayNite_textLatAbs = (np.max(settings['map']['lat range'])-np.min(settings['map']['lat range']))*.9 + np.min(settings['map']['lat range']); #calc like 80% of the max latitude
+            # if( hLgd_FLG_day > 0 ): #only do work if it is there
+            #     #calc all that day/nite stuff in one function to keep it from getting cluttered
+            #     dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(0,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
+            #     dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
+            #     imDayNite_day = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='g',linewidth=1.75,zorder=6); #plots a line to show the sunrise time
+            #     if( settings['movie']['day nite text'] == 1 ):
+            #         dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
+            #         textDayNite_day = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunrise", rotation=dayNite_textRotation, color='g', fontsize=settings['plot']['font axis tick'], zorder=6);
+            #     #END IF
+            # #END IF
+            
+            # dayNite_temp = np.abs(dayNite_sunset - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunset locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
+            # hLgd_FLG_nite = np.sum(dayNite_temp); #plotting flag, shows when legend is active
+            # if( hLgd_FLG_nite > 0 ): #only do work if it is there
+            #     #calc all that day/nite stuff in one function to keep it from getting cluttered
+            #     dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(1,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
+            #     dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
+            #     imDayNite_nite = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='b',linewidth=1.75,zorder=6); #plots a line to show the sunset time
+            #     if( settings['movie']['day nite text'] == 1 ):
+            #         dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
+            #         textDayNite_nite = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunset", rotation=dayNite_textRotation, color='b', fontsize=settings['plot']['font axis tick'], zorder=6);
+            #     #EMD IF
+            # #END IF
+        elif( settings['movie']['day nite line'] == 2 ):
+            if( settings['map']['coord type'] == 'geo' ):
+                shifted = data['TEC']['time unique']; #no shift
+                latLongShift = None;
+            else:
+                #this ain't perfect, but it's plenty good for general where not sun
+                # shifter = (np.mod(data['movie']['sun loc']['long'],360) - np.mod(data['movie']['sun loc']['long geo'],360))*240 #sec, effective time to shift by so Sun is in right spot; 240 = 24*3600/360
+                # shifted = data['TEC']['time unique'] - shifter; #shift the time so Sun is in the right spot
+                shifted = data['TEC']['time unique']; #no shift
+                latLongShift = {'lat':data['movie']['sun loc']['lat'],'long':data['movie']['sun loc']['long'],'rel':False};
+            #END IF
+            dayNite_currentDay = subfun_dayNum_to_date( np.array((dates['date range zero hr dayNum'][0],np.int64(shifted/86400)),ndmin=2))[0]; #get the current yr/month/day
+            dayNite_currentHr = np.int64((shifted/86400-np.int64(shifted/86400))*24); #hr, get the current hour
+            dayNite_currentMin = np.int64( ((shifted/86400-np.int64(shifted/86400))*24 - dayNite_currentHr)*60); #min, get the current min
+            dayNite_currentSec = np.int64( (((shifted/86400-np.int64(shifted/86400))*24 - dayNite_currentHr)*60 - dayNite_currentMin)*60); #min, get the current min
+            dayNite_currentTime = datetime(dayNite_currentDay[0], dayNite_currentDay[1], dayNite_currentDay[2], dayNite_currentHr, dayNite_currentMin,dayNite_currentSec);
+            # dayNite_shade = geoMap.nightshade(dayNite_currentTime, color='k', delta=0.25, alpha=0.25, ax=ax, zorder=25); #basemap version
+            dayNite_shade = ax.add_feature(nightshader(dayNite_currentTime, latLongShift=latLongShift, alpha=0.25),zorder=25); #nighttime shading, only relevant for geographic
+        #END IF
+        
+        if( 'stere' in settings['map']['projection name'] ):
+            if( settings['movie']['spin'] == 0):
+#                            x = (1.05*0.5*np.sin(settings['movie']['sun loc']['long']))+0.5; #geoMap coordinate 
+#                            y = (1.05*0.5*np.cos(settings['movie']['sun loc']['long']+np.pi))+0.5; #geoMap coordinate 
+                x = (1.05*0.5*np.cos(data['movie']['sun loc']['long rad']))+0.5; #geoMap coordinate 
+                y = (1.05*0.5*np.sin(data['movie']['sun loc']['long rad']))+0.5; #geoMap coordinate 
+                #hSun = ax[0].text(x,y,'SUN\N{DEGREE SIGN}',transform=ax[0].transAxes,horizontalalignment='center',verticalalignment='center',fontproperties=settings['plot']['font axis tick FM']);
+                circleSun = plt.Circle((x, y), radius=0.015, color='xkcd:sun yellow', clip_on=False,transform=ax.transAxes); #make a sun figure
+                hSun = ax.add_artist(circleSun); #plot the sun
+            else:
+                hSun = ax.set_theta_offset(settings['movie']['sun loc']['long rad']); #turn the whole plot so top is where the sun is
+                #I'm not sure if I can get this working easily - not a lot of optons with cartopy.
+            #END IF
+        #END IF
+        
+        #Now drawing point of interest
+        # Millstone_latLongMapped = geoMap(settings['map']['site coords'][0,1],settings['map']['site coords'][0,0]); #convert the lat/long arcdeg to the current map coordinates
+        if( (settings['map']['site coords'][0,0] <= np.max(settings['map']['lat range'])) & (settings['map']['site coords'][0,0] >= np.min(settings['map']['lat range'])) & (settings['map']['site coords'][0,1] <= np.max(settings['map']['long range'])) & (settings['map']['site coords'][0,1] >= np.min(settings['map']['long range'])) ):
+            imMillstone = ax.plot(settings['map']['site coords'][0,1],settings['map']['site coords'][0,0],marker=settings['map']['site marker type'], color=settings['map']['site marker color'], markersize=settings['map']['site marker size'], transform=cartopy.crs.PlateCarree(), zorder=50); #plot this, 50 always on top
+        else:
+            if( 'stere' in settings['map']['projection name'] ):
+                diameter_offset = 0.09;
+                x = ((1+diameter_offset)*0.5*np.cos((settings['map']['site coords'][0,1][0]-90)*np.pi/180))+0.5; #geoMap coordinate 
+                y = ((1+diameter_offset)*0.5*np.sin((settings['map']['site coords'][0,1][0]-90)*np.pi/180))+0.5; #geoMap coordinate
+                imMillstone = ax.arrow(x, y, (diameter_offset/2)*np.cos((settings['map']['site coords'][0,1][0]+90)*np.pi/180), (diameter_offset/2)*np.sin((settings['map']['site coords'][0,1][0]+90)*np.pi/180), width=0.007, head_width=0.007*3.5, head_length=0.007*3.5*1.00, length_includes_head=True, color=settings['map']['site marker color'], clip_on=False, transform=ax.transAxes); #plot this, 50 always on top
+            #END IF
+            #if needed, code something for rectangular plots but idk what it should be exactly rn
+        #END IF
     
-                    if( settings['movie']['day nite line'] == 1 ):
-                        #Plot the sunrise/sunset terminators
-                        dayNite_temp = np.abs(dayNite_sunrise - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunrise locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
-                        hLgd_FLG_day = np.sum(dayNite_temp); #plotting flag, shows when legend is active
-                        if( hLgd_FLG_day > 0 ): #only do work if it is there
-                            #calc all that day/nite stuff in one function to keep it from getting cluttered
-                            dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(0,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
-                            dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
-                            imDayNite_day = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='g',linewidth=1.75,zorder=6); #plots a line to show the sunrise time
-                            if( settings['movie']['day nite text'] == 1 ):
-                                dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
-                                textDayNite_day = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunrise", rotation=dayNite_textRotation, color='g', fontsize=settings['plot']['font axis tick'], zorder=6);
-                            #END IF
-                        #END IF
-                        
-                        dayNite_temp = np.abs(dayNite_sunset - (data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600) <= 10/3600; #gets the sunset locations that are within 10 sec of the current TEC time (2 min had way too many hits, zigzags)
-                        hLgd_FLG_nite = np.sum(dayNite_temp); #plotting flag, shows when legend is active
-                        if( hLgd_FLG_nite > 0 ): #only do work if it is there
-                            #calc all that day/nite stuff in one function to keep it from getting cluttered
-                            dayNite_Lat_line, dayNite_Long_line, dayNite_Lat_text, dayNite_Long_text, dayNite_textRotation = GRITI_movieMaker_subfun_dayniteCalc(1,np.sum(dayNite_temp),dayNite_Grid_Long[dayNite_temp],dayNite_Grid_Lat[dayNite_temp],dayNite_textLatAbs,plot_ratio,dayNite_savgolFiltLenOrig,dayNite_textRotationLenOrig);
-                            dayNite_latLongMapped = geoMap(dayNite_Long_line,dayNite_Lat_line); #convert the lat/long arcdeg to the current map coordinates
-                            imDayNite_nite = ax.plot(dayNite_latLongMapped[0],dayNite_latLongMapped[1],color='b',linewidth=1.75,zorder=6); #plots a line to show the sunset time
-                            if( settings['movie']['day nite text'] == 1 ):
-                                dayNite_latLongMapped = geoMap(dayNite_Long_text,dayNite_Lat_text); #convert the lat/long arcdeg to the current map coordinates
-                                textDayNite_nite = ax.text(dayNite_latLongMapped[0], dayNite_latLongMapped[1], "Sunset", rotation=dayNite_textRotation, color='b', fontsize=settings['plot']['font axis tick'], zorder=6);
-                            #END IF
-                        #END IF
-                    elif( settings['movie']['day nite line'] == 2 ):
-                        dayNite_currentDay = subfun_dayNum_to_date( np.array((dates['date range zero hr dayNum'][0],np.int64(data['TEC']['time unique'][i]/86400)),ndmin=2))[0]; #get the current yr/month/day
-                        dayNite_currentHr = np.int64((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24); #hr, get the current hour
-                        dayNite_currentMin = np.int64( ((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24 - dayNite_currentHr)*60); #min, get the current min
-                        dayNite_currentSec = np.int64( (((data['TEC']['time unique'][i]/86400-np.int64(data['TEC']['time unique'][i]/86400))*24 - dayNite_currentHr)*60 - dayNite_currentMin)*60); #min, get the current min
-                        dayNite_currentTime = datetime(dayNite_currentDay[0], dayNite_currentDay[1], dayNite_currentDay[2], dayNite_currentHr, dayNite_currentMin,dayNite_currentSec);
-                        dayNite_shade = geoMap.nightshade(dayNite_currentTime, color='k', delta=0.25, alpha=0.25, ax=ax, zorder=2);
-                    #END IF
+        #-----------------------Create Movie/GIF---------------------------
+        #Makes the gif now
+        plt.draw();
+        # movie_writer.grab_frame(); #get the frame and save it
                     
-                    if( 'stere' in settings['map']['projection name'] ):
-                        if( settings['movie']['spin'] == 0):
-#                            x = (1.05*0.5*np.sin(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-#                            y = (1.05*0.5*np.cos(settings['movie']['sun loc'][i]+np.pi))+0.5; #geoMap coordinate 
-                            x = (1.05*0.5*np.cos(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-                            y = (1.05*0.5*np.sin(settings['movie']['sun loc'][i]))+0.5; #geoMap coordinate 
-                            #hSun = ax.text(x,y,'SUN\N{DEGREE SIGN}',transform=ax.transAxes,horizontalalignment='center',verticalalignment='center',fontproperties=settings['plot']['font axis tick FM']);
-                            circleSun = plt.Circle((x, y), radius=0.015, color='xkcd:sun yellow', clip_on=False,transform=ax.transAxes); #make a sun figure
-                            hSun = ax.add_artist(circleSun); #plot the sun
-                        else:
-                            hSun = ax.set_theta_offset(settings['movie']['sun loc'][i]); #turn the whole plot so top is where the sun is
-                            #I'm not sure if I can get this working easily - not a lot of optons.
-                        #END IF
-                    #END IF
-                    
-                    #Now drawing line of interest
-    #                imMillstone = ax.plot(Millstone_latLongMapped[0],Millstone_latLongMapped[1],marker=settings['map']['site marker type'], markerfacecolor=settings['map']['site marker color'] ,markersize=settings['map']['site marker size']); #plot this
-                #END IF
-            
-            
-                #-----------------------Create Movie/GIF---------------------------
-                #Makes the gif now
-                plt.draw();
-                
-                movie_writer.grab_frame(); #get the frame and save it
-                            
-                #-------------------Clean up for re-use----------------------------
-                #if forget one (like hOverlay) slows it way down after many plots
-                imTEC.remove();
-    #            imOverlay.pop(0).remove();
-    #            imMillstone.pop(0).remove();
-                if( settings['movie']['day nite line'] == 1 ):
-                    if(hLgd_FLG_day > 0): #only delete if it is there
-                        imDayNite_day.pop(0).remove();
-                        if( settings['movie']['day nite text'] == 1 ):
-                            textDayNite_day.remove();
-                        #END IF
-                    #END IF
-                    if(hLgd_FLG_nite > 0): #only delete if it is there
-                        imDayNite_nite.pop(0).remove();
-                        if( settings['movie']['day nite text'] == 1 ):
-                            textDayNite_nite.remove();
-                        #END IF
-                    #END IF
-                elif( settings['movie']['day nite line'] == 2): #only delete if it is there
-                    for middleman in dayNite_shade.collections: #this needs an extra helping hand
-                        middleman.remove();
-                #END IF
-                if( 'stere' in settings['map']['projection name'] ): #only delete if it is there
-                    hSun.remove();
-                #END IF
-            #END FOR i
-        #END WITH
+        # #-------------------Clean up for re-use----------------------------
+        # #if forget one (like hOverlay) slows it way down after many plots
+        # imTEC.remove();
+        # # imOverlay.pop(0).remove();
+        # # imMillstone.pop(0).remove();
+        # if( settings['movie']['day nite line'] == 1 ):
+        #     if(hLgd_FLG_day > 0): #only delete if it is there
+        #         imDayNite_day.pop(0).remove();
+        #         if( settings['movie']['day nite text'] == 1 ):
+        #             textDayNite_day.remove();
+        #         #END IF
+        #     #END IF
+        #     if(hLgd_FLG_nite > 0): #only delete if it is there
+        #         imDayNite_nite.pop(0).remove();
+        #         if( settings['movie']['day nite text'] == 1 ):
+        #             textDayNite_nite.remove();
+        #         #END IF
+        #     #END IF
+        # elif( settings['movie']['day nite line'] == 2): #only delete if it is there
+        #     for middleman in dayNite_shade.collections: #this needs an extra helping hand
+        #         middleman.remove();
+        # #END IF
+        # if( 'stere' in settings['map']['projection name'] ): #only delete if it is there
+        #     hSun.remove();
+        # #END IF
+        
     #================================================================= MOVIE TYPE 2 =================================================================
     elif(settings['movie']['movie type'] == 2): #stationary data points (through averaging) + Zenith ISR overlay
         
@@ -388,6 +388,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -569,6 +578,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -775,6 +793,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot | AMPERE Time Avg\'d to Every '+str(gif_TimeAvg)+' Min | Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -1170,6 +1197,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
                 
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
+                
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot | Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
                     ', 0 UT on '+dates['date range zero hr month name']+' '+str(dates['date range zero hr'][2])+', '+str(dates['date range zero hr'][0]); #create mecha title
@@ -1485,6 +1521,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot | Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -1870,6 +1915,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
                 
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
+                
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot | Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
                     ', 0 UT on '+dates['date range zero hr month name']+' '+str(dates['date range zero hr'][2])+', '+str(dates['date range zero hr'][0]); #create mecha title
@@ -2218,6 +2272,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
                 
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
+                
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
                     ', 0 UT on '+dates['date range zero hr month name']+' '+str(dates['date range zero hr'][2])+', '+str(dates['date range zero hr dayNum'][0]); #create mecha title
@@ -2413,6 +2476,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -2637,6 +2709,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                             
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(pplat_portion,pplong_portion,vTEC_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat spaces'],settings['movie']['grid long spaces'],settings['movie']['grid lat delta'],settings['movie']['grid long delta'],settings['movie']['data reject ratio'],settings['movie']['data reject perc lim'],settings['movie']['data reject ratio max']);
                 #call a numba'd function that makes the movie quicker by crunching the numbers gooder
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 string_title = 'TEC Global Plot, Time =  '+'{0:.2f}'.format(np.round((data['TEC']['time unique'][i]-dates['date range zero hr dayNum'][1]*86400)/3600,2))+\
@@ -3054,6 +3135,15 @@ def GRITI_movieMaker_subfun_imageWriter(data, dates, settings, movie_writer, mov
                 
                 gif_Grid = GRITI_movieMaker_subfun_dataGridder(AMPERE_lat_portion,AMPERE_long_portion,AMPERE_data_portion,settings['movie']['grid lat'],settings['movie']['grid long'],settings['movie']['grid lat'].size-1,settings['movie']['grid long'].size-1,AMPERE_lat_delta,AMPERE_long_delta,settings['movie']['data reject ratio'],101,settings['movie']['data reject ratio max']).T; #101 disables the data rejection stuff b/c AMPERE doesn't need it
                 # gif_Grid = np.vstack((np.hstack((np.roll(AMPERE_data_portion.reshape(settings['movie']['grid lat'].size-1,settings['movie']['grid long'].size-1),60,axis=1),np.nan*np.ones((settings['movie']['grid lat'].size-1,1)))),np.nan*np.ones((1,settings['movie']['grid long'].size)))); # replicate what gif_Grid would do with reshaping b/c there's no need to avg pts
+                
+                if( settings['movie']['interpolation'] == True ):
+                    gif_Grid_nan = np.isnan(gif_Grid); #getem
+                    if( gif_Grid_nan.sum() > 0 ):
+                        gif_Grid_Lat_radMesh, gif_Grid_Long_radMesh = np.meshgrid(settings['movie']['grid lat']*np.pi/180, settings['movie']['grid long']*np.pi/180); #get a meshgrid in radians
+                        gif_Grid[gif_Grid_nan] = rbf_interp(np.float32(gif_Grid_Lat_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[gif_Grid_nan]), np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan]), \
+                                                           lu_solve(lu_factor(distance_calc_identical(np.float32(gif_Grid_Lat_radMesh[~gif_Grid_nan]), np.float32(gif_Grid_Long_radMesh[~gif_Grid_nan])),overwrite_a=True, check_finite=False), -gif_Grid[~gif_Grid_nan].copy(), trans=0, overwrite_b=True, check_finite=False)); #most powerful function call
+                    #END IF
+                #END IF
                 
                 #----------------------------Tack on Title-------------------------
                 curr_time_mod = np.mod(data['AMPERE']['time unique'][i],86400);

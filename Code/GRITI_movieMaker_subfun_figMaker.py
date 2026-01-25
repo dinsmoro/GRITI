@@ -56,6 +56,14 @@ def GRITI_movieMaker_subfun_figMaker(data, settings, time4mag, movie_figOffsets=
             cax2.yaxis.label.set_text(''); #clear out the text in case it isn't used
         #END IF
         
+        #make sure the ticks are up on it (they weren't)
+        for tick in ax.xaxis.get_major_ticks(): #if only I could apply the font manager directly
+            tick.label1.set_fontproperties(settings['plot']['font axis tick FM']); #yee
+        #END FOR tick
+        for tick in ax.yaxis.get_major_ticks(): #if only I could apply the font manager directly
+            tick.label1.set_fontproperties(settings['plot']['font axis tick FM']); #yee
+        #END FOR tick
+        
         #update settings['movie']['fig size'] to now be the size of the movie plot (it'll be smaller if there are other plots on the screen)
         bbox = fig.get_window_extent().transformed(fig.dpi_scale_trans.inverted()); #get the size of the movie plot currently
         width, height = bbox.width, bbox.height; #break out the width/height in inches or something

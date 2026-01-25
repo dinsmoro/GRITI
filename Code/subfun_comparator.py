@@ -180,7 +180,7 @@ def subfun_comparator(rule_holder, data, dates=None):
                         prune_before = True; #if at the edge, defaults to prune (True)
                     #END IF
                     #check after
-                    if( kCompare_prune[i] < kCompare_where.size ):
+                    if( kCompare_prune[i] < (kCompare_where.size-1) ):
                         prune_after = (kCompare_where[kCompare_prune[i]]+kCompare_len[kCompare_prune[i]]+minDist2indx) < kCompare_where[kCompare_prune[i]+1]; #True prunes, False keeps
                     else:
                         prune_after = True; #if at the edge, defaults to prune (True)

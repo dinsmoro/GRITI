@@ -27,6 +27,7 @@ from Code.subfun_sunAlsoRises import sunAlsoRises
 from Code.subfun_date_to_dayNum import subfun_date_to_dayNum
 from Code.GRITI_plotHelper_axisizerTime import GRITI_plotHelper_axisizerTime
 from Code.GRITI_plotHelper_axisizerLatLong import GRITI_plotHelper_axisizerLatLong
+from os import path as ospath
 
 def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,TEC_plotLimValu, \
         colorMap,plotLatRange,plotLongRange,latMillstone,longMillstone,dateRange_dayNum_zeroHr,time_Ref,latLong_ref, \
@@ -549,6 +550,6 @@ def GRITI_TEC_keo_fancyPlot_TEC_wDayNite(vTECChunked_anyAngleAvg,TEC_timeUnique,
     #-----Attempt to detect a./b. overlap with negative signs-----
     subfun_figLetteringFitter(fig, ax); #call a function that makes the a./b./.. lettering fit automagically
     
-    fig.savefig(folder[3]+'\TEC_avgKeo_wDayNite'+settings_plot['save file type']); #save the figure
+    fig.savefig(ospath(folder[3],'TEC_avgKeo_wDayNite'+settings_plot['save file type'])); #save the figure
     plt.close(); #close figure b/c it lurks apparently
     plt.ion(); #re-enable it for later stuff
