@@ -50,6 +50,14 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
     letteringPositionX = -0.105; #set the X position of the lettering (e.g., a. b. c. ...)
     letteringPositionY = 0.88; #set the X position of the lettering (e.g., a. b. c. ...)
     
+    FLG_justZenith = True; #for just Zenith, if you were doin stuff; make it real sometime cause maybe taht's good <- ISR revamp needed
+    
+    if( settings_plot['save file type'].lower() != '.pdf' ):
+        plot_rasterize = False; #don't need to bother
+    else:
+        plot_rasterize = True; #it needs it
+    #END IF
+    
     #----- Plot ISR POPL HP results as a RTI -----
     #unpack
     # dateRange = dates['date range'];
@@ -63,8 +71,11 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
     else:
         figNumRows = 3; #xtra for the dayNite
     #END IF
+    if( FLG_justZenith == True ):
+        figNumRows -= 1; #decrement
+    #END IF
     if( FLG_fancyPlot == 0 ):
-        if( figNumRows == 2 ):
+        if( FLG_dayNite == False ):
             fig, ax = plt.subplots(nrows=figNumRows, ncols=1); #use instead of fig because it inits an axis too (I think I dunno)
         else:
             import matplotlib.gridspec as gridspec
@@ -86,24 +97,36 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
         figManager.window.showMaximized(); #force maximized
     else:
         plt.ioff() #disable showing the plot as its size will be larger than the screen, which cannot happen if the plot is shown
-        if( figNumRows == 2 ):
+        if( FLG_dayNite == False ):
             fig, ax = plt.subplots(nrows=figNumRows, ncols=1, figsize=(14,8.5), dpi=settings_plot['journal dpi']); #use instead of fig because it inits an axis too (I think I dunno)
         else:
             import matplotlib.gridspec as gridspec
-            fig = plt.figure(figsize=(14,10.5),dpi=settings_plot['journal dpi']);
+            if( FLG_justZenith == True ):
+                fig = plt.figure(figsize=(14,8.5),dpi=settings_plot['journal dpi']);
+            else:
+                fig = plt.figure(figsize=(14,10.5),dpi=settings_plot['journal dpi']);
+            #END IF
             # gridr = gridspec.GridSpec(nrows=7, ncols=1, figure=fig);
             # fig.subplots_adjust(hspace=0.75)
-            gridr = gridspec.GridSpec(nrows=2, ncols=1, height_ratios = [20, 1], figure=fig); #prep for a nested gridspec (it's 2) and note the ratios of the plots (8 to 1)
-            gridr1 = gridspec.GridSpecFromSubplotSpec(nrows=20, ncols=1, subplot_spec = gridr[0], hspace = 6.0)
-            gridr2 = gridspec.GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec = gridr[1], hspace = 0.0)
-            # gridr.update(hspace=0.05); # set the spacing between axes.
-            fig.add_subplot(gridr1[0:10]); #RTI plots are 2 tall
-            # gridr.update(hspace=0.80); # set the spacing between axes.
-            fig.add_subplot(gridr1[10:20]); #RTI plots are 2 tall
-            # gridr.update(hspace=0.90); # set the spacing between axes.
+            if( FLG_justZenith == True ):
+                #For this, the day/nite needed to be taller so it went from 20:1 (with 1 being the ratio the day/nite gets) to 40:3 (so 1.5 times bigger, but scaled so it's always integers)
+                gridr = gridspec.GridSpec(nrows=2, ncols=1, height_ratios = [40, 3], figure=fig); #prep for a nested gridspec (it's 2) and note the ratios of the plots (8 to 1)
+                gridr1 = gridspec.GridSpecFromSubplotSpec(nrows=40, ncols=1, subplot_spec = gridr[0], hspace = 6.0)
+                gridr2 = gridspec.GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec = gridr[1], hspace = 0.0)
+                fig.add_subplot(gridr1[0:38]); #RTI plots are 2 tall (this needed to be smaller to make the x axis label fit)
+            else:
+                gridr = gridspec.GridSpec(nrows=2, ncols=1, height_ratios = [20, 1], figure=fig); #prep for a nested gridspec (it's 2) and note the ratios of the plots (8 to 1)
+                gridr1 = gridspec.GridSpecFromSubplotSpec(nrows=20, ncols=1, subplot_spec = gridr[0], hspace = 6.0)
+                gridr2 = gridspec.GridSpecFromSubplotSpec(nrows=1, ncols=1, subplot_spec = gridr[1], hspace = 0.0)
+                fig.add_subplot(gridr1[0:10]); #RTI plots are 2 tall
+                fig.add_subplot(gridr1[10:20]); #RTI plots are 2 tall
+            #END IF
             fig.add_subplot(gridr2[0]); #dayNite plot is 1 tall
             ax = fig.axes; #get a list of the axes
         #END IF
+    #END IF
+    if not isinstance( ax, (list,tuple,np.ndarray) ):
+        ax = [ax]; #love it or list it
     #END IF
     #Remove the aspect ratio from the basemap so it fills the screen better
     for i in range(0,len(ax)):
@@ -125,13 +148,15 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
         MISA_POPL_hp = np.copy(MISA_POPL_hp[:,time_cutout_indexes[0]:time_cutout_indexes[1]+1]);
     #END IF
     
+    
     #----- ZENITH STUFF ----- 
-    divider = make_axes_locatable(ax[0]); #prep to add an axis
+    figCntr = 0; #keep that fig in line
+    divider = make_axes_locatable(ax[figCntr]); #prep to add an axis
     cax = divider.append_axes('right', size='2.0%', pad=0.15); #make a color bar axis
     
     pltHelprX, pltHelprY = np.meshgrid( (Zenith_time - dateRange_dayNum_zeroHr[1]*86400)/3600, \
                 Zenith_height);
-    im = ax[0].pcolormesh(pltHelprX , pltHelprY , Zenith_POPL_hp , vmin=np.min(ISR_POPL_plotLimValu) , vmax=np.max(ISR_POPL_plotLimValu) , cmap='gray' , shading='gouraud', antialiased=True); # pseudocolor plot "stretched" to the grid
+    im = ax[figCntr].pcolormesh(pltHelprX , pltHelprY , Zenith_POPL_hp , vmin=np.min(ISR_POPL_plotLimValu) , vmax=np.max(ISR_POPL_plotLimValu) , cmap='gray' , shading='gouraud', antialiased=True, rasterized=plot_rasterize); # pseudocolor plot "stretched" to the grid
     cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
     cbar.mappable.set_clim(vmin=np.min(ISR_POPL_plotLimValu), vmax=np.max(ISR_POPL_plotLimValu));
     #cbar.ax.set_yticklabels(np.round(np.linspace(-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu,5), len(str(ISR_POPL_plotLimValu).split('.')[1])+1 )); #create useful tick marks
@@ -148,56 +173,66 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
         if( np.all(time_cutout_range != None) ):
             string_Title = string_Title + ' - Hours '+textNice(np.min(time_cutout_range))+' to '+textNice(np.max(time_cutout_range));
         #END IF
-        ax[0].set_title(string_Title,fontproperties=settings_plot['font title FM']); #set the title
+        ax[figCntr].set_title(string_Title,fontproperties=settings_plot['font title FM']); #set the title
     #END IF
-    # ax[0].set_xlabel(subfun_monthNum_to_word(dateRange[0,1])[0]+" "+str(dateRange[0,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[0,0])+" to "+subfun_monthNum_to_word(dateRange[1,1])[0]+" "+str(dateRange[1,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[1,0]),fontproperties=settings_plot['font axis label FM']); #set the x axis label
-    ax[0].set_ylabel('Height [km]',fontproperties=settings_plot['font axis label FM']); #set the y axis label
+    # ax[figCntr].set_xlabel(subfun_monthNum_to_word(dateRange[0,1])[0]+" "+str(dateRange[0,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[0,0])+" to "+subfun_monthNum_to_word(dateRange[1,1])[0]+" "+str(dateRange[1,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[1,0]),fontproperties=settings_plot['font axis label FM']); #set the x axis label
+    ax[figCntr].set_ylabel('Height [km]',fontproperties=settings_plot['font axis label FM']); #set the y axis label
     
     
-    xAxis_ticks, xAxis_lims = GRITI_plotHelper_axisizerTime(Zenith_time/3600,ax=ax[0],unit='hr',FLG_manualLims=((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),FLG_removeLabels=False);
-    ax[0].set_yticks(yAxisTicks); #set y axis ticks
-    ax[0].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
-    ax[0].text( letteringPositionX, letteringPositionY, 'a.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[0].transAxes); #print the text saying the day or nite
+    xAxis_ticks, xAxis_lims = GRITI_plotHelper_axisizerTime(Zenith_time/3600,ax=ax[figCntr],unit='hr',FLG_manualLims=((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),FLG_removeLabels=False);
+    ax[figCntr].set_yticks(yAxisTicks); #set y axis ticks
+    ax[figCntr].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
+    if( (FLG_justZenith == True) and (FLG_dayNite == True) ):
+        ax[figCntr].text( letteringPositionX, letteringPositionY, chr(97+figCntr)+'.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[figCntr].transAxes); #print the text saying the day or nite
+    #END IF
+    
+    if( FLG_justZenith == True ):
+        ax[figCntr].set_xlabel('Time in UT [hr] - 0 Hr on '+dates['date range zero hr month name']+' '+str(dateRange_zeroHr[2])+dates['date range zero hr day post fix']+' | Day '+str(dateRange_dayNum_zeroHr[1])+', '+str(dateRange_dayNum_zeroHr[0]),fontproperties=settings_plot['font axis label FM']); #set the x axis label
+        ax[figCntr].set_ylabel('Height [km]',fontproperties=settings_plot['font axis label FM']); #set the y axis label
+    #END IF
     
     #----- MISA STUFF ----- 
-    divider = make_axes_locatable(ax[1]); #prep to add an axis
-    cax = divider.append_axes('right', size='2.0%', pad=0.15); #make a color bar axis
-    
-    pltHelprX, pltHelprY = np.meshgrid( (MISA_time - dateRange_dayNum_zeroHr[1]*86400)/3600, \
-                MISA_height);
-    im = ax[1].pcolormesh(pltHelprX , pltHelprY , MISA_POPL_hp , vmin=np.min(ISR_POPL_plotLimValu) , vmax=np.max(ISR_POPL_plotLimValu) , cmap='gray', shading='gouraud', antialiased=True); # pseudocolor plot "stretched" to the grid
-    cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
-    cbar.mappable.set_clim(vmin=np.min(ISR_POPL_plotLimValu), vmax=np.max(ISR_POPL_plotLimValu));
-    #cbar.ax.set_yticklabels(np.round(np.linspace(-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu,5), len(str(ISR_POPL_plotLimValu).split('.')[1])+1 )); #create useful tick marks
-    # cbar.set_label("POPL [$e^-/m^3$]"); #tabel the colorbar
-    cbar.set_label("N$_{e^-}$ [$e^-/cc$]"); #tabel the colorbar
-    #    cax.yaxis.set_major_formatter(FormatStrFormatter('%.2f')); #force a rounded format
-    cbar.ax.tick_params(labelsize=settings_plot['font axis tick']);
-    cax.yaxis.label.set_font_properties(settings_plot['font axis label FM']);
-    #cbar.ax.set_ylim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
-    #cax.set_ylim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
-    #cbar.set_clim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
-    
-    if( FLG_fancyPlot == 0 ):
-        string_Title = 'MISA POPL with High-pass Filter '+textNice(np.round(filter_cutoffPeriod/3600,2))+' hr Cutoff'; #create mecha title
-        if( np.all(time_cutout_range != None) ):
-            string_Title = string_Title + ' - Hours '+textNice(np.min(time_cutout_range))+' to '+textNice(np.max(time_cutout_range));
+    if( FLG_justZenith == False ):
+        figCntr +=1 ; #keep that fig in line
+        divider = make_axes_locatable(ax[figCntr]); #prep to add an axis
+        cax = divider.append_axes('right', size='2.0%', pad=0.15); #make a color bar axis
+        
+        pltHelprX, pltHelprY = np.meshgrid( (MISA_time - dateRange_dayNum_zeroHr[1]*86400)/3600, \
+                    MISA_height);
+        im = ax[figCntr].pcolormesh(pltHelprX , pltHelprY , MISA_POPL_hp , vmin=np.min(ISR_POPL_plotLimValu) , vmax=np.max(ISR_POPL_plotLimValu) , cmap='gray', shading='gouraud', antialiased=True, rasterized=plot_rasterize); # pseudocolor plot "stretched" to the grid
+        cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
+        cbar.mappable.set_clim(vmin=np.min(ISR_POPL_plotLimValu), vmax=np.max(ISR_POPL_plotLimValu));
+        #cbar.ax.set_yticklabels(np.round(np.linspace(-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu,5), len(str(ISR_POPL_plotLimValu).split('.')[1])+1 )); #create useful tick marks
+        # cbar.set_label("POPL [$e^-/m^3$]"); #tabel the colorbar
+        cbar.set_label("N$_{e^-}$ [$e^-/cc$]"); #tabel the colorbar
+        #    cax.yaxis.set_major_formatter(FormatStrFormatter('%.2f')); #force a rounded format
+        cbar.ax.tick_params(labelsize=settings_plot['font axis tick']);
+        cax.yaxis.label.set_font_properties(settings_plot['font axis label FM']);
+        #cbar.ax.set_ylim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
+        #cax.set_ylim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
+        #cbar.set_clim( (-ISR_POPL_plotLimValu,ISR_POPL_plotLimValu) ); #create useful tick marks
+        
+        if( FLG_fancyPlot == 0 ):
+            string_Title = 'MISA POPL with High-pass Filter '+textNice(np.round(filter_cutoffPeriod/3600,2))+' hr Cutoff'; #create mecha title
+            if( np.all(time_cutout_range != None) ):
+                string_Title = string_Title + ' - Hours '+textNice(np.min(time_cutout_range))+' to '+textNice(np.max(time_cutout_range));
+            #END IF
+            ax[figCntr].set_title(string_Title,fontproperties=settings_plot['font title FM']); #set the title
         #END IF
-        ax[1].set_title(string_Title,fontproperties=settings_plot['font title FM']); #set the title
+        ax[figCntr].set_xlabel('Time in UT [hr] - 0 Hr on '+dates['date range zero hr month name']+' '+str(dateRange_zeroHr[2])+dates['date range zero hr day post fix']+' | Day '+str(dateRange_dayNum_zeroHr[1])+', '+str(dateRange_dayNum_zeroHr[0]),fontproperties=settings_plot['font axis label FM']); #set the x axis label
+        ax[figCntr].set_ylabel('Height [km]',fontproperties=settings_plot['font axis label FM']); #set the y axis label
+        
+        # GRITI_plotHelper_axisizerTime(MISA_time/3600,ax=ax[figCntr],unit='hr',FLG_manualLims=((np.min(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),FLG_removeLabels=False);
+        ax[figCntr].set_xticks(xAxis_ticks); #set x axis ticks
+        ax[figCntr].set_xlim( xAxis_lims ); #set x axis limits (based off of Zenith)
+        ax[figCntr].set_yticks(yAxisTicks); #set y axis ticks
+        ax[figCntr].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
+        ax[figCntr].text( letteringPositionX, letteringPositionY, chr(97+figCntr)+'.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[figCntr].transAxes); #print the text saying the day or nite
     #END IF
-    ax[1].set_xlabel('Time in UT [hr] - 0 Hr on '+dates['date range zero hr month name']+' '+str(dateRange_zeroHr[2])+dates['date range zero hr day post fix']+' | Day '+str(dateRange_dayNum_zeroHr[1])+', '+str(dateRange_dayNum_zeroHr[0]),fontproperties=settings_plot['font axis label FM']); #set the x axis label
-    ax[1].set_ylabel('Height [km]',fontproperties=settings_plot['font axis label FM']); #set the y axis label
-    
-    # GRITI_plotHelper_axisizerTime(MISA_time/3600,ax=ax[1],unit='hr',FLG_manualLims=((np.min(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),FLG_removeLabels=False);
-    ax[1].set_xticks(xAxis_ticks); #set x axis ticks
-    ax[1].set_xlim( xAxis_lims ); #set x axis limits (based off of Zenith)
-    ax[1].set_yticks(yAxisTicks); #set y axis ticks
-    ax[1].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
-    ax[1].text( letteringPositionX, letteringPositionY, 'b.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[1].transAxes); #print the text saying the day or nite
-    
     
     #----- DAYNITE STUFF IF NEEDED ----- 
-    if( FLG_fancyPlot >= 1 ):       
+    if( FLG_fancyPlot >= 1 ):
+        figCntr +=1 ; #keep that fig in line
         #FIRST: GET SUNRISE/SUNSET TIMES
         (dayNite_sunrise, dayNite_sunset, daynites_dateRange_fullPad) = sunAlsoRises(dates['date range full'],settings_map['site coords'][0][0],settings_map['site coords'][0][1]); #call sunrise/set function
     
@@ -288,10 +323,10 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
         
         
         #FIFTH STEP: ACTUALLY PLOTTING
-        divider2 = make_axes_locatable(ax[2]); #prep to add an axis
+        divider2 = make_axes_locatable(ax[figCntr]); #prep to add an axis
         cax2 = divider2.append_axes('right', size='2.0%', pad=0.15); #make a color bar axis
         cax2.set_visible(False); #mkae it invisible so it matches the other plots in width
-        ax[2].plot(xTime,yDayNite,color='xkcd:black',linewidth=settings_plot['line width']['thicc'], antialiased=True);
+        ax[figCntr].plot(xTime,yDayNite,color='xkcd:black',linewidth=settings_plot['line width']['thicc'], antialiased=True);
         if( timeZone_DSTnUTCOffset != 0 ):
             strang = timeZone_offset_str+' (Daylight Savings) '+timeZone_name+' Time Zone';
         else:
@@ -305,25 +340,25 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
         # #END IF
         for i in range(0,xTime.size,2):
             if( yDayNite[i] == 1 ):
-                ax[2].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.3, \
+                ax[figCntr].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.3, \
                     0.22,'Day', color='k', fontproperties=settings_plot['font title FM']); #print the text saying the day or nite
             else:
-                ax[2].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.9, \
+                ax[figCntr].text( (xTime[i+1]-xTime[i])/2+xTime[i]-1.9, \
                    0.28, 'Night', color='k', fontproperties=settings_plot['font title FM']); #print the text saying the day or nite
             #END IF
         #END FOR i
-        ax[2].set_xlabel('Local Time [hr] | '+strang,fontproperties=settings_plot['font axis label FM'])
-        ax[2].set_xticks(xAxis_ticks+timeZone_offset); #set x axis ticks
-        # ax[2].set_xlim( ((np.min(MISA_time)-dateRange_dayNum_zeroHr[1])*24 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1])*24) ); #set x axis limits
-        ax[2].set_yticklabels([]); #remove y labels for day nite plot
-        ax[2].set_yticks([]); #remove y tick marks for day nite plot
-        ax[2].set_xlim( (xAxis_lims[0]+timeZone_offset,xAxis_lims[1]+timeZone_offset) ); #set x axis limits
-        ax[2].set_ylim( (0,1) ); #set y lims to 0 and 1
-        ax[2].spines['left'].set_visible(False); #turn off box lines
-        ax[2].spines['right'].set_visible(False); #turn off box lines
-        ax[2].spines['top'].set_visible(False); #turn off box lines
-        # ax[2].grid(b=True, which='major', axis='x', color='xkcd:light grey',linewidth=PLOT_lineWidthSmol); #sets major axis grid lines to be on
-        ax[2].text( letteringPositionX, letteringPositionY, 'c.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[2].transAxes); #print the text saying the day or nite
+        ax[figCntr].set_xlabel('Local Time [hr] | '+strang,fontproperties=settings_plot['font axis label FM'])
+        ax[figCntr].set_xticks(xAxis_ticks+timeZone_offset); #set x axis ticks
+        # ax[figCntr].set_xlim( ((np.min(MISA_time)-dateRange_dayNum_zeroHr[1])*24 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1])*24) ); #set x axis limits
+        ax[figCntr].set_yticklabels([]); #remove y labels for day nite plot
+        ax[figCntr].set_yticks([]); #remove y tick marks for day nite plot
+        ax[figCntr].set_xlim( (xAxis_lims[0]+timeZone_offset,xAxis_lims[1]+timeZone_offset) ); #set x axis limits
+        ax[figCntr].set_ylim( (0,1) ); #set y lims to 0 and 1
+        ax[figCntr].spines['left'].set_visible(False); #turn off box lines
+        ax[figCntr].spines['right'].set_visible(False); #turn off box lines
+        ax[figCntr].spines['top'].set_visible(False); #turn off box lines
+        # ax[figCntr].grid(b=True, which='major', axis='x', color='xkcd:light grey',linewidth=PLOT_lineWidthSmol); #sets major axis grid lines to be on
+        ax[figCntr].text( letteringPositionX, letteringPositionY, chr(97+figCntr)+'.', color='r', fontproperties=settings_plot['font grandiose FM'], transform=ax[figCntr].transAxes); #print the text saying the day or nite
     #END IF
     
     #----- FINISH UP ----- 
@@ -332,15 +367,7 @@ def GRITI_ISR_Haystack_plot_POPL_HP(Zenith_time,Zenith_height,Zenith_POPL_hp,MIS
     if( FLG_fancyPlot == 0 ):
         plt.show(); #req to make plot show up
     else:
-        figFileName = jointer(settings_paths['fancyPlots'],fileName+settings_plot['save file type']);
-        if( settings_plot['save file type'].lower() != '.pdf' ):
-            fig.savefig(figFileName); #save the figure
-        else:
-            from matplotlib.backends.backend_pdf import PdfPages
-            pp = PdfPages(figFileName);
-            pp.savefig(fig);
-            pp.close();
-        #END IF
+        fig.savefig(jointer(settings_paths['fancyPlots'],fileName+settings_plot['save file type'])); #save the figure
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff
     #END IF

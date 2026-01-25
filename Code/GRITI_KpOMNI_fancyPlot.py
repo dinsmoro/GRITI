@@ -17,6 +17,7 @@ import matplotlib.gridspec as gridspec
 from Code.subfun_date_to_dayNum import subfun_date_to_dayNum
 from Code.subfun_figFitter import figFitter
 from Code.GRITI_plotHelper_axisizerTime import GRITI_plotHelper_axisizerTime
+from os import path as ospath
 
 
 def GRITI_KpOMNI_fancyPlot(Kp_data,Kp_time, OMNI_data,OMNI_timeUnique, \
@@ -218,6 +219,6 @@ def GRITI_KpOMNI_fancyPlot(Kp_data,Kp_time, OMNI_data,OMNI_timeUnique, \
     figFitter(fig); #fit that fig fast
     # fig.subplots_adjust(left = 0.10, right = 0.982, top = 0.990, bottom = 0.050); #sets padding to small numbers for minimal white space
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
-    fig.savefig('fancyPlots\Kp&OMNI.png'); #save the figure
+    fig.savefig(ospath.join('fancyPlots,Kp&OMNI.png')); #save the figure
     plt.close(); #close figure b/c it lurks apparently
     plt.ion(); #re-enable it for later stuff

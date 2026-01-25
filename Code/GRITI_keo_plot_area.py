@@ -114,7 +114,7 @@ def GRITI_keo_plot_area(data_data, data_time, data_lat, data_long, data_timeUniq
         timeIndex = np.where( np.abs(data_timeRef[0] - data_timeUnique) == np.min(np.abs(data_timeRef[0] - data_timeUnique)) )[0][0]; #get an index where there's a lot of data
     #END IF
     # timeIndex = np.where( np.abs(-15.4*3600 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400)) == np.min(np.abs(-15.4*3600 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400))) )[0][0]; #get an index where there's a lot of data
-    timeIndex = np.where( np.abs(104640 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400)) == np.min(np.abs(104640 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400))) )[0][0]; #get an index where there's a lot of data [29:04, didn't divide well]
+    # timeIndex = np.where( np.abs(104640 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400)) == np.min(np.abs(104640 - (data_timeUnique-dateRange_dayNum_zeroHr[1]*86400))) )[0][0]; #get an index where there's a lot of data [29:04, didn't divide well]
     # timeIndex = np.where( np.abs(data_timeRef[0] - data_timeUnique) == np.min(np.abs(data_timeRef[0] - data_timeUnique)) )[0][0]; #get an index where there's a lot of data
     timeHr = np.int16((data_timeUnique[timeIndex]-dateRange_dayNum_zeroHr[1]*86400)/3600); #calc the hour
     timeMin = np.int16(np.round(((data_timeUnique[timeIndex]-dateRange_dayNum_zeroHr[1]*86400)/3600 - timeHr)*60)); #calc the minute
@@ -427,7 +427,7 @@ def GRITI_keo_plot_area(data_data, data_time, data_lat, data_long, data_timeUniq
         GRITI_plotHelper_axisizerLatLong(plotLatRange,ax=ax,axDir='y',tickNumGoal=tickNumGoal_y,tickReducer=0,FLG_extendLims=False,FLG_labelUnits=plot_latLongUnitsOnLabels); #auto tick the thing
         GRITI_plotHelper_axisizerLatLong(plotLongRange,ax=ax,axDir='x',tickNumGoal=tickNumGoal_x,tickReducer=3.5,FLG_extendLims=False,FLG_labelUnits=plot_latLongUnitsOnLabels);
     #END IF
-    
+        
     figFitter(fig); #fit the fig fast
     if( FLG_fancyPlot == 0 ):
         # plt.show(); #req to make plot show up

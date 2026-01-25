@@ -10,6 +10,7 @@ import numpy as np #import in here I dunno
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from Code.subfun_monthNum_to_word import subfun_monthNum_to_word
+from Code.subfun_figFitter import figFitter
 
 def GRITI_ISR_Haystack_plot_POPL(Zenith_time,Zenith_height,Zenith_POPL,MISA_time,MISA_height,MISA_POPL,ISR_cutoffPeriod,ISR_RTI_heightLimValues,dateRange,dateRange_dayNum,dateRange_dayNum_zeroHr,FONT_titleFM,FONT_axisTick,FONT_axisLabelFM):
     #-----Plot ISR POPL results as a RTI-----
@@ -24,7 +25,7 @@ def GRITI_ISR_Haystack_plot_POPL(Zenith_time,Zenith_height,Zenith_POPL,MISA_time
     ax[0].set_aspect('auto');
     ax[1].set_aspect('auto');
     
-    pltHelprX, pltHelprY = np.meshgrid( (Zenith_time - dateRange_dayNum_zeroHr[1])*24, \
+    pltHelprX, pltHelprY = np.meshgrid( (Zenith_time - dateRange_dayNum_zeroHr[1]*86400)/3600, \
                 Zenith_height);
     im = ax[0].pcolormesh(pltHelprX , pltHelprY , Zenith_POPL , cmap='gray' , shading='gouraud'); # pseudocolor plot "stretched" to the grid
     cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
@@ -41,11 +42,11 @@ def GRITI_ISR_Haystack_plot_POPL(Zenith_time,Zenith_height,Zenith_POPL,MISA_time
     ax[0].set_xlabel(subfun_monthNum_to_word(dateRange[0,1])[0]+" "+str(dateRange[0,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[0,0])+" to "+subfun_monthNum_to_word(dateRange[1,1])[0]+" "+str(dateRange[1,2])+" (Day "+str(dateRange_dayNum[0,1])+"), "+str(dateRange[1,0]),fontproperties=FONT_axisLabelFM); #set the x axis label
     ax[0].set_ylabel('Height (km)',fontproperties=FONT_axisLabelFM); #set the y axis label
     
-    xAxisTicks = np.arange( (np.round((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1])*24) - np.mod(np.round((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1])*24),2)) , \
-            (np.round((np.max(Zenith_time)-dateRange_dayNum_zeroHr[1])*24) - np.mod(np.round((np.max(Zenith_time)-dateRange_dayNum_zeroHr[1])*24),2)) + 2 , \
+    xAxisTicks = np.arange( (np.round((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) - np.mod(np.round((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),2)) , \
+            (np.round((np.max(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) - np.mod(np.round((np.max(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),2)) + 2 , \
             2); #sets the start hr, stop hr, and the step size between (in this case, 2 hr)
     ax[0].set_xticks(xAxisTicks); #set x axis ticks
-    ax[0].set_xlim( ((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1])*24 , (np.max(Zenith_time)-dateRange_dayNum_zeroHr[1])*24) ); #set x axis limits
+    ax[0].set_xlim( ((np.min(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(Zenith_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) ); #set x axis limits
     
     ax[0].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
     
@@ -53,7 +54,7 @@ def GRITI_ISR_Haystack_plot_POPL(Zenith_time,Zenith_height,Zenith_POPL,MISA_time
     divider = make_axes_locatable(ax[1]); #prep to add an axis
     cax = divider.append_axes('right', size='2.0%', pad=0.35); #make a color bar axis
     
-    pltHelprX, pltHelprY = np.meshgrid( (MISA_time - dateRange_dayNum_zeroHr[1])*24, \
+    pltHelprX, pltHelprY = np.meshgrid( (MISA_time - dateRange_dayNum_zeroHr[1]*86400)/3600, \
                 MISA_height);
     im = ax[1].pcolormesh(pltHelprX , pltHelprY , MISA_POPL , cmap='gray' , shading='gouraud'); # pseudocolor plot "stretched" to the grid
     cbar = fig.colorbar(im, cax=cax, orientation='vertical'); #create a colorbar using the prev. defined cax
@@ -70,14 +71,15 @@ def GRITI_ISR_Haystack_plot_POPL(Zenith_time,Zenith_height,Zenith_POPL,MISA_time
     ax[1].set_xlabel('Time in UT - 0 Hr on Day '+str(dateRange_dayNum_zeroHr[1])+', '+str(dateRange_dayNum_zeroHr[0])+' (hr)',fontproperties=FONT_axisLabelFM); #set the x axis label
     ax[1].set_ylabel('Height (km)',fontproperties=FONT_axisLabelFM); #set the y axis label
     
-    xAxisTicks = np.arange( (np.round((np.min(MISA_time)-dateRange_dayNum_zeroHr[1])*24) - np.mod(np.round((np.min(MISA_time)-dateRange_dayNum_zeroHr[1])*24),2)) , \
-            (np.round((np.max(MISA_time)-dateRange_dayNum_zeroHr[1])*24) - np.mod(np.round((np.max(MISA_time)-dateRange_dayNum_zeroHr[1])*24),2)) + 2 , \
+    xAxisTicks = np.arange( (np.round((np.min(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) - np.mod(np.round((np.min(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),2)) , \
+            (np.round((np.max(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) - np.mod(np.round((np.max(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600),2)) + 2 , \
             2); #sets the start hr, stop hr, and the step size between (in this case, 2 hr)
     ax[1].set_xticks(xAxisTicks); #set x axis ticks
-    ax[1].set_xlim( ((np.min(MISA_time)-dateRange_dayNum_zeroHr[1])*24 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1])*24) ); #set x axis limits
+    ax[1].set_xlim( ((np.min(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600 , (np.max(MISA_time)-dateRange_dayNum_zeroHr[1]*86400)/3600) ); #set x axis limits
     
     ax[1].set_ylim( ISR_RTI_heightLimValues ); #set y axis limits
     
-    fig.subplots_adjust(left = 0.045, right = 0.95, top = 0.96, bottom = 0.065 , hspace = 0.225); #sets padding to small numbers for minimal white space
+    figFitter(fig); #fit that fig fast
+    # fig.subplots_adjust(left = 0.045, right = 0.95, top = 0.96, bottom = 0.065 , hspace = 0.225); #sets padding to small numbers for minimal white space
     #fig.tight_layout(); #function for a tight layout, doesn't seem to do much here
     plt.show(); #req to make plot show up

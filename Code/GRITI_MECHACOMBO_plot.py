@@ -256,23 +256,23 @@ def GRITI_MECHACOMBO_plot(FLG_MECHACOMBO_names, data, dates, settings, opt=0, FL
                 plotNames_now[j] = plotNames_now[j][:plotNames_now[j].find('-')]; #remove the filt info
                 if( componentNum.lower() == 'x' ):
                     componentNum = 0; #component index
-                    componentName = '$\mathregular{'+plotNames_now[j]+'_X}$';
+                    componentName = r'$\mathregular{'+plotNames_now[j]+'_X}$';
                     FLG_components = True;
                 elif( componentNum.lower() == 'y' ):
                     componentNum = 1; #component index
-                    componentName = '$\mathregular{'+plotNames_now[j]+'_Y}$';
+                    componentName = r'$\mathregular{'+plotNames_now[j]+'_Y}$';
                     FLG_components = True;
                 elif( componentNum.lower() == 'z' ):
                     componentNum = 2; #component index
-                    componentName = '$\mathregular{'+plotNames_now[j]+'_Z}$';
+                    componentName = r'$\mathregular{'+plotNames_now[j]+'_Z}$';
                     FLG_components = True;
                 elif( componentNum.lower() == 'f' ):
-                    componentName = '$\mathregular{'+plotNames_now[j]+'_F}$';
+                    componentName = r'$\mathregular{'+plotNames_now[j]+'_F}$';
                     FLG_components = False;           
                 #END IF
             else:
                 componentNum = 2; #component index
-                componentName = '$\mathregular{'+plotNames_now[j]+'_Z}$';
+                componentName = r'$\mathregular{'+plotNames_now[j]+'_Z}$';
                 FLG_components = True;
             #END IF
             

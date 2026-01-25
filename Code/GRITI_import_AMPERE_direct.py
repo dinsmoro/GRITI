@@ -271,7 +271,7 @@ def GRITI_import_AMPERE_direct(dates,settings_paths,AMPERE_hemi,settings_config,
             
             if( os.path.getsize(os.path.join(settings_paths['data'], folder_AMPERE, str(dateRange_full[AMPERE_dataAvail_missing[i],0]), AMPERE_fileName)) < 100000 ):
                 # a really small file shows up if the data wasn't there apparently
-                print('ERROR in GRITI_import_AMPERE_direct: '+AMPERE_fileName+' is not available, DL\'d a smol placeholder file. There is no data for this day, change date range or code a way to bypass a day with NaNs or something. Check out "https://ampere.jhuapl.edu/download/?page=dataTab" at "Daily NetCDF Files" tab and the "Filtered" data for your day(s) & hemisphere - but it ain\'t there. ¯\_(ツ)_/¯');
+                print('ERROR in GRITI_import_AMPERE_direct: '+AMPERE_fileName+' is not available, DL\'d a smol placeholder file. There is no data for this day, change date range or code a way to bypass a day with NaNs or something. Check out "https://ampere.jhuapl.edu/download/?page=dataTab" at "Daily NetCDF Files" tab and the "Filtered" data for your day(s) & hemisphere - but it ain\'t there. '+r'¯\_(ツ)_/¯');
                 os.remove(os.path.join(settings_paths['data'], folder_AMPERE, str(dateRange_full[AMPERE_dataAvail_missing[i],0]), AMPERE_fileName)); #cleanup since partial file will be there
                 import sys #yolo import
                 sys.exit(); #more def will crash

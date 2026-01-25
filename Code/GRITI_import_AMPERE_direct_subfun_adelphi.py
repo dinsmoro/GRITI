@@ -339,7 +339,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
     from Code.subfun_textNice import textNice
     #======================================================================
     print('file for 2D output in geomagnetic coordinates');
-    pfilout='E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geomagnetic.txt';
+    pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geomagnetic.txt';
     with open(pfilout, 'w') as fandle:
         for ip in range(0,time_cntStop):
             print(dayin+'\t'+format(time_hr[ip],'.5f'),' UT',file=fandle);
@@ -357,7 +357,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
     #END WITH fandle
     #========================================================================
     print('file for 1D output');
-    pfilout='E:\Big Data\AMPERE\AuroraPHILE 1D Output '+dayin+' '+hemi+'.txt'
+    pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 1D Output '+dayin+' '+hemi+'.txt'
     with open(pfilout, 'w') as fandle:
         print('  Date       UT     CPCP(kV) EnFlux(GW) JHeat(GW) Model_AE',file=fandle);
         for ip in range(0,time_cntStop):
@@ -373,7 +373,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
         geogout = np.zeros((11,time_stepsAvail,24,50),dtype=np.float64);
         print('geog coords is going down');
         clong= np.arange(0,360,15);
-        zfile='E:\Big Data\AMPERE\lat-long index_file'; #gotta read this file, it's saved IDL variables, lost in time I suspect [it's not]
+        zfile=r'E:\Big Data\AMPERE\lat-long index_file'; #gotta read this file, it's saved IDL variables, lost in time I suspect [it's not]
         idl_save_data = readsav(zfile);
         zlatx = idl_save_data['zlatx'];
         zlonx = idl_save_data['zlonx'];
@@ -402,7 +402,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
         #END FOR ntime #end of ntime loop
         #======================================================================
         print('file for 2D output for geographic coordinates');
-        pfilout='E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geographic.txt'
+        pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geographic.txt'
         with open(pfilout, 'w') as fandle:
             for ip in range(0,time_cntStop):
                 print(dayin+'\t'+format(time_hr[ip],'.5f')+' UT',file=fandle);
@@ -428,7 +428,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
     # from Code.subfun_textNice import textNice
     #======================================================================
     print('file for 2D output in geomagnetic coordinates');
-    pfilout='E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geomagnetic.txt';
+    pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geomagnetic.txt';
     with open(pfilout, 'w') as fandle:
         for ip in range(0,time_cntStop):
             print(dayin+'\t'+format(time_hr[ip],'.5f'),' UT',file=fandle);
@@ -446,7 +446,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
     #END WITH fandle
     #========================================================================
     print('file for 1D output');
-    pfilout='E:\Big Data\AMPERE\AuroraPHILE 1D Output '+dayin+' '+hemi+'.txt'
+    pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 1D Output '+dayin+' '+hemi+'.txt'
     with open(pfilout, 'w') as fandle:
         print('  Date       UT     CPCP(kV) EnFlux(GW) JHeat(GW) Model_AE',file=fandle);
         for ip in range(0,time_cntStop):
@@ -462,7 +462,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
         geogout = np.zeros((11,time_stepsAvail,24,50),dtype=np.float64);
         print('geog coords is going down');
         clong= np.arange(0,360,15);
-        zfile='E:\Big Data\AMPERE\lat-long index_file'; #gotta read this file, it's saved IDL variables, lost in time I suspect [it's not]
+        zfile=r'E:\Big Data\AMPERE\lat-long index_file'; #gotta read this file, it's saved IDL variables, lost in time I suspect [it's not]
         idl_save_data = readsav(zfile);
         zlatx = idl_save_data['zlatx'];
         zlonx = idl_save_data['zlonx'];
@@ -491,7 +491,7 @@ def adelphi_textOutputs(dayin,hemi,time_cntStop,time_stepsAvail,time_hr,phmlt,th
         #END FOR ntime #end of ntime loop
         #======================================================================
         print('file for 2D output for geographic coordinates');
-        pfilout='E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geographic.txt'
+        pfilout=r'E:\Big Data\AMPERE\AuroraPHILE 2D Output '+dayin+' '+hemi+' Geographic.txt'
         with open(pfilout, 'w') as fandle:
             for ip in range(0,time_cntStop):
                 print(dayin+'\t'+format(time_hr[ip],'.5f')+' UT',file=fandle);
@@ -997,6 +997,8 @@ def potentializer_bot2top(ajr,spb,shb,thmax,thsn,delth,dtr,dph,re,FLG_smoothing_
         cotth = np.cos(theta)/sinth
         kprev = k+1;
         knext = k-1;
+        # kprev = k-1;
+        # knext = k+1;
         for j in range(0,23+1):
             if j == 0:
                 phibjm1 = phib[23,k]
@@ -1276,8 +1278,8 @@ def get_auroral_parameters(th50,spb,shb,phib,FLG_smoothing_efield=True):
     # phmlt = 15*np.arange(24,dtype=np.float64)
     # mlat=(90.-thmax)+delth*np.arange(50,dtype=np.float64)    #the magnetic latitudes corresponding to the theta array
     re = 6300.e3        # Earth radius in m
-    etheta = np.empty((50),dtype=np.float64);
-    ephi = np.empty((50),dtype=np.float64);
+    etheta = np.zeros((50),dtype=np.float64);
+    ephi = np.zeros((50),dtype=np.float64);
     enorth = np.empty((24,50),dtype=np.float64);
     eeast = np.empty((24,50),dtype=np.float64);
     jeast = np.zeros((24,50),dtype=np.float64);

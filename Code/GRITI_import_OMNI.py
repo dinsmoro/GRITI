@@ -244,7 +244,7 @@ def GRITI_import_OMNI(dateRange_dayNum_full, settings_paths, OMNI_columns_wanted
             OMNI_PCFilePath = os.path.join(settings_paths['data'], 'OMNI', 'pcnpcs_min' + str(dateRange_yearRange[i]) + '.txt'); #create the expected data path
             if( os.path.isfile(OMNI_PCFilePath) == 1 ): #check if omni data file exists
                 import pandas as pd      
-                PC_read = pd.read_csv(OMNI_PCFilePath, delim_whitespace=True, lineterminator='\n'); #read in the data
+                PC_read = pd.read_csv(OMNI_PCFilePath, sep='\s+', lineterminator='\n'); #read in the data
                 
                 dateRange_full_currentYear_where = np.where(dateRange_full_currentYear)[0]; #GET WHERE
                 for j in range(0,dateRange_full_currentYear_where.size):

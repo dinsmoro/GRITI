@@ -226,25 +226,26 @@ def GRITI_import_ISR_Pokerflat(dateRange_dayNum_full,folder,dateRange_dayNum_zer
             with open( os.path.join(folder[1],"Supporting","leap-seconds.txt"),"r") as leapFile: #prep to read 
                 leapRead = leapFile.read().split("\n"); #read file, split by \n
             #END WITH
-            leapReadDel = np.zeros(len(leapRead),dtype=np.int64); #prep list, keep it in python's weird systems
+            leapExpire = leapRead.pop(0).split(" "); #first line is the expire line, get it out
+            leapReadDel = np.ones(len(leapRead),dtype=np.int64)*-1; #prep list, keep it in python's weird systems
             for i in range(0,len(leapRead)):
                 if( len(leapRead[i]) == 0 ):
                     leapReadDel[i] = i;  #record strings to delete
                 #END IF
             #END FOR i
-            leapReadDel = np.delete(leapReadDel,np.where(leapReadDel == 0)[0]); #remove the 0's we didn't need
+            leapReadDel = np.delete(leapReadDel,np.where(leapReadDel == -1)[0]); #remove the 0's we didn't need
             leapRead = np.delete(leapRead,leapReadDel); #now it's a numpy array
             
             #now gotta make sure file we have is current enough
             leapCurrentDay = subfun_date_to_dayNum(np.int16(np.array(date.today().strftime("%Y %m %d").split(" "))))[0]; #get current day
-            leapExpire = leapRead[0][ (leapRead[0].find(":")+3):(len(leapRead[0])+1) ].split(" "); #get the date of expiry
-            leapExpire = subfun_date_to_dayNum(np.int16(np.array( [leapExpire[2], subfun_monthWord_to_num(leapExpire[1]) , leapExpire[0]] )))[0]; #create a number version
+            leapExpire = subfun_date_to_dayNum(np.int16(np.array( [leapExpire[5], subfun_monthWord_to_num(leapExpire[4]) , leapExpire[3]] )))[0]; #create a number version
             
             if( leapExpire[0] < leapCurrentDay[0] ): #if the expiry year is less than the current one, easy catch
                 raise ValueError("Raising an error so the except triggers and it goes and gets new data from the website, as the current data is old! Current date:\n"+str(leapCurrentDay)+"\nExpiring date:\n"+str(leapExpire));
             elif( leapExpire[0] == leapCurrentDay[0] ): #if the year is the same
                 if( leapExpire[1] < leapCurrentDay[1] ): #check the days within them
                     raise ValueError("Raising an error so the except triggers and it goes and gets new data from the website, as the current data is old! Current date:\n"+str(leapCurrentDay)+"\nExpiring date:\n"+str(leapExpire));
+                #END IF
             #END IF
             
             #if we made it through, time to read that data in and then use it!
@@ -256,7 +257,7 @@ def GRITI_import_ISR_Pokerflat(dateRange_dayNum_full,folder,dateRange_dayNum_zer
             
         except: #fail and do this to get it from 
             from urllib.request import urlopen #only need it here
-            web_leapSecond = "https://www.ietf.org/timezones/data/leap-seconds.list"; #build site to go to
+            web_leapSecond = "https://data.iana.org/time-zones/data/leap-seconds.list"; #build site to go to
             web_page = urlopen(web_leapSecond); #get raw HTML
             web_htmlContent = web_page.read().decode("UTF-8").split("\n"); #read off the HTML from whatever the page holder is
             leapStart = -1; #prep flag/counter recorders

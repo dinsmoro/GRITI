@@ -343,7 +343,7 @@ def GRITI_movieMaker(data, dates, settings, FLG_parallelizer=True):
     #same for all gif types
         
     #prime stuff for parallel
-    parallel_numThreads = settings['config']['parallel num threads']; #it is CPU bound while drawing, but getting them out is what takes a bit it seems
+    parallel_numThreads = settings['config']['parallel num threads']*2; #it is CPU bound while drawing, but getting them out is what takes a bit it seems
     batches = np.append(np.arange(movie_timeRange[0],movie_timeRange[1],parallel_numThreads),movie_timeRange[1]);
     
     # precalc what can be
@@ -456,7 +456,7 @@ def GRITI_movieMaker(data, dates, settings, FLG_parallelizer=True):
                         #END IF
                         
                         # Load everything into the list
-                        parallel_list.append([movie_data, dates, settings, movie_writer, movie_dict['fig offsets'], movie_dict['title offset']]);
+                        parallel_list.append([movie_data, dates, settings, movie_dict['fig offsets'], movie_dict['title offset']]);
                     #END FOR i
                                         
                     #------------------------Draw & Write Images------------------------------
@@ -501,9 +501,9 @@ def GRITI_movieMaker(data, dates, settings, FLG_parallelizer=True):
                         plt.close(tempFig); #close it again
                           
                         movie_dict['fig'].canvas.draw(); #key for all instances
-                        for j in range(0,movie_repeatFrameNum): #runs this as many times as needed to get 30 FPS or whatever
+                        for k in range(0,movie_repeatFrameNum): #runs this as many times as needed to get 30 FPS or whatever
                             movie_writer.grab_frame(); #get the frame and save it
-                        #END FOR j
+                        #END FOR k
                     #END FOR j
                     
                     if( np.mod(b,batches.size//10) == 0 ):

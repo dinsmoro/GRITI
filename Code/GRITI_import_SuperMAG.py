@@ -64,11 +64,11 @@ def GRITI_import_SuperMAG(dateRange_dayNum_full, settings_paths, FLG_deleteOrig 
                     #END WITH
                 except OSError:
                     #if this happens then the data is corrupted or something [happens implicitly]
-                    print('ERROR in GRITI_import_SuperMAG: "'+SuperMAG_dataFilePath_CSV+'" is broken. Redownload it from SuperMAG for the year '+str(dateRange_yearRange[i])+'. Returning gibberish ¯\_(ツ)_/¯');
+                    print('ERROR in GRITI_import_SuperMAG: "'+SuperMAG_dataFilePath_CSV+'" is broken. Redownload it from SuperMAG for the year '+str(dateRange_yearRange[i])+'. Returning gibberish '+r'¯\_(ツ)_/¯');
                     return 'no'
                 #END TRY
             else:
-                print('ERROR in GRITI_import_SuperMAG: "'+SuperMAG_dataFilePath_CSV+'" is not downloaded. Download it from SuperMAG for the year '+str(dateRange_yearRange[i])+'. Returning gibberish ¯\_(ツ)_/¯');
+                print('ERROR in GRITI_import_SuperMAG: "'+SuperMAG_dataFilePath_CSV+'" is not downloaded. Download it from SuperMAG for the year '+str(dateRange_yearRange[i])+'. Returning gibberish '+r'¯\_(ツ)_/¯');
                 return 'no'
             #END IF
             

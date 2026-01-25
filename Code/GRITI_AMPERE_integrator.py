@@ -23,7 +23,15 @@ def GRITI_AMPERE_integrator(AMPERE_data, dates, settings_AMPERE, plotLatRange, p
     # plotLongRange = settings['map']['long range'];
     AMPERE_dataType = settings_AMPERE['data type']; #get the current AMPERE data type
     
-    FLG_paddedDays = ~np.all(dates['date range full dayNum'] == subfun_time_to_dateRange(AMPERE_data['time unique'], dates_zeroHr = dates['date range zero hr dayNum'], FLG_timesWRTzeroHr = False, options = 0)); #see if the time indices exceed the expected date range or not
+    if( 'integrate plot force disable padding' in settings_AMPERE ):
+        if( settings_AMPERE['integrate plot force disable padding'] == True ):
+            FLG_paddedDays = False;
+        else:
+            FLG_paddedDays = ~np.all(dates['date range full dayNum'] == subfun_time_to_dateRange(AMPERE_data['time unique'], dates_zeroHr = dates['date range zero hr dayNum'], FLG_timesWRTzeroHr = False, options = 0)); #see if the time indices exceed the expected date range or not
+        #END IF
+    else:
+        FLG_paddedDays = ~np.all(dates['date range full dayNum'] == subfun_time_to_dateRange(AMPERE_data['time unique'], dates_zeroHr = dates['date range zero hr dayNum'], FLG_timesWRTzeroHr = False, options = 0)); #see if the time indices exceed the expected date range or not
+    #END IF
     
     if( (AMPERE_integrateMethod_coordType != 'reg') & (AMPERE_integrateMethod_coordType != AMPERE_integrateMethod_coordType_global)  ):
         if( GRITI_import_AMPERE == None ):

@@ -75,34 +75,50 @@ def GRITI_import_TEC_support_filter(settings_paths,settings_config,paths_TEC,TEC
         #END IF
         
         if( numInstances_toDo > 1 ):
-            #--- pack up for parallel ---
-            print('WARNING in GRITI_import_TEC_support_filter: Parallelization possible for converting unfiltered data to filtered data, which will speed it up. Downside is that no updates will be printed. See you on the other side!');
-            tic = time();
-            parallel_list = []; #Prep
-            for i in range(0, instances_toDo_where.size): # Every iteration appends a list of inputs to parallel_list, each index of parallel_list will be independently run
-                parallel_list.append([ instances_toDo_where[i], dateRange_dayNum_full, dateRange_dayNum_full_orig, dateRange_full, \
-                                       TEC_dataFileNameUnfilt, TEC_dataFileName, \
-                                       TEC_dataAvail,  TEC_dataRate, TEC_timeTolerance, TEC_maxAmpAllowed, \
-                                       minElevation, minimumTimeGap, dataType_meth, \
-                                       filter_savGolPeriod, order_savGol, version_filt, version_unfiltReq, \
-                                       settings_paths, paths_TEC, TEC_dataFilePathUnfilt, \
-                                       TEC_dataAgg_timeAdditionLimit, TEC_dataAgg_distToPts_degcSq, deltaTEC_compareValue, \
-                                       FLG_reqPaddedDays, FLG_dataAggregation, FLG_deleteUnfilt, True ]);
-            #END FOR i
-            
-            #--- apply parallel calc on function ---
-            with joblib.parallel_backend('loky'):
-                with joblib.Parallel(n_jobs=numInstances_toDo,pre_dispatch=numInstances_toDo,batch_size=1) as parallel_arbiter:    
-                    parallel_results = parallel_arbiter(joblib.delayed(GRITI_import_TEC_support_filter_perDay)(*sublist) for sublist in parallel_list); #annoyingly I need to unpack every variable input manually
+            try:
+                #--- pack up for parallel ---
+                print('WARNING in GRITI_import_TEC_support_filter: Parallelization possible for converting unfiltered data to filtered data, which will speed it up. Downside is that no updates will be printed. See you on the other side!');
+                tic = time();
+                parallel_list = []; #Prep
+                for i in range(0, instances_toDo_where.size): # Every iteration appends a list of inputs to parallel_list, each index of parallel_list will be independently run
+                    parallel_list.append([ instances_toDo_where[i], dateRange_dayNum_full, dateRange_dayNum_full_orig, dateRange_full, \
+                                           TEC_dataFileNameUnfilt, TEC_dataFileName, \
+                                           TEC_dataAvail,  TEC_dataRate, TEC_timeTolerance, TEC_maxAmpAllowed, \
+                                           minElevation, minimumTimeGap, dataType_meth, \
+                                           filter_savGolPeriod, order_savGol, version_filt, version_unfiltReq, \
+                                           settings_paths, paths_TEC, TEC_dataFilePathUnfilt, \
+                                           TEC_dataAgg_timeAdditionLimit, TEC_dataAgg_distToPts_degcSq, deltaTEC_compareValue, \
+                                           FLG_reqPaddedDays, FLG_dataAggregation, FLG_deleteUnfilt, True ]);
+                #END FOR i
+                
+                #--- apply parallel calc on function ---
+                with joblib.parallel_backend('loky'):
+                    with joblib.Parallel(n_jobs=numInstances_toDo,pre_dispatch=numInstances_toDo,batch_size=1) as parallel_arbiter:    
+                        parallel_results = parallel_arbiter(joblib.delayed(GRITI_import_TEC_support_filter_perDay)(*sublist) for sublist in parallel_list); #annoyingly I need to unpack every variable input manually
+                    #END WITH
                 #END WITH
-            #END WITH
-            del parallel_list #save some mem
-            #--- unpack parallel results ---
-            for i in range(0,len(parallel_results)):
-                TEC_dataAvail[instances_toDo_where[i]] = parallel_results[i];
-            #END FOR i
-            del parallel_results #save some mem
-            print('\nTime to filter '+str(instances_toDo_where.size)+' days in parallel took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end  
+                del parallel_list #save some mem
+                #--- unpack parallel results ---
+                for i in range(0,len(parallel_results)):
+                    TEC_dataAvail[instances_toDo_where[i]] = parallel_results[i];
+                #END FOR i
+                del parallel_results #save some mem
+                print('\nTime to filter '+str(instances_toDo_where.size)+' days in parallel took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end
+            except Exception as err:
+                print('WARNING IN GRITI_import_TEC_support_filter: ERROR detected in parallelization attempt. Trying non-parallelization. Error message here:\n'+str(err)); #report something went bad, hopefully it was joblib
+                del parallel_list #save some mem
+                tic = time();
+                for i in range(0, instances_toDo_where.size):
+                    TEC_dataAvail[instances_toDo_where[i]] = GRITI_import_TEC_support_filter_perDay(instances_toDo_where[i], dateRange_dayNum_full, dateRange_dayNum_full_orig, dateRange_full, \
+                                        TEC_dataFileNameUnfilt, TEC_dataFileName, \
+                                        TEC_dataAvail,  TEC_dataRate, TEC_timeTolerance, TEC_maxAmpAllowed, \
+                                        minElevation, minimumTimeGap, dataType_meth, \
+                                        filter_savGolPeriod, order_savGol, version_filt, version_unfiltReq, \
+                                        settings_paths, paths_TEC, TEC_dataFilePathUnfilt, \
+                                        TEC_dataAgg_timeAdditionLimit, TEC_dataAgg_distToPts_degcSq, deltaTEC_compareValue, \
+                                        FLG_reqPaddedDays, FLG_dataAggregation, FLG_deleteUnfilt, False);
+                #END FOR i
+                print('\nTime to filter '+str(instances_toDo_where.size)+' days in serial took: '+str(np.round((time()-tic)/60,2))+' min\n'); #extra space at end
         else:
             # no need to parallelize if just 1 instance can run
             for i in range(0, instances_toDo_where.size):

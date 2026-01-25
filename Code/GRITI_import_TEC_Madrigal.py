@@ -8,6 +8,7 @@ import os, glob, sys
 from time import time, sleep as timesleep
 from urllib.request import urlopen, urlretrieve
 import html2text
+import re
 from Code.subfun_strstr import strstr
 from Code.subfun_strstrNB import strstrNB
 from Code.subfun_downloadProgress import downloadProgress
@@ -257,6 +258,9 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
     #END FOR
         
     #==============Check website and locally for data (in all formats)==============
+    
+    regex_fileName = re.compile(r'los_\d{8}\.\d{3}\.h5[^/]'); # Used for web stuff, but compile once
+    regex_fileDate = re.compile(r'\d{8}');
     FLG_newYr = -1; #start the new year flag - used to detect if a new year occured
     for i in range(0,len(dateRange_dayNum_full[:,0])): #loop to check if any data exists - data will not be downloaded yet!
         #Since data download takes so long (5GB+) I decided to check if it is there before trying to download anything
@@ -272,6 +276,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 #first - need to check if TEC data is availiable for the days requested
                 
                 if( FLG_newYr != dateRange_full[i,0] ): #check to go get the year's web links and file names and file dates
+                    regex_fileLinks = re.compile(re.escape(web_base + str(dateRange_dayNum_full[i,0]) + web_baseAfter)+r'.+los_\d{8}\.\d{3}\.h5/'); # Compile on each year
                     #basically, if within the same year only need to get this once for the whole year's data availiability
                     FLG_newYr = dateRange_full[i,0]; #set it so the flag works good
                 
@@ -307,21 +312,28 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                         html_content = html_content.decode(charset); #"decode" the HTML content so it's legible
                         rendered_content = html2text.html2text(html_content); #render the HTML like webpage would and get the real stuff
                         #print("{}".format(rendered_content)); #print for debug
-                        web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
-                        web_fileNotNamesIndex = strstrNB(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
-                        web_fileLinksIndex = strstrNB(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
-                        web_fileLinksEndIndex = strstrNB(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
+                        # web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                        # web_fileNotNamesIndex = strstrNB(rendered_content,r'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
+                        # web_fileLinksIndex = strstrNB(rendered_content,r'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
+                        # web_fileLinksEndIndex = strstrNB(rendered_content,r'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly 
                     
-                        web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
+                        # web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
                         
-                        web_fileNames = []; #prep a list for strings, names of the files
-                        web_fileNamesDate = []; #prep a list for strings, dates of the files
-                        web_fileLinks = []; #prep a list for strings, links to the files
-                        for j in range(0,len(web_fileNamesIndex)):
-                            web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
-                            web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
-                            web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
-                        #END FOR j
+                        # web_fileNames = []; #prep a list for strings, names of the files
+                        # web_fileNamesDate = []; #prep a list for strings, dates of the files
+                        # web_fileLinks = []; #prep a list for strings, links to the files
+                        # for j in range(0,len(web_fileNamesIndex)):
+                        #     web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
+                        #     web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
+                        #     web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
+                        # #END FOR j
+                        # web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
+                    
+                        # Better regex stuff to do this, I learned it coolio right?
+                        web_fileNames = re.findall(regex_fileName, rendered_content);
+                        web_fileNames = [web_fileNames[jk][:-1] for jk in range(0, len(web_fileNames))]; # Cut off the last character
+                        web_fileLinks = re.findall(regex_fileLinks, rendered_content);
+                        web_fileNamesDate = [re.findall(regex_fileDate, web_fileNames[jk])[0] for jk in range(0, len(web_fileNames))];
                         web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
                     else:
                         print('\nWARNING: No internet access, can\'t check Madrigal for latest data availability.');
@@ -573,6 +585,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             
             #First apply code that makes sure the web stuff is for the correct year
             if( FLG_newYr != dateRange_full[i,0] ): #check to go get the year's web links and file names and file dates
+                regex_fileLinks = re.compile(re.escape(web_base + str(dateRange_dayNum_full[i,0]) + web_baseAfter)+r'.+los_\d{8}\.\d{3}\.h5/');
                 #basically, if within the same year only need to get this once for the whole year's data availiability
                 FLG_newYr = dateRange_full[i,0]; #set it so the flag works good
             
@@ -586,24 +599,31 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                 html_content = html_content.decode(charset); #"decode" the HTML content so it's legible
                 rendered_content = html2text.html2text(html_content); #render the HTML like webpage would and get the real stuff
                 #print("{}".format(rendered_content)); #print for debug
-                web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
-                web_fileNotNamesIndex = strstrNB(rendered_content,'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
-                web_fileLinksIndex = strstrNB(rendered_content,'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
-                web_fileLinksEndIndex = strstrNB(rendered_content,'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
+                # web_fileNamesIndex = strstrNB(rendered_content,'los_'); #pull out indexes related to the file name and file links ~can't get file name only reliably directly~
+                # web_fileNotNamesIndex = strstrNB(rendered_content,r'%252Flos_')+5; #pull out indexes related to the end of the file links only ~for removing from above~
+                # web_fileLinksIndex = strstrNB(rendered_content,r'.h5](/ftp')+5; #pull out indexes related to the ~start~ of the file links only
+                # web_fileLinksEndIndex = strstrNB(rendered_content,r'.h5/)')+4; #pull out indexes related to the ~end~ of the file links olnly   
             
-                web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
+                # web_fileNamesIndex = np.delete( web_fileNamesIndex,np.where(np.in1d(web_fileNamesIndex, web_fileNotNamesIndex))[0]); #search for the not wanted file name ending and remove them
                 
-                web_fileNames = []; #prep a list for strings, names of the files
-                web_fileNamesDate = []; #prep a list for strings, dates of the files
-                web_fileLinks = []; #prep a list for strings, links to the files
-                for j in range(0,len(web_fileNamesIndex)):
-                    web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
-                    web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
-                    web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
-                #END FOR
+                # web_fileNames = []; #prep a list for strings, names of the files
+                # web_fileNamesDate = []; #prep a list for strings, dates of the files
+                # web_fileLinks = []; #prep a list for strings, links to the files
+                # for j in range(0,len(web_fileNamesIndex)):
+                #     web_fileNames.append(rendered_content[web_fileNamesIndex[j]:web_fileNamesIndex[j]+19]); #get the file name recorded
+                #     web_fileNamesDate.append(rendered_content[web_fileNamesIndex[j]+4:web_fileNamesIndex[j]+12]); #get the file name's date recorded
+                #     web_fileLinks.append(rendered_content[web_fileLinksIndex[j]:web_fileLinksEndIndex[j]]); #get the file name recorded
+                # #END FOR
+                # web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
+            
+                # Better regex stuff to do this, I learned it coolio right?
+                web_fileNames = re.findall(regex_fileName, rendered_content);
+                web_fileNames = [web_fileNames[jk][:-1] for jk in range(0, len(web_fileNames))]; # Cut off the last character
+                web_fileLinks = re.findall(regex_fileLinks, rendered_content);
+                web_fileNamesDate = [re.findall(regex_fileDate, web_fileNames[jk])[0] for jk in range(0, len(web_fileNames))];
                 web_fileNamesDate = np.swapaxes(np.array([np.asarray([w[0:4] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[4:6] for w in web_fileNamesDate]).astype("int16"),np.asarray([w[6:8] for w in web_fileNamesDate]).astype("int16")]),0,1); #pull out the yr/month/day in the file name in M/D/YR format
             #END IF
-                    
+            
             current_webFileNames = [web_fileNames[k] for k in np.where(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ))[0]][0]; #get the current web file name, because it's a list it is real oof
             current_web_fileLinks = [web_fileLinks[k] for k in np.where(np.all(( web_fileNamesDate - dateRange_full[i,:] )  == 0, axis=1 ))[0]][0]; #get the current web file link, because it's a list it is real oof
             current_webFileSize = np.asarray(urlopen(web_base_site+current_web_fileLinks).info()['Content-Length'],dtype=np.int64);
@@ -619,7 +639,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
                     FLG_gotPage = True; #exit the loop
                 except:
                     print('\n'); #print a new line
-                    sys.stdout.write('\rDownload failed for some reason ¯\_(ツ)_/¯. Try #{}/{}, will wait {} sec\t'.format(web_retryNum,web_maxRetry,web_retryWait)); #report
+                    sys.stdout.write('\rDownload failed for some reason '+r'¯\_(ツ)_/¯'+'. Try #{}/{}, will wait {} sec\t'.format(web_retryNum,web_maxRetry,web_retryWait)); #report
                     sys.stdout.flush();
                     timesleep(web_retryWait);
                     web_retryNum += 1; #increment try
@@ -707,6 +727,7 @@ def GRITI_import_TEC_Madrigal(dates, settings, FLG_justChecking=False):
             try:
                 #--- pack up for parallel ---
                 print('WARNING in GRITI_import_TEC: Parallelization possible for converting raw data to unfiltered data, which will speed it up. Downside is that no updates will be printed. See you on the other side!');
+                print('Able to fit '+str(numInstances_toDo)+' threads into '+str(np.round(comp_availMem/1024**3,2))+' GB of RAM (which is 90% of total system RAM). One day of TEC data estimated to take up '+str(np.round(TEC_dataMem/1024**3,2))+' GB of RAM.');
                 tic = time();
                 parallel_list = []; #Prep
                 for i in range(0,instances_toDo_where.size): # Every iteration appends a list of inputs to parallel_list, each index of parallel_list will be independently run

@@ -119,6 +119,7 @@ def GRITI_import_TEC_importer(data, dates, settings, FLG_timeToCheck=False):
             #END IF
         #END IF
         
+        
         if( 'justChecking' not in data['TEC'] ):
             if( FLG_dataTypes[FLG_TECloc] >= 1 ):
                 # TEC_timeUnique = np.unique(data['TEC']['time']); #days, get unique times (v useful)
@@ -131,6 +132,7 @@ def GRITI_import_TEC_importer(data, dates, settings, FLG_timeToCheck=False):
             #END IF
                 
             if( (settings['TEC']['noise settings']['noise mode'] >= 1) & (FLG_dataTypes[FLG_TECloc] >= 1) ): #replace the delta-vTEC data with random data OR random data with synth waves embedded
+                print('getting noisy data')
                 data['TEC']['dTEC'] = GRITI_TEC_randomSynth(data['TEC']['dTEC'].size,data['TEC']['lat'],data['TEC']['long'],data['TEC']['time'], \
                     settings['TEC']['noise settings']['noise mean'],settings['TEC']['noise settings']['noise stdev'],settings['map']['Re'],dates['date range zero hr'], \
                     settings['map']['lat range'],settings['map']['long range'],settings['map']['lat autotick'],settings['map']['long autotick'], \

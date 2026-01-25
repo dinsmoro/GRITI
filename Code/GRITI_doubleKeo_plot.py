@@ -15,6 +15,7 @@ from Code.subfun_dictDelver import dictDelver_get
 from Code.subfun_strfind import strfind
 from Code.subfun_textNice import textNice
 from copy import deepcopy
+from os import path as ospath
 # from time import sleep as nappytime
         
 def GRITI_doubleKeo_plot(doubleKeo, overlayName, dates, settings, dataAll=None, timeCutout = None, FLG_fancyPlot=0):
@@ -488,9 +489,9 @@ def GRITI_doubleKeo_plot(doubleKeo, overlayName, dates, settings, dataAll=None, 
     figFitter(fig); #fit the fig fast
     if( FLG_fancyPlot != 0 ):
         if( np.any(timeCutout == None) ):
-            fig.savefig(os.path.join(settings['paths']['fancyPlots'],'doubleKeo_'+settings['double keo']['keo data type']+'&'+overlayName+'_keo'+settings['plot']['save file type'])); #save the figure
+            fig.savefig(ospath.join(settings['paths']['fancyPlots'],'doubleKeo_'+settings['double keo']['keo data type']+'&'+overlayName+'_keo'+settings['plot']['save file type'])); #save the figure
         else:
-            fig.savefig(os.path.join(settings['paths']['fancyPlots'],'doubleKeo_'+settings['double keo']['keo data type']+'&'+overlayName+'_keo_cutout'+settings['plot']['save file type'])); #save the figure
+            fig.savefig(ospath.join(settings['paths']['fancyPlots'],'doubleKeo_'+settings['double keo']['keo data type']+'&'+overlayName+'_keo_cutout'+settings['plot']['save file type'])); #save the figure
         #END IF
         plt.close(); #close figure b/c it lurks apparently
         plt.ion(); #re-enable it for later stuff

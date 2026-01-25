@@ -97,8 +97,8 @@ def GRITI_import_ISR_Haystack(dateRange_dayNum_full,folder,dateRange_dayNum_zero
         testFile_expParams_end_Date_Split = np.int16(np.array(testFile_expParams_end_Date.split('-'))); #split by dash
         
         filenameInRange[i] = (dateRange_full[0,0] >= testFile_expParams_start_Date_Split[0]) & (dateRange_full[0,1] >= testFile_expParams_start_Date_Split[1]) & \
-        (dateRange_full[0,2] >= testFile_expParams_start_Date_Split[2]) & (dateRange_full[-1,0] >= testFile_expParams_end_Date_Split[0]) & \
-        (dateRange_full[-1,1] >= testFile_expParams_end_Date_Split[1]) & (dateRange_full[-1,2] >= testFile_expParams_end_Date_Split[2]); #make sure data start is before or during the first day desired and the data end is after or during the last day desired
+        (dateRange_full[0,2] >= testFile_expParams_start_Date_Split[2]) & (dateRange_full[-1,0] <= testFile_expParams_end_Date_Split[0]) & \
+        (dateRange_full[-1,1] <= testFile_expParams_end_Date_Split[1]) & (dateRange_full[-1,2] <= testFile_expParams_end_Date_Split[2]); #make sure data start is before or during the first day desired and the data end is after or during the last day desired
     #END FOR i
     
     if( np.sum(filenameInRange) > 1 ):
@@ -130,7 +130,7 @@ def GRITI_import_ISR_Haystack(dateRange_dayNum_full,folder,dateRange_dayNum_zero
     elif( np.sum(filenameInRange) == 0 ):
         print("\n==============ERROR==============");
         print("Of the files found in the given directory '"+os.path.join(folder[1],"ISR")+"':");
-        print({}.format( filenamePossibles ));
+        print(filenamePossibles);
         print("None of them covered the date range needed: "+str(dateRange_full[0,:])+" to "+str(dateRange_full[-1,:]));
         print("Crashin' on purpose, sorry!");
         import sys; #prep for destruction
@@ -239,19 +239,19 @@ def GRITI_import_ISR_Haystack(dateRange_dayNum_full,folder,dateRange_dayNum_zero
         with open( os.path.join(folder[1],"Supporting","leap-seconds.txt"),"r") as leapFile: #prep to read 
             leapRead = leapFile.read().split("\n"); #read file, split by \n
         #END WITH
-        leapReadDel = np.zeros(len(leapRead),dtype=np.int64); #prep list, keep it in python's weird systems
+        leapExpire = leapRead.pop(0).split(" "); #first line is the expire line, get it out
+        leapReadDel = np.ones(len(leapRead),dtype=np.int64)*-1; #prep list, keep it in python's weird systems
         for i in range(0,len(leapRead)):
             if( len(leapRead[i]) == 0 ):
                 leapReadDel[i] = i;  #record strings to delete
             #END IF
         #END FOR i
-        leapReadDel = np.delete(leapReadDel,np.where(leapReadDel == 0)[0]); #remove the 0's we didn't need
+        leapReadDel = np.delete(leapReadDel,np.where(leapReadDel == -1)[0]); #remove the 0's we didn't need
         leapRead = np.delete(leapRead,leapReadDel); #now it's a numpy array
         
         #now gotta make sure file we have is current enough
         leapCurrentDay = subfun_date_to_dayNum(np.int16(np.array(date.today().strftime("%Y %m %d").split(" "))))[0]; #get current day
-        leapExpire = leapRead[0][ (leapRead[0].find(":")+3):(len(leapRead[0])+1) ].split(" "); #get the date of expiry
-        leapExpire = subfun_date_to_dayNum(np.int16(np.array( [leapExpire[2], subfun_monthWord_to_num(leapExpire[1]) , leapExpire[0]] )))[0]; #create a number version
+        leapExpire = subfun_date_to_dayNum(np.int16(np.array( [leapExpire[5], subfun_monthWord_to_num(leapExpire[4]) , leapExpire[3]] )))[0]; #create a number version
         
         if( leapExpire[0] < leapCurrentDay[0] ): #if the expiry year is less than the current one, easy catch
             raise ValueError("Raising an error so the except triggers and it goes and gets new data from the website, as the current data is old! Current date:\n"+str(leapCurrentDay)+"\nExpiring date:\n"+str(leapExpire));
@@ -269,7 +269,7 @@ def GRITI_import_ISR_Haystack(dateRange_dayNum_full,folder,dateRange_dayNum_zero
         
     except: #fail and do this to get it from 
         from urllib.request import urlopen #only need it here
-        web_leapSecond = "https://www.ietf.org/timezones/data/leap-seconds.list"; #build site to go to
+        web_leapSecond = "https://data.iana.org/time-zones/data/leap-seconds.list"; #build site to go to
         web_page = urlopen(web_leapSecond); #get raw HTML
         web_htmlContent = web_page.read().decode("UTF-8").split("\n"); #read off the HTML from whatever the page holder is
         leapStart = -1; #prep flag/counter recorders
@@ -401,7 +401,7 @@ def GRITI_import_ISR_Haystack(dateRange_dayNum_full,folder,dateRange_dayNum_zero
     if( np.abs(np.median(Zenith_el)-np.mean(Zenith_el)) < 0.1 ):
         MISA_height = MISA_range/((1. + ((np.tan( (90. - np.median(MISA_el))*np.pi/180 ))**2))**0.5);
     else:
-        print("WARNING: For file "+filenamePath+"\MISA elevation mean is "+str(np.mean(MISA_el))+" but median is "+str(np.median(MISA_el))+" which indicates MISA is moving with time, may mess with data - using median b/c I don't have code for that");
+        print("WARNING: For file "+filenamePath+"\nMISA elevation mean is "+str(np.mean(MISA_el))+" but median is "+str(np.median(MISA_el))+" which indicates MISA is moving with time, may mess with data - using median b/c I don't have code for that");
         MISA_height = MISA_range/((1. + ((np.tan( (90. - np.median(MISA_el))*np.pi/180 ))**2))**0.5);
     #END IF
     
