@@ -260,6 +260,7 @@ plot_unitBracket_R = ']'; #whatevs you want for right bracket around units
 #dateRange = np.array([[2014,7,30],[2014,8,1]],dtype="int16"); #dates are in int16 because they can be
 dateRange = np.array([[2013,5,6],[2013,5,8]],dtype="int16"); #Paper 1 & 2
 # dateRange = np.array([[2013,5,6],[2013,5,6]],dtype="int16"); #dates are in int16 because they can be
+# dateRange = np.array([[2013,5,6],[2013,5,7]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2013,5,2],[2013,5,13]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2013,3,17],[2013,3,20]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2013,4,9],[2013,4,11]],dtype="int16"); #dates are in int16 because they can be
@@ -273,12 +274,14 @@ dateRange = np.array([[2013,5,6],[2013,5,8]],dtype="int16"); #Paper 1 & 2
 #dateRange = np.array([[2015,2,11],[2015,2,13]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2015,3,16],[2015,3,18]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2011,3,11],[2011,3,11]],dtype="int16"); #dates are in int16 because they can be
-dateRange = np.array([[2017,3,14],[2017,3,16]],dtype="int16"); #Salih Paper
+# dateRange = np.array([[2017,3,14],[2017,3,16]],dtype="int16"); #<- Salih Paper
+# dateRange = np.array([[2019,10,6],[2019,10,8]],dtype="int16"); #<- possible other Salih (not so)
+# dateRange = np.array([[2021,12,25],[2021,12,27]],dtype="int16"); #<- possible other Salih (not so)
 # dateRange = np.array([[2017,3,15],[2017,3,15]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,13],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2017,3,12],[2017,3,16]],dtype="int16"); #dates are in int16 because they can be
-dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
-dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look but smaller for testing
+# dateRange = np.array([[2018,2,1],[2018,4,10]],dtype="int16"); #dates are in int16 because they can be <- big look
+# dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16 because they can be <- big look but smaller for testing
 # dateRange = np.array([[2018,3,28],[2018,4,7]],dtype="int16"); #dates are in int16 because they can be <- kinda calm
 # dateRange = np.array([[2018,4,27],[2018,5,4]],dtype="int16"); #dates are in int16 because they can be <- very calm period [no AMPERE data here yet...]
 # dateRange = np.array([[2019,5,17],[2019,5,21]],dtype="int16"); #dates are in int16 because they can be <- kinda calm, one SWPPE
@@ -292,6 +295,8 @@ dateRange = np.array([[2018,2,1],[2018,2,4]],dtype="int16"); #dates are in int16
 # dateRange = np.array([[2014,5,5],[2014,5,9]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2022,1,14],[2022,1,18]],dtype="int16"); #dates are in int16 because they can be
 # dateRange = np.array([[2015,11,1],[2015,11,3]],dtype="int16"); #dates are in int16 because they can be <- Salih new dates
+# dateRange = np.array([[2019,12,31],[2020,1,1]],dtype="int16"); #<- test year roll-over
+# dateRange = np.array([[2015,11,22],[2015,11,24]],dtype="int16"); #<- new LISN
 #dates better go earlier -> later
 #print("{}".format(dateRange))
 dateRange_zeroHr_override = [2013,5,7]; #overrides the zero hr, which is normally estimated based on the middle of the given dateRange
@@ -393,8 +398,8 @@ plot_periodLim_max = settings_spectra['period limit max']; #min, time to limit t
 geoMap_projectionStyle = 'mill'; #type the word in
 settings_map = {}; #prep a dict
 settings_map['coord type'] = coordType; #record the coordinate type
-settings_map['degree label'] = 'arcdeg'; #set degree label, 'arcdeg', '°', '' for none
-settings_map['indicate direction'] = [False, {'lat':'\n← South | North →', 'long':'\n← West | East →'}]; #set 1st value of list to true to indicate direction, set 1st value to false to not
+settings_map['degree label'] = ''; #set degree label, 'arcdeg', '°', '' for none
+settings_map['indicate direction'] = [True, {'lat':'\n← South | North →', 'long':'\n← West | East →'}]; #set 1st value of list to true to indicate direction, set 1st value to false to not
 
 plotLatRange = [35,50]; #latitude limit for plotting
 plotLongRange = [-85,-60]; #longitude limit for plotting
@@ -409,8 +414,8 @@ plotLongRange = [-85,-60]; #longitude limit for plotting
 # plotLatRange = [0,90]; #latitude limit for plotting
 # plotLongRange = [-180,180]; #longitude limit for plotting
 
-plotLatRange = [40,90]; #latitude limit for plotting AMPERE polar
-plotLongRange = [-180,180]; #longitude limit for plotting
+# plotLatRange = [40,90]; #latitude limit for plotting AMPERE polar
+# plotLongRange = [-180,180]; #longitude limit for plotting
 
 # plotLatRange = [50,90]; #latitude limit for plotting
 # plotLongRange = [-180,180]; #longitude limit for plotting
@@ -450,8 +455,8 @@ plotLongRange = [-180,180]; #longitude limit for plotting
 
 # plotLatRange = [30,75]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
-plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing, avoids no data above 48 lat)
-plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
+# plotLatRange = [30,48]; #latitude limit for plotting EAST HALF OF USA/CANADA (for img processing, avoids no data above 48 lat)
+# plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
 
 # plotLatRange = [25,55]; #latitude limit for plotting EAST HALF OF USA/CANADA
 # plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANADA
@@ -469,6 +474,8 @@ plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANAD
 # plotLongRange = [-100,-25]; #longitude limit for South America
 
 # plotLatRange = [30,75]; #latitude limit for Europe
+# plotLongRange = [-15,40]; #longitude limit for Europe
+# plotLatRange = [40,60]; #latitude limit for Europe (for img processing, avoids no data above 60 lat/below 40g)
 # plotLongRange = [-15,40]; #longitude limit for Europe
 # plotLatRange = [17,75]; #latitude limit for Europe !MAG COORDS in 2017 3/15!
 # plotLongRange = [69,122]; #longitude limit for Europe !MAG COORDS in 2017 3/15!
@@ -503,8 +510,14 @@ plotLongRange = [-100,-60]; #longitude limit for plotting EAST HALF OF USA/CANAD
 # plotLatRange = [45,90]; #good for North Pole
 # plotLongRange = [-180,180]; #good for North Pole
 
+plotLatRange = [0,35]; #good for top left of Africa
+plotLongRange = [-20,15]; #good for top left of Africa
+
 # plotLatRange = [-15,10]; #good for top of South America
 # plotLongRange = [-82,-35]; #good for top of South America
+
+# plotLatRange = [-15,10]; #good for top left of South America
+# plotLongRange = [-90,-70]; #good for top left of South America
 
 # plotLatRange = [-30,-50]; #good for AO magnetic conjugate in South America
 # plotLongRange = [-70,-45]; #good for top of South America
@@ -548,8 +561,8 @@ pointAltitude = 350; #km, altitude where most e-'s are (F region max - assumed)
 # time_cutout_range = [20*3600,24*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-18*3600,-4*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-14*3600,0*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
-time_cutout_range = [5*3600,16*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
-time_cutout_range = [36*3600,47*3600+58*60]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [5*3600,16*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [36*3600,47*3600+58*60]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-18*3600,-4*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 time_cutout_range = [-16*3600,-4*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-18*3600,-8*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
@@ -558,7 +571,8 @@ time_cutout_range = [-16*3600,-4*3600]; #sec, cut-out this time period for compa
 # time_cutout_range = [-13*3600,-10*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-10*3600,-7*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-7*3600,-3*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
-time_cutout_range = [-18*3600,-2*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [-8*3600,16*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [-18*3600,-2*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-9*3600,-3*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-16*3600,-12*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-12*3600,-4*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
@@ -568,7 +582,9 @@ time_cutout_range = [-18*3600,-2*3600]; #sec, cut-out this time period for compa
 # time_cutout_range = [4*3600,47*3600+58*60]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [-18*3600,12*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [12*3600,47*3600+58*60]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
-time_cutout_range = [16*3600,23*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [16*3600,23*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [25*3600,33*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
+# time_cutout_range = [30*3600,36*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 # time_cutout_range = [40*3600,47*3600]; #sec, cut-out this time period for comparison between the ISR & GPS data at the best possible time to compare (night)
 
 # time_cutout_range = [59*3600,69*3600]; #sec, cut-out this time period for comparison
@@ -583,7 +599,7 @@ settings_TEC_import = {
     'TEC_minimumTimeGap':5*60, #sec, how long to accept a gap in a satellite observation before calling it a new, unrelated observation
     'TEC_deltaTEC_compareValue':6, #median comparator number for choosing stuff on the edges that are out of an acceptable range, inspired by https://stackoverflow.com/questions/11686720/is-there-a-numpy-builtin-to-reject-outliers-from-a-list
     'TEC_dataRate':30, #sec/datapt, the data rate. No super easy way to get it out of the data automatically, so it's a variable to control
-    'filter_savGolPeriod':60*60, #sec, filter period for the Sav-Gol filter (only passes this long or longer are kept, many are not longer - very few are 3 hr long)
+    'filter_savGolPeriod':np.int64(np.round(1*60*60)), #sec, filter period for the Sav-Gol filter (only passes this long or longer are kept, many are not longer - very few are 3 hr long)
     'order_savGol':1, #order of the Sav-Gol fit, 3 is default, 1 is linear
     'web_base_name':settings_config['login Madrigal']['name'], #put your name here (for spaces use +'s instead)
     'web_base_email':settings_config['login Madrigal']['email'], #put your email here
@@ -619,8 +635,8 @@ latMillstone = 42.6233; #Deg North MH
 longMillstone = -71.4882; #Deg East MH (71.4882 deg West)
 # longMillstone = 15; #Deg East, forces it into Europe
 #Location of Arecibo
-# latMillstone = 18+20/60+36.6/3600; #Deg North AO
-# longMillstone = -(66+45/60+11.1/60); #Deg East AO (67some deg West)
+latMillstone = 18+20/60+36.6/3600; #Deg North AO
+longMillstone = -(66+45/60+11.1/60); #Deg East AO (67some deg West)
 # latMillstone = 40; #Deg North !Conjugate! for AO
 # longMillstone = -58; #Deg East !Conjugate! for AO (67some deg West)
 # latMillstone = 34+51/60+8/3600; #Deg North - Japan MU radar
@@ -669,20 +685,21 @@ wave_waveLength = np.zeros(2); #preallocate
 wave_angle = np.zeros(2); #preallocate
 wave_phase = np.zeros(2); #preallocate
 wave_amp = np.zeros(2); #preallocate
-wave_period[0] = 1.0*3600; #sec, period of wave
+wave_period[0] = 1.5*3600; #sec, period of wave
 wave_waveLength[0] = 200; #km, wavelength of wave given in paper EPS_2008_Seker
 # wave_waveLength = 700; #km, wavelength of wave
 # wave_waveLength[0] = 4000; #km, wavelength of wave
 # wave_waveLength = 1.21*2800; #km, wavelength of wave
-wave_angle[0] = 135; #deg, angle of wave direction
+# wave_angle[0] = 135; #deg, angle of wave direction
 wave_phase[0] = 0; #deg, 0 to 360, phase of wave
 wave_amp[0] = 0.0; #delta_vTEC, amplitude of wave
 # wave_amp[0] = 0.15; #delta_vTEC, amplitude of wave
 #2ND WAVE
 wave_period[1] = 1.5*3600; #sec, period of wave
-# wave_waveLength[1] = 200; #km, wavelength of wave given in paper EPS_2008_Seker
-wave_waveLength[1] = 700; #km, wavelength of wave
+wave_waveLength[1] = 200; #km, wavelength of wave given in paper EPS_2008_Seker
+# wave_waveLength[1] = 700; #km, wavelength of wave
 # wave_waveLength[1] = 1.21*2800; #km, wavelength of wave
+wave_waveLength[1] = 10000; #km, wavelength of wave
 wave_angle[1] = 90; #deg, angle of wave direction
 wave_phase[1] = 0; #deg, 0 to 360, phase of wave
 wave_amp[1] = 0.35; #delta_vTEC, amplitude of wave
@@ -723,7 +740,7 @@ FLG_combinedPlot_keo_TEC_n_AMPERE_1Dintegration_auroralZone_spectra_timeMatch = 
 
 FLG_FFTthruTime_KEOnAvgPtnAMPEREintegrated = 0; #perform FFT power spectra walking through time on TEC Keogram & TEC at a pt & AMPERE integrated
 
-FLG_keo_stacker = 2; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
+FLG_keo_stacker = 0; #stacks keogram days ontop of eachother [1 plots a direct stack, 2 plots the stacks aligned to the 1st day's sunrise time]
 FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables clipping higher/lower values
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['OMNI','Bz GSM'], 'comparison':'less than|0 & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
@@ -731,7 +748,7 @@ FLG_keo_stacker_clip = [False, np.array( (-0.25,0.25) )]; #True at start enables
 FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'rate|auto & nan', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
 # FLG_keo_stacker_ignore = [True, {'ref data path':['TEC'], 'data path':[['SuperMAG','SMUs'],['OMNI','Bz GSM']], 'comparison':['elevated|auto,pos only & rate|auto & nan', 'less than|0 & nan'], 'time offset':[122*60, 122*60]}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
-FLG_keo_stackerPlot = 1; #plots the stacked keograms
+FLG_keo_stackerPlot = 0; #plots the stacked keograms
 
 
 FLG_keo_featureFinder = 0; #find some features, good luck tiger
@@ -741,9 +758,9 @@ FLG_keo_timeMatch_n_HP_Scargle = 0; #Scargles the data
 FLG_keo_Scargle_FFT = 1; #0 for Scargle, 1 for FFT
 #FLG_keo_fullTime = 1; #0 for match to Zenith/MISA (norm), 1 for full time (will break stuff later I bet)
 #-----Settings for above plots-----
-keo_angle = 90; #deg, user defined angle
+keo_angle = 0; #deg, user defined angle
 keo_Width_orig = 360; #arcdeg, total width - not an angle in this instance [put 360 for 0/90/180/270 because the code will autotruncate that]
-keo_N = 200; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
+keo_N = 50; #number of chunks to split the range into  [reg 200 for dense areas, 50 for less dense, 20 for super sparse]
 keo_polarMode = 0; #0 for regular plotting, 1 for polar plotting of the averaging area
 keo_45vsLatLong = 1; #0 for longitude on xaxis on a 45 degree angle (or multiple of it), 1 for latitude on xaxis
 keo_Zoom = 5; #+/-# arcdeg around the Millstone Hill beam of choice, zoom for the time-cut plot
@@ -767,7 +784,7 @@ settings_TEC['keo'] = {
     'day nite shading':1, #0 No shading, 1 to shade day/nite, 2 to shade manual times, -1 to draw the _|-|_ day/nite mini plot
     'day nite shading times':[0.5,11.35], #the times if above is set to 2
     'day nite shading lettering':True, #letters (True) or not (False) if 'day nite shading' is less than 0 (mini day/nite plot is going on)
-    'lat long words':False, #causes lat/long words to be plotted on the keogram area plot x/y axes
+    'lat long words':True, #causes lat/long words to be plotted on the keogram area plot x/y axes
     'terrain draw':False, #causes the terrain to be colored in the keo area plot
     'border draw':True, #causes the country borders to be drawn in the keo area plot (useful for close stuff)
     'interpolation':False, #interpolates missing bits, great for intermittant gaps - less useful for edges with no data
@@ -798,6 +815,7 @@ doubleKeo_latLong = [[[50,75],[-15,40]],[[25,50],[-100,-60]]]; #the 2 sets of la
 # doubleKeo_latLong = [[[25,50],[-100,-60]]]; #just eastern US
 # doubleKeo_latLong = [[[-18,-4],[-85,-68]],[[-35,-18],[-72,-68]]]; #the 2 sets of lat and long coords (Andes)
 # doubleKeo_latLong = [[[25,50],[-100,-60]],[[25,50],[-165,-100]]]; #the 2 sets of lat and long coords [west USA]
+# doubleKeo_latLong = [[[56,70],[67,122]],[[31,56],[-13,27]]]; #the 2 sets of lat and long coords (east USA, Europe in geomag so that latitudes meet at geomagnetic)
 doubleKeo_angle_orig = [90,90]; #deg, user defined angle
 doubleKeo_width_orig = [360,360]; #arcdeg, total width - not an angle in this instance
 doubleKeo_N = [200,200]; #number of chunks to split the range into  [reg 200]
@@ -1003,16 +1021,22 @@ FLG_ISR_AMPERE_CPSD_cutOut = 0; #perform CPSD between ISR & JH over designated t
 
 #==============Kp and OMNI and SuperMAG and NRCanMAG Mecha Ploter Options==============
 FLG_MECHACOMBO_plot = 1; #plots
+FLG_MECHACOMBO_plot_names = [['By GSM','Bz GSM'],'Psw','Vsw','PC(N)',['SMUs','SMLs'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Kp','Bz GSM','Psw','Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = [['Bx GSE & GSM','By GSM','Bz GSM'],'Vsw','Proton Density','PC(N)',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Proton Density',['SMR','HUA-X &R detrended','SJG-X &R detrended'],'Psw',['Bx GSE & GSM','By GSM','Bz GSM']]; #names of things to plot for Salih's paper
 # FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw','PC(N)','EUA-Z &F nan & sav-gol & sav-gol denoise|15',['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','AMP:int:JH',['PC(N)','PC(S)'],['EUA-Z &F nan & high-pass & zero-mean & sav-gol denoise|15','EUA-Y &F nan & high-pass & zero-mean & sav-gol denoise|15'],['SMLs','SMLd'],['SYM/H','SMR']]; #names of things to plot
-FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw',['PC(N)','PC(S)'],['RES-Z &F nan & high-pass & zero-mean & sav-gol denoise|15','RES-Y &F nan & high-pass & zero-mean & sav-gol denoise|15','CBB-X &F nan & high-pass & zero-mean & sav-gol denoise|15'],['SMUs','SMLs'],['SYM/H','SMR']]; #names of things to plot
+# FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw',['PC(N)','PC(S)'],['RES-Z &F nan & high-pass & zero-mean & sav-gol denoise|15','RES-Y &F nan & high-pass & zero-mean & sav-gol denoise|15','CBB-X &F nan & high-pass & zero-mean & sav-gol denoise|15'],['SMUs','SMLs'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw',['PC(N)','PC(S)'],['SMUs','SMLs'],['SYM/H','SMR']]; #names of things to plot
 # FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw',['PC(N)','PC(S)'],['SMUs','SMLs'],['SYM/H','SMR'],['SMR00','SMR06','SMR12','SMR18']]; #names of things to plot
 
-FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw','PC(N)',['SMUs','SMLs'],['SMUd','SMLd'],['SYM/H','SMR']]; #names of things to plot
+# FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw','PC(N)',['SMUs','SMLs'],['SMUd','SMLd'],['SYM/H','SMR']]; #names of things to plot
+# FLG_MECHACOMBO_plot_names = ['Bz GSM','Psw','Vsw',['EUA-Z &F nan & high-pass & zero-mean & sav-gol denoise|15','EUA-Y &F nan & high-pass & zero-mean & sav-gol denoise|15'],['SMUs','SMLs'],['SYM/H','SMR']]; #names of things to plot
+# FLG_MECHACOMBO_plot_names = ['IMF clock angle','Bz GSM','By GSM','PC(N)',['SMUs','SMLs'],['SMUd','SMLd'],['SYM/H','SMR']]; #names of things to plot
+
+
+
 FLG_MECHACOMBO_plot_singleColumn = True; #only allow for single column plotting
 FLG_MECHACOMBO_plot_mixUnits = False; #allow for data types/units to mix
 FLG_MECHACOMBO_plot_timeLim = [None,0-4,12-4]; #time limit in hours wrt 0 hour (if localTime on the timeLim needs to be in local hours) - set 1st value to None to disable (None must be in list a la [None])
@@ -1154,9 +1178,9 @@ settings_SuperMAG = {
         'SME':'SME','SMU':'SMU','SML':'SML',
         # 'SMEs':'SME Sunlit','SMUs':'SMU Sunlit','SMLs':'SML Sunlit',
         # 'SMEd':'SME Darkside','SMUd':'SMU Darkside','SMLd':'SML Darkside',
-        'SMEs':'$\mathregular{SME_s}$','SMUs':'$\mathregular{SMU_s}$','SMLs':'$\mathregular{SML_s}$',
-        'SMEd':'$\mathregular{SME_d}$','SMUd':'$\mathregular{SMU_d}$','SMLd':'$\mathregular{SML_d}$',
-        'SMR':'SMR','SMR00':'$\mathregular{SMR_{00}}$','SMR06':'$\mathregular{SMR_{06}}$','SMR12':'$\mathregular{SMR_{12}}$','SMR18':'$\mathregular{SMR_{18}}$',
+        'SMEs':r'$\mathregular{SME_s}$','SMUs':r'$\mathregular{SMU_s}$','SMLs':r'$\mathregular{SML_s}$',
+        'SMEd':r'$\mathregular{SME_d}$','SMUd':r'$\mathregular{SMU_d}$','SMLd':r'$\mathregular{SML_d}$',
+        'SMR':'SMR','SMR00':r'$\mathregular{SMR_{00}}$','SMR06':r'$\mathregular{SMR_{06}}$','SMR12':r'$\mathregular{SMR_{12}}$','SMR18':r'$\mathregular{SMR_{18}}$',
         },
     'units':{
         'SME':' [nT]','SMU':' [nT]','SML':' [nT]',
@@ -1174,7 +1198,7 @@ for i in range(0,24):
 settings['SuperMAG'] = settings_SuperMAG; #set these settings
 
 #==============AMPERE Plotting Options==============
-AMPERE_latLongSteps = [1,15]; #[lat, long] - AMPERE comes default [1, 15], anything else will incur significant processing times (spherical RBF!)
+AMPERE_latLongSteps = [1,3]; #[lat, long] - AMPERE comes default [1, 15], anything else will incur significant processing times (spherical RBF!)
 
 #-----0 for off, 1 for on-----
 #NOTE the 3 below use the TEC settings above for the same plot styles
@@ -1231,6 +1255,7 @@ FLG_AMPEREnAMPERE_correlator_options = {'mode':'range','time range':time_cutout_
 FLG_AMPERE_integrate_plot = 0; #plot AMPERE integrated across the northern and southern hemispheres vs time
 FLG_AMPERE_integrate_plot_highlightIMFSouth = True; #highlights IMF south (magnetic reconnection) times
 FLG_AMPERE_integrate_plot_highlightIMFSouth_type = 'Bz GSM'; #OMNI data type to use for negative == south
+FLG_AMPERE_integrate_plot_disablePaddedDays = True; #force disables padded days
 FLG_AMPERE_integrate_area = 0; #plot scatter shot of the data
 FLG_AMPERE_integrate_scargle = 0; #plot scargle of AMPERE integrated across the defined integration areavs periods [NOT YET]
 FLG_AMPERE_integrate_FFT = 0; #plot FFT of AMPERE integrated across the defined integration area vs periods [NOT YET]
@@ -1313,6 +1338,7 @@ settings_AMPERE = {
     'integrate method coord type':AMPERE_integrateMethod_coordType,
     'integrate method log':AMPERE_integrateMethod_log,
     'integrate method radius n loc':AMPERE_integrateMethod_radiusNloc,
+    'integrate plot force disable padding':FLG_AMPERE_integrate_plot_disablePaddedDays,
     'delay wrt TEC':AMPERE_delay_wrt_TEC,
     'labels':{
         'Ped':'Pederson Cond.',
@@ -1424,7 +1450,7 @@ FLG_magicks = 0; #1 for on, 0 for off
 
 #==============Movie Snaps Options==============
 #-----0 for off, 1 for on-----
-FLG_enable_movieSnaps = 1; #1 for on, 0 for off 
+FLG_enable_movieSnaps = 0; #1 for on, 0 for off 
 #-----Settings for above plots-----
 snaps_type = 1; #see below, the numbering mimics movieType's numbering
 #1 = stationary data points
@@ -1432,37 +1458,25 @@ snaps_type = 1; #see below, the numbering mimics movieType's numbering
 #11 = ONLY AMPERE data
 #12 = ONLY AMPERE data w/ time averaging between snaps
 
-snaps_auto = 2; #if 0, uses snaps_Times | 1 will generate them from snaps_auto & steps to take | 2 will generate from snaps_auto_start & _end
-#MAKE SURE THEY'RE EVEN!
-snaps_times = [ 16*3600, 17*3600, 18*3600, 19*3600 ]; #sec, input some times in hrs for when to take snaps - best way is to make a movie, then choose the times
+snaps_auto = 0; #if 0, uses snaps_Times | 1 will generate them from snaps_auto & steps to take | 2 will generate from snaps_auto_start & _end
 
-#Otherwise will automatically generate
-snaps_auto_start = -16*3600; #sec, time to start
-snaps_auto_start = -11*3600; #sec, time to start
-#snaps_auto_start = -13.00*3600; #sec, time to start
+# --- For snaps_auto == 0 ---
+# Declare your own specific times
+snaps_times = [ 16*3600, 17*3600, 18*3600, 19*3600 ]; #sec, input some times in sec for when to take snaps - best way is to make a movie, then choose the times
+snaps_times = [ 29*3600, 29.5*3600, 30*3600, 30.5*3600, 31*3600, 31.5*3600, 32*3600, 32.5*3600 ]; #sec, input some times in sec for when to take snaps - best way is to make a movie, then choose the times
 
-#snaps_auto_start = 18*3600; #sec, time to start
-#snaps_auto_start = 20.25*3600; #sec, time to start
+# --- For snaps_auto == 1 ---
+# Automatically generate based on a snaps_auto_start start time, snaps_auto_step step amount, and number of steps to take snaps_auto_stepsToTake
+# snaps_auto_start = -16*3600; #sec, time to start
+# snaps_auto_step = 30*60; #sec, time to step
+# snaps_auto_stepsToTake = 12; #steps to take after the start
 
-#snaps_auto_start = 24*3600; #sec, time to start
-
-# snaps_auto_start = 30*3600; #sec, time to start
-
-# snaps_auto_start = 13.50*3600; #sec, time to start
-
-snaps_auto_start = 21*3600; #sec, time to start
-
+# --- For snaps_auto == 2 ---
+# Automatically generate based on a snaps_auto_start start time, snaps_auto_step step amount, and end time of snaps_auto_end (non-inclusive with respect to the end time)
 snaps_auto_start = 'auto'; #sec, time to start [-11*3600, 20 min steps, 6 steps is nice too], 'auto' chooses the start time as the start edge automagically
 snaps_auto_step = 30*60; #sec, time to step
-snaps_auto_stepsToTake = 12; #steps to take after the start
+snaps_auto_end = 'auto'; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically (does not include last time step! e.g., 0 to 90 at 30 step will yield 0, 30, 60 steps)
 
-snaps_auto_end = 'auto'; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically
-
-snaps_auto_start = 0; #sec, time to start [-11, 20 min steps, 6 steps is nice too], 'auto' chooses the start time as the start edge automagically
-snaps_auto_step = 30; #sec, time to step
-snaps_auto_end = 180; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically (does not include last time step! e.g., 0 to 90 at 30 step will yield 0, 30, 60 steps)
-
-# snaps_auto_end = 24; #sec, time to end *for snaps_auto == 2*, 'auto' chooses the end time as the end edge automagically (does not include last time step! e.g., 0 to 90 at 30 step will yield 0, 30, 60 steps)
 #4-8 is a good limit of steps to take.
 snaps_dayNiteLine = 2; #0 for no dayNite line, 1 for dayNite line on, 2 for shading of nite time
 snaps_dayNiteText = 0; #0 for no dayNite text, 1 for dayNite text on
@@ -1480,15 +1494,15 @@ snaps_Grid_Lat_Size = 1; #degc, how long a avg square is in latitude, longitude 
 snaps_Grid_Lat_Spaces = 40; #how many spaces to break the latitude range up into (only for stationary data points)
 snaps_Grid_Long_Spaces = 80; #how many spaces to break the longitude range up into (only for stationary data points)
 
-FLG_snaps_interpolate = True; # Interpolates gaps in each snap
-FLG_snaps_forceSinglePlot = True; # False batches multiple subplots into a single plot, True forces a single subplot per plot - useful for high time resolution imaging
+FLG_snaps_interpolate = False; # Interpolates gaps in each snap
+FLG_snaps_forceSubplotPerPlot = 1; # 0 batches multiple subplots into a single plot automagically, any # forces that # of subplots per plot (1 is useful for making multiple views of the time)
 FLG_snaps_forceInteractive = True; # False does not show the snap plots and just saves them (higher resolution, better control, etc), True shows each snap plot (limited to monitor size) - best use is with "force single plot" above.
 
 #==============Movie Options==============
 #-----0 for off, 1 for on-----
 FLG_movieCreation_enable = 0; #1 for on, 0 for off 
 #-----Settings for above plots-----
-movieType = 0; #see below
+movieType = 5; #see below
 #0 = dTEC moving data points (Fastest, confusing to actually see what up)
 #1 = dTEC stationary data points
 #2 = dTEC stationary data points + Zenith ISR overlay on 2nd plot
@@ -1506,9 +1520,10 @@ movie_MP4 = 1; #1 for MP4, 0 for gif
 movie_dayNiteLine = 2; #0 for no dayNite line, 1 for dayNite line on, 2 for daynite shadowing - no text here so setting irrelevant
 movie_dayNiteText = 1; #0 for no dayNite text, 1 for dayNite text on
 movie_spin = 0; #0 for no spin and sun moves along perimiter, 1 for spin whole plot with sun always at top of plot [I don't think works b/c cartopy weak]
-movie_timeLim = 0; #0 for no time limit, 1 for time limit
-movie_timeLimRange = np.array([-24,-23]); #hr, hours to limit the movie to
+movie_timeLim = 1; #0 for no time limit, 1 for time limit
+movie_timeLimRange = np.array([-15,-13]); #hr, hours to limit the movie to
 movie_timeDelay = 0; #1 uses time delay for non-direct electron data, 0 ignores the time delay
+movie_interpolate = False; #interpolates NaN gaps in movies
 #good for world
 #gif_Grid_Lat_Spaces = 150; #how many spaces to break the latitude range up into (only for stationary data points)
 #gif_Grid_Long_Spaces = 300; #how many spaces to break the longitude range up into (only for stationary data points)
@@ -1520,7 +1535,7 @@ movie_gridDiv = 2; #number of blocks to divide a 1 deg by 1 deg square into (so 
 
 movie_desiredMaxRunTime = 8*60; #sec, desired max run time (to keep video limited) - if calc'd over this it will bump from 30 FPS to 60 FPS
 movie_FLGdisableFPSShift = 1; #use this to disable the jump to 60 FPS if it makes it go too fast (0 allow 60 FPS jump, 1 disabled)
-movie_desiredFrameTime = 0.35; #sec, desired time between frame for MP4 (how long a frame is on the screen)
+movie_desiredFrameTime = 0.05; #sec, desired time between frame for MP4 (how long a frame is on the screen)
 movie_figureSize = np.array((1920, 949)); #pixels, these values make it fit pretty good, as that's a maximized window's size for a 1080p monitor (W x H in pixels)
 movie_figurePPI = 100; #pixels per inch, called DPI in matplotlib, figureSize/figurePPI makes it inches which is what matplotlib uses - 100 is what my 1080p monitor did
 
@@ -1586,6 +1601,7 @@ settings_movie = {
     'time lim':movie_timeLim,
     'time lim range':movie_timeLimRange,
     'use time delays':movie_timeDelay,
+    'interpolate':movie_interpolate,
     'grid divider':movie_gridDiv,
     'data reject ratio':2, #ratio that is multiplied by variance and used to determine how much data to eject
     'data reject ratio max':4*dataReject, #maximum multiplier to reach
@@ -1643,9 +1659,18 @@ else:
     dateRange_zeroHr = dateRange_full[np.int16( np.floor((len(dateRange_dayNum_full[:,0]) - 1)/2) ),:]; #choose day for when "0 hr" is - makes plots nice, no day units just hr units
 #END IF
 dateRange_zeroHr_monthName = subfun_monthNum_to_word(dateRange_zeroHr[1])[0]; #get the month name for plotting uses
-dateRange_zeroHr_hrOffset = np.int16( np.floor((len(dateRange_dayNum_full[:,0]) - 1)/2) )*24; #put in the hour offset that makes a 0 to 72 hour range into the right -24 to 48 hour range (ALWAYS SUBTRACT)
+if( dateRange_dayNum_full[:,0].size > 2 ):
+    dateRange_zeroHr_hrOffset = np.int64( np.floor((dateRange_dayNum_full[:,0].size - 1)/2) )*24; #put in the hour offset that makes a 0 to 72 hour range into the right -24 to 48 hour range (ALWAYS SUBTRACT)
+elif( dateRange_dayNum_full[:,0].size == 2 ):
+    dateRange_zeroHr_hrOffset = np.int64( np.where(np.all( dateRange_dayNum_zeroHr == dateRange_dayNum_full, axis=1))[0].item()*24); #get the right offset (ALWAYS SUBTRACT)
+else:
+    dateRange_zeroHr_hrOffset = 0; #just one day, no offsets
+    # dateRange_zeroHr_hrBounds = np.array( [0, 24] );
+    # dateRange_zeroHr_hrs = dateRange_zeroHr_hrBounds; #same so link
+#END IF
 dateRange_zeroHr_hrBounds = np.array( [-dateRange_zeroHr_hrOffset , dateRange_dayNum_full.shape[0]*24 - dateRange_zeroHr_hrOffset] ); #create hour date range and put zero hour at desired time
 dateRange_zeroHr_hrs = np.arange(0,dateRange_dayNum_full.shape[0]*24+24,24) - dateRange_zeroHr_hrOffset; #hr, the hours that split the day wrt the zero hour day
+
 if( (dateRange_zeroHr[2] == 1) | (dateRange_zeroHr[2] == 21) ): #makes a suffix for the day
     dateRange_zeroHr_dayPostfix = 'st'; #appropriate abbrevs for beauty
 elif( (dateRange_zeroHr[2] == 2) | (dateRange_zeroHr[2] == 22) ):
@@ -2494,7 +2519,8 @@ else:
     (np.min(plotLongRange_importer) < np.min(FLG_rerunner['TEC']['plotLongRange'])) | \
     (not np.array_equal(dateRange,FLG_rerunner['TEC']['dateRange'])) | \
     (FLG_TEC_noise != FLG_rerunner['TEC']['FLG_TEC_noise']) | \
-    (settings_map['coord type'] != FLG_rerunner['TEC']['coord type']) ) ):
+    (settings_map['coord type'] != FLG_rerunner['TEC']['coord type']) | \
+    (FLG_TEC_noise == 2) ) ): #code this better so that params changing kicks this, but basically the params were set in stone since they're applied in the TEC loading
         del data['TEC']; # remove the TEC if the essential params are diff on rerun
         FLG_rerunner['TEC'] = {
             'FLG_TEC_use':FLG_TEC_use,
@@ -2795,15 +2821,17 @@ settings['map'] = settings_map; #map settings
 #==============Import needed data sets==============
 print('Data Import Beginning:');
 tic = time.time();
-#-----Import delta-vTEC-----
-data, settings = GRITI_import_TEC_importer(data, dates, settings); # The multi-stage import process is jammed in a function (to support justChecking memory saving)
-# unpack some things
-if( 'justChecking' not in data['TEC'] ):
-    TEC_timeUnique = data['TEC']['time unique']; #alias
-    TEC_timeUniqueAligned = data['TEC']['time unique aligned']; #alias
-    TEC_dataRate = data['TEC']['data rate']; #alias
-else:
-    TEC_timeUnique = 'justChecking'; #no time here
+if( FLG_dataTypes[FLG_TECloc] > 0):
+    #-----Import delta-vTEC-----
+    data, settings = GRITI_import_TEC_importer(data, dates, settings); # The multi-stage import process is jammed in a function (to support justChecking memory saving)
+    # unpack some things
+    if( 'justChecking' not in data['TEC'] ):
+        TEC_timeUnique = data['TEC']['time unique']; #alias
+        TEC_timeUniqueAligned = data['TEC']['time unique aligned']; #alias
+        TEC_dataRate = data['TEC']['data rate']; #alias
+    else:
+        TEC_timeUnique = 'justChecking'; #no time here
+    #END IF
 #END IF
 
 # if( not 'TEC' in list(data.keys()) ):
@@ -2964,7 +2992,7 @@ else:
     #[] = Receiver Site Name (there's no dim on this one) - use .decode('UTF-8') to make it a string again
 
 #-----Import ISR Data-----
-if( FLG_dataTypes[FLG_ISRloc] == 1):
+if( FLG_dataTypes[FLG_ISRloc] > 0):
     print("Importing ISR");
     (ISR_Mill_lat, ISR_Mill_long, Zenith_SNR, Zenith_SNR_hp, Zenith_POPL, Zenith_POPL_hp, Zenith_height, Zenith_time, \
      Zenith_vel, Zenith_vel_hp, Zenith_el, Zenith_az, Zenith_dopplar, Zenith_filtHeight, MISA_SNR, MISA_SNR_hp, MISA_POPL, MISA_POPL_hp, MISA_height, \
@@ -2981,7 +3009,7 @@ if( FLG_dataTypes[FLG_ISRloc] == 1):
 #END IF
 
 #-----Import AMPERE Data-----  
-if( FLG_dataTypes[FLG_AMPEREloc] == 1):
+if( FLG_dataTypes[FLG_AMPEREloc] > 0):
     print("Importing AMPERE");
     settings['AMPERE']['padded'] = time_Reference != 'AMPERE'; #precalc it
     
@@ -3041,7 +3069,7 @@ if( FLG_dataTypes[FLG_AMPEREloc] == 1):
     #7 = longitude [arcdeg]
     
 #-----Import Kp Data-----  
-if( FLG_dataTypes[FLG_Kploc] == 1):
+if( FLG_dataTypes[FLG_Kploc] > 0):
     print("Importing Kp"); #now importing full padded days always
     # if( OMNI_delay_wrt_TEC > 0 ):
     #     dateRange_extraDaysForDelay = np.int64(np.ceil(OMNI_delay_wrt_TEC/24)); #get how many extra days are needed
@@ -3062,7 +3090,7 @@ if( FLG_dataTypes[FLG_Kploc] == 1):
     #NOTE: Kp is every 3 hours, 0-3, 3-6, 6-9, 9-12, 12-15, 15-18, 18-21, 21-24 UT (8 of em) - assumed that data occurs on hour end (e.g. 0-3 means 3 is the data pt)
     
 #-----Import OMNI Data-----  
-if( FLG_dataTypes[FLG_OMNIloc] == 1):
+if( FLG_dataTypes[FLG_OMNIloc] > 0):
     print("Importing OMNI");
     # if( OMNI_delay_wrt_TEC > 0 ): #now importing full padded days always
     #     dateRange_extraDaysForDelay = np.int64(np.ceil(OMNI_delay_wrt_TEC/24)); #get how many extra days are needed
@@ -3123,7 +3151,7 @@ if( FLG_dataTypes[FLG_OMNIloc] == 1):
 #8 = SYM/H Index (nT)
 
 #-----Import SuperMAG Data-----  
-if( FLG_dataTypes[FLG_SuperMAGloc] == 1):
+if( FLG_dataTypes[FLG_SuperMAGloc] > 0):
     print("Importing SuperMAG Indices");
     # if( SuperMAG_delay_wrt_TEC > 0 ):
     #     dateRange_extraDaysForDelay = np.int64(np.ceil(SuperMAG_delay_wrt_TEC/24)); #get how many extra days are needed
@@ -3138,7 +3166,7 @@ if( FLG_dataTypes[FLG_SuperMAGloc] == 1):
 #END IF
 
 #-----Import SuperMAG stations Data-----  
-if( FLG_dataTypes[FLG_SuperMAGstationsloc] == 1):
+if( FLG_dataTypes[FLG_SuperMAGstationsloc] > 0):
     print("Importing SuperMAG Stations");
     # if( SuperMAG_delay_wrt_TEC > 0 ):
     #     dateRange_extraDaysForDelay = np.int64(np.ceil(SuperMAG_delay_wrt_TEC/24)); #get how many extra days are needed
@@ -3154,7 +3182,7 @@ if( FLG_dataTypes[FLG_SuperMAGstationsloc] == 1):
 
 
 #-----Import Canadian Mag Data-----  
-if( FLG_dataTypes[FLG_MagCANloc] >= 1):
+if( FLG_dataTypes[FLG_MagCANloc] > 0):
     print("Importing Magnetometer Data");
     try:
         data['MagCAN'] = GRITI_import_Mag_NRCan(dates, settings, FLG_deleteRaw = 0, FLG_overwrite = 0); #import OMNI data from internet
@@ -3521,7 +3549,6 @@ if( (FLG_keo == 1) ):
         # #END FOR jj
     #END IF
 #END IF
-  
     
 #==============Analysis: Plot Keograms of Any Angle AVG==============
 if( (FLG_keo_plot == 1) & (FLG_keo == 1) ):
@@ -3997,6 +4024,8 @@ if( FLG_keo_featureFinder >= 1 ):
     from skimage.measure import LineModelND, ransac
     from numba import jit
     from Code.subfun_textNice import textNice
+    from Code.subfun_figFitter import figFitter
+    from Code.subfun_comparator import subfun_comparator
     
     
     # #--- create uint8 version cause that's what opencv reqs apparently ---
@@ -4312,7 +4341,8 @@ if( FLG_keo_featureFinder >= 1 ):
                     #END FOR jj
                     waveWidth = np.nanmean(width_times); #sec, get the mean (few data pts so just divide I guess)
                     
-                    liner_chunkr.append({'line coeffs':polly, 'extent':extent, 'robust fit':model_robust, 'polarity':polarity, 'time width':waveWidth}); #add on a dict so I don't forget what they mean
+                    liner_chunkr.append({'line coeffs':polly, 'extent':extent, 'robust fit':model_robust, \
+                                         'polarity':polarity, 'time width':waveWidth}); #add on a dict so I don't forget what they mean
                 #END IF
             #END IF
         #END FOR i
@@ -4427,8 +4457,17 @@ if( FLG_keo_featureFinder >= 1 ):
         
     
     #remove times w/ undesired activity/near sunrise/sunset
+    # Europe mode
+    # latLong_ref[0][0] = 65; # Europe -> set delay to 84 (Europe) from 122 (US)
+    # latLong_ref[0][1] = 12.5; #Europe
+    
+    # FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['OMNI','Bz'], 'comparison':'elevated|auto,pos only & nan & prune|120,600 & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
+    # FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['AMPERE','JH'], 'comparison':'elevated|auto,pos only & nan & prune|120,600 & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
+    # FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'nan & prune|120,600 & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
     FLG_keo_featureFinder_ignore = [True, {'ref data path':['TEC'], 'data path':['SuperMAG','SMUs'], 'comparison':'elevated|auto,pos only & nan & prune|120,600 & sunrisesunset|'+str(latLong_ref[0][0])+','+str(latLong_ref[0][1])+',4500,4500', 'time offset':122*60}]; #True at start enables, dict is list for the data['path']['to']['data'], the comparison to make, and the comparison value (data needs to be 1D)
-
+    
+    FLG_keo_featureFinder_speedLimit = 700; #m/s, positive is southward (rn absolute speed) - set to False to disable
+    
     kCompare = subfun_comparator(FLG_keo_featureFinder_ignore[1], data, dates=dates); #get when is bad
 
     #----- prune ----- 
@@ -4463,6 +4502,7 @@ if( FLG_keo_featureFinder >= 1 ):
         geoRef = avgPt_coords[0,0];
         #END IF
     #END IF
+    # geoRef = 65; # for Europe
     nogoodtimes = data['TEC']['time unique aligned'][kCompare]; #get em to ditch
     nogoodtimes_diff = np.diff(nogoodtimes).astype(np.int32)//data['TEC']['data rate']; #get the diff, pad w/ data rate at the start
     nogoodtimes_diff[ nogoodtimes_diff > 1 ] = 0; #yeet
@@ -4524,16 +4564,96 @@ if( FLG_keo_featureFinder >= 1 ):
     startTimes_sortedIndxr = np.argsort(startTimes); #sort it
     liner = [liner[i] for i in startTimes_sortedIndxr]; #apply the sorting
     
-    fig, ax = plt.subplots(nrows=1, ncols=1); #use instead of fig because it inits an axis too (I think I dunno)
-    ax = [ax]; #wrap into list for ez later
-    figManager = fig.canvas.manager; #req to maximize
-    figManager.window.showMaximized(); #force maximized
+    #--- calculate stats---
+    kCompare_len = np.diff(np.where(np.concatenate(([kCompare[0]], kCompare[:-1] != kCompare[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
+    timez_nogood = np.sum(kCompare_len*data['TEC']['data rate']); #sec, total of no good time spans
+    timez_total = dates['date range full'].shape[0]*86400; #sec in the number of days involved
+    timez_good = timez_total - timez_nogood; #sec, you can see how I got here
+    
+    liner_stats = {
+        'start time':np.empty( len(liner) , dtype=np.float64), #hr
+        'start geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
+        'end time':np.empty( len(liner) , dtype=np.float64), #hr
+        'end geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
+        'ref time':np.empty( len(liner) , dtype=np.float64), #hr
+        'wave speed':np.empty( len(liner) , dtype=np.float64), #km/hr
+        'wave angle':np.empty( len(liner) , dtype=np.float64), #deg
+        'wave width':np.empty( len(liner) , dtype=np.float64), #hr, width in time
+        'wave polarity':np.empty( len(liner) , dtype=np.int64), #-1 for negative, 0 for undetermined, 1 for positive
+        'reach ref lat':np.zeros( len(liner) , dtype=np.bool_),
+        }; #stats go in the form [time start, time end, wave speed]
+    for i in range(0, len(liner)):
+        if( (settings['TEC']['keo']['keo plot latlong name'] == 'Latitude') & np.isclose(settings['TEC']['keo']['keo angle'], 90) ):
+            liner_stats['wave speed'][i] = -np.deg2rad(liner[i]['line coeffs'][1])*settings['map']['Re']; #km/hr, assume southward is positive b/c it's the usual
+        else:
+            print('I didn\'t code this caus I\'m cruisin rn');
+            sys.crash()
+        #END IF
+        
+        liner_stats['start time'][i] = np.min(liner[i]['extent'][0]);
+        liner_stats['start geo'][i] = liner[i]['extent'][1][np.where(liner_stats['start time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
+        liner_stats['end time'][i] = np.max(liner[i]['extent'][0]);
+        liner_stats['end geo'][i] = liner[i]['extent'][1][np.where(liner_stats['end time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
+        if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
+            liner_stats['ref time'][i] = (avgPt_coords[0,1] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
+        else: #else latitude
+            liner_stats['ref time'][i] = (avgPt_coords[0,0] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
+        #END IF
+        
+        vectorComp_geo = np.min(settings['TEC']['keo']['keo plot latlong chunks']) - np.max(settings['TEC']['keo']['keo plot latlong chunks']);
+        vectorComp_time = liner_stats['end time'][i]-liner_stats['start time'][i];
+        liner_stats['wave angle'][i] = np.rad2deg(np.arccos( (vectorComp_geo*-1 +  vectorComp_time*0)/np.sqrt(vectorComp_geo**2 + vectorComp_time**2) ));
+        liner_stats['wave width'][i] = liner[i]['time width']/3600; #hr, yoink
+        liner_stats['wave polarity'][i] = liner[i]['polarity']; #yoink
+    #END FOR i
+    
+    
+    #--- apply speed limit ---
+    kdel = np.zeros( len(liner) , dtype=np.bool_); #preallocate
+    if( FLG_keo_featureFinder_speedLimit ):
+        for i in range(len(liner)-1, 0, -1):
+            if( np.abs(liner_stats['wave speed'][i]) < FLG_keo_featureFinder_speedLimit ):
+                liner.pop(i) #deleteamundo
+                kdel[i] = True; #prep to delete
+            # END IF
+        # END FOR i
+        if( kdel.sum() > 0 ):
+            for keyz in liner_stats:
+                if( isinstance(liner_stats[keyz], np.ndarray) ):
+                    liner_stats[keyz] = np.delete(liner_stats[keyz], kdel); #deleteamundo
+                # END IF
+            # END FOR keyz
+        # END IF
+    # END IF
+    
+    
+    #--- final plot ---
+    FLG_makeItFancy = False; #set to true to make it fancy, false to not
+    # settings_plot['save file type'] = '.pdf';
+    
+    if( settings_plot['save file type'].lower() != '.pdf' ):
+        plot_rasterize = False; #don't need to bother
+    else:
+        plot_rasterize = True; #it needs it
+    #END IF
+    
+    if (FLG_makeItFancy ):
+        plt.ioff() #disable showing the plot as its size will be larger than the screen, which cannot happen if the plot is shown
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(14,8.5), dpi=settings_plot['journal dpi']); #use instead of fig because it inits an axis too (I think I dunno)
+        ax = [ax]; #wrap into list for ez later
+    else:
+        fig, ax = plt.subplots(nrows=1, ncols=1); #use instead of fig because it inits an axis too (I think I dunno)
+        ax = [ax]; #wrap into list for ez later
+        figManager = fig.canvas.manager; #req to maximize
+        figManager.window.showMaximized(); #force maximized
+    #END IF
     divider = make_axes_locatable(ax[0]); #prep to add an axis
     cax = divider.append_axes('right', size='2.0%', pad=0.15); #make a color bar axis
     ax[0].set_aspect('auto');
     pltHelprX, pltHelprY = np.meshgrid( (np.append(data['TEC']['time unique'],data['TEC']['time unique'][-1]+np.median(np.diff(data['TEC']['time unique']))) - dateRange_dayNum_zeroHr[1]*86400)/3600, \
                 settings['TEC']['keo']['keo plot latlong chunks']);
-    im = ax[0].pcolormesh(pltHelprX, pltHelprY,  data['TEC']['keo'].T ,cmap=settings['TEC']['colormap'], linewidth=0, rasterized=False); # pseudocolor plot "stretched" to the grid
+    # im = ax[0].pcolormesh(pltHelprX, pltHelprY,  data['TEC']['keo'].T ,cmap=settings['TEC']['colormap'], vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim']), linewidth=0, rasterized=False); # pseudocolor plot "stretched" to the grid
+    im = ax[0].pcolormesh(pltHelprX, pltHelprY,  imgified.T ,cmap=settings['TEC']['colormap'], vmin=np.min(settings['TEC']['plot lim'])*2, vmax=np.max(settings['TEC']['plot lim'])*2, linewidth=0, rasterized=plot_rasterize); # pseudocolor plot "stretched" to the grid    
 
     #draw lines found on
     for i in range(0, len(liner)):
@@ -4569,9 +4689,11 @@ if( FLG_keo_featureFinder >= 1 ):
     #END FOR tick
     # cbar.mappable.set_clim(vmin=np.min(settings['TEC']['plot lim']), vmax=np.max(settings['TEC']['plot lim'])); #now it's this
     cax.yaxis.label.set_font_properties(FONT_axisLabelFM);
-    string_Title = settings['TEC']['keo']['keo labels']+' Averaged on Angle of '+textNice(np.round(keo_angle,2))+' ° and Width of '+ \
-        textNice(np.round(settings['TEC']['keo']['keo width'],2))+' arc°'; #create mecha title - for debug so hardcode unit
-    ax[0].set_title(string_Title,fontproperties=FONT_titleFM); #set the title
+    if( FLG_makeItFancy == False ):
+        string_Title = settings['TEC']['keo']['keo labels']+' Averaged on Angle of '+textNice(np.round(keo_angle,2))+' ° and Width of '+ \
+            textNice(np.round(settings['TEC']['keo']['keo width'],2))+' arc°'; #create mecha title - for debug so hardcode unit
+        ax[0].set_title(string_Title,fontproperties=FONT_titleFM); #set the title
+    #END IF
     ax[0].set_xlabel('Time in UT '+settings_plot['unit L']+'hr'+settings_plot['unit R']+' | 0 Hr on '+dateRange_zeroHr_monthName+' '+textNice(dateRange_zeroHr[2])+dateRange_zeroHr_dayPostfix+' (Day '+textNice(dateRange_dayNum_zeroHr[1])+'), '+textNice(dateRange_dayNum_zeroHr[0]),fontproperties=FONT_axisLabelFM); #set the x axis label
     if( 'degree label' in settings_map ):
         latlong_unitName = settings_map['degree label']; #use supplied label
@@ -4643,50 +4765,16 @@ if( FLG_keo_featureFinder >= 1 ):
     #END IF
     
     figFitter(fig); #fit the fig fast
-    plt.show()
+    if( FLG_makeItFancy ):
+        from os.path import join as path_join
+        figFileName = path_join(settings_paths['fancyPlots'],settings['TEC']['keo']['keo data type']+'_keoFF'+settings_plot['save file type']); #save the figure
+        fig.savefig(figFileName); #save the figure
+        plt.close(); #close figure b/c it lurks apparently
+        plt.ion(); #re-enable it for later stuff
+    #END IF
     
     
-    kCompare_len = np.diff(np.where(np.concatenate(([kCompare[0]], kCompare[:-1] != kCompare[1:], [True])))[0])[::2]; #inspired by https://stackoverflow.com/a/24343375/2403531
-    timez_nogood = np.sum(kCompare_len*data['TEC']['data rate']); #sec, total of no good time spans
-    timez_total = dates['date range full'].shape[0]*86400; #sec in the number of days involved
-    timez_good = timez_total - timez_nogood; #sec, you can see how I got here
-    
-    liner_stats = {
-        'start time':np.empty( len(liner) , dtype=np.float64), #hr
-        'start geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
-        'end time':np.empty( len(liner) , dtype=np.float64), #hr
-        'end geo':np.empty( len(liner) , dtype=np.float64), #arcdeg
-        'ref time':np.empty( len(liner) , dtype=np.float64), #hr
-        'wave speed':np.empty( len(liner) , dtype=np.float64), #km/hr
-        'wave angle':np.empty( len(liner) , dtype=np.float64), #deg
-        'wave width':np.empty( len(liner) , dtype=np.float64), #hr, width in time
-        'wave polarity':np.empty( len(liner) , dtype=np.int64), #-1 for negative, 0 for undetermined, 1 for positive
-        'reach ref lat':np.zeros( len(liner) , dtype=np.bool_),
-        }; #stats go in the form [time start, time end, wave speed]
-    for i in range(0, len(liner)):
-        if( (settings['TEC']['keo']['keo plot latlong name'] == 'Latitude') & np.isclose(settings['TEC']['keo']['keo angle'], 90) ):
-            liner_stats['wave speed'][i] = -np.deg2rad(liner[i]['line coeffs'][1])*settings['map']['Re']; #km/hr, assume southward is positive b/c it's the usual
-        else:
-            print('I didn\'t code this caus I\'m cruisin rn');
-            sys.crash()
-        #END IF
-        
-        liner_stats['start time'][i] = np.min(liner[i]['extent'][0]);
-        liner_stats['start geo'][i] = liner[i]['extent'][1][np.where(liner_stats['start time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
-        liner_stats['end time'][i] = np.max(liner[i]['extent'][0]);
-        liner_stats['end geo'][i] = liner[i]['extent'][1][np.where(liner_stats['end time'][i] == liner[i]['extent'][0])[0].item()]; #get corresponding geo lat/long
-        if( settings['TEC']['keo']['keo plot latlong name'] == 'Longitude' ): #if true, longitude
-            liner_stats['ref time'][i] = (avgPt_coords[0,1] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
-        else: #else latitude
-            liner_stats['ref time'][i] = (avgPt_coords[0,0] - liner[i]['line coeffs'][0])/liner[i]['line coeffs'][1]; #hr, calc time at ref lat/long
-        #END IF
-        
-        vectorComp_geo = np.min(settings['TEC']['keo']['keo plot latlong chunks']) - np.max(settings['TEC']['keo']['keo plot latlong chunks']);
-        vectorComp_time = liner_stats['end time'][i]-liner_stats['start time'][i];
-        liner_stats['wave angle'][i] = np.rad2deg(np.arccos( (vectorComp_geo*-1 +  vectorComp_time*0)/np.sqrt(vectorComp_geo**2 + vectorComp_time**2) ));
-        liner_stats['wave width'][i] = liner[i]['time width']/3600; #hr, yoink
-        liner_stats['wave polarity'][i] = liner[i]['polarity']; #yoink
-    #END FOR i
+
     
     #--- identify how long is covered by activity ---
     timz_total =  dates['date range full'].shape[0]*24; #hr in the number of days involved
@@ -14718,13 +14806,13 @@ if( FLG_enable_movieSnaps  == 1 ):
     snaps_timesSec += dateRange_dayNum_zeroHr[1]*86400; #sec, add on the zero day for comparison with stuff
     
     #----------------------CHOOSE THE CORRECT ARRANGEMENT-----------------------------
-    snaps_supported_plotsPerPlot = np.array((1, 4, 6, 9, 12));
+    snaps_supported_plotsPerPlot = np.array((1, 2, 4, 6, 9, 12));
     snaps_optimal_plotsPerPlot = np.where( np.mod(snaps_timesDays.size/snaps_supported_plotsPerPlot,1) == np.min(np.mod(snaps_timesDays.size/snaps_supported_plotsPerPlot,1)))[0];
     # snaps_optimal_plotsPerPlot = snaps_optimal_plotsPerPlot[snaps_optimal_plotsPerPlot.size//2]; #choose middle option
     snaps_optimal_plotsPerPlot = snaps_optimal_plotsPerPlot[-1]; #choose last (densist) option
     snaps_chosen_plotsPerPlot = snaps_supported_plotsPerPlot[snaps_optimal_plotsPerPlot]; #choose a size
-    if( FLG_snaps_forceSinglePlot == True ):
-        snaps_chosen_plotsPerPlot = 1; #set 1, hope it just works
+    if( FLG_snaps_forceSubplotPerPlot > 0 ):
+        snaps_chosen_plotsPerPlot = FLG_snaps_forceSubplotPerPlot; #set it to FLG_snaps_forceSubplotPerPlot if greater than 0
     # END IF
     snaps_chosen_plotNum = np.int64(np.ceil(snaps_times.size/snaps_chosen_plotsPerPlot)); #calc the number of plots needed
     snaps_chosen_plotsPerPlot_vect = np.arange(0,snaps_times.size+snaps_chosen_plotsPerPlot,snaps_chosen_plotsPerPlot);
@@ -14734,60 +14822,42 @@ if( FLG_enable_movieSnaps  == 1 ):
         snaps_rows = 1; #set pre-determined row/col stuff
         snaps_cols = 1;
         
-        snaps_left = 0.045; #for the figure to adjust its sizing
-        snaps_right = 0.945;
-        snaps_top = 0.96;
-        snaps_bottom = 0.035;  
+        snaps_hspace = 0.135; 
+        snaps_wspace = 0.265;
+    elif( snaps_chosen_plotsPerPlot == 2 ):
+        snaps_rows = 1; #set pre-determined row/col stuff
+        snaps_cols = 2;
+        
         snaps_hspace = 0.135; 
         snaps_wspace = 0.265;
     elif( snaps_chosen_plotsPerPlot == 4 ):
         snaps_rows = 2; #set pre-determined row/col stuff
         snaps_cols = 2;
         
-        snaps_left = 0.045; #for the figure to adjust its sizing
-        snaps_right = 0.945;
-        snaps_top = 0.96;
-        snaps_bottom = 0.035;  
         snaps_hspace = 0.135; 
         snaps_wspace = 0.265;
     elif( snaps_chosen_plotsPerPlot == 6 ):
         snaps_rows = 2; #set pre-determined row/col stuff
         snaps_cols = 3;
         
-        snaps_left = 0.045; #for the figure to adjust its sizing
-        snaps_right = 0.945;
-        snaps_top = 0.96;
-        snaps_bottom = 0.035;  
         snaps_hspace = 0.155; 
         snaps_wspace = 0.265;
     elif( snaps_chosen_plotsPerPlot == 9 ):
         snaps_rows = 3; #set pre-determined row/col stuff
         snaps_cols = 3;
         
-        snaps_left = 0.045; #for the figure to adjust its sizing
-        snaps_right = 0.945;
-        snaps_top = 0.96;
-        snaps_bottom = 0.035;  
         snaps_hspace = 0.225; 
         snaps_wspace = 0.205;
     elif( snaps_chosen_plotsPerPlot == 12 ):
         snaps_rows = 3; #set pre-determined row/col stuff
         snaps_cols = 4;
         
-        # snaps_left = 0.045; #for the figure to adjust its sizing
-        # snaps_right = 0.945;
-        # snaps_top = 0.96;
-        # snaps_bottom = 0.035;  
         snaps_hspace = 0.225; 
         snaps_wspace = 0.195;
     # elif( snaps_chosen_plotsPerPlot == 16 ): #too dense
     #     snaps_rows = 4; #set pre-determined row/col stuff
     #     snaps_cols = 4;
         
-    #     # snaps_left = 0.045; #for the figure to adjust its sizing
-    #     # snaps_right = 0.945;
-    #     # snaps_top = 0.96;
-    #     # snaps_bottom = 0.035;  
     #     # snaps_hspace = 0.225; 
     #     snaps_wspace = 0.195;
     else:
@@ -15090,7 +15160,21 @@ if( FLG_enable_movieSnaps  == 1 ):
                     pltHelprX, pltHelprY = np.meshgrid( gif_Grid_Long, gif_Grid_Lat); #helps the pcolor work
                     imTEC = ax[snaps_rowsArray[i],snaps_colsArray[i]].pcolormesh(pltHelprX, pltHelprY,  gif_Grid.T ,vmin=np.min(settings_TEC['plot lim']), vmax=np.max(settings_TEC['plot lim']), transform=cartopy.crs.PlateCarree(), cmap='jet', zorder=150); # pseudocolor plot "stretched" to the grid
                     
-                    ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading
+                    #Do the nighttiem shading
+                    if( settings_map_snaps['coord type'] == 'geo' ):
+                        ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading, only relevant for geographic
+                    else:
+                        #this ain't perfect, but it's plenty good for general where not sun
+                        shifter = (np.mod(sunSubSolar_loc['long'][itot],360) - np.mod(sunSubSolar_loc_geo['long'][itot],360))*240 #sec, effective time to shift by so Sun is in right spot; 240 = 24*3600/360
+                        shifted = snaps_times_currSec[i] - shifter; #shift the time so Sun is in the right spot
+                        kk = np.where(np.int64(shifted/86400) == dates['date range full padded dayNum'][:,1])[0].item(); #get where the year is gonna be
+                        time4mag_hr = np.int32(np.mod(shifted,86400)//3600); #get hours
+                        time4mag_min = np.int32(np.mod(shifted,86400)//60-time4mag_hr*60); #get the minutes
+                        time4mag_sec = np.int32(np.mod(shifted,86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+                        time4mag_shifted = datetime.datetime(dates['date range full padded'][kk,0],dates['date range full padded'][kk,1],dates['date range full padded'][kk,2], \
+                                                      hour = time4mag_hr, minute = time4mag_min, second = time4mag_sec); #date time object for aacgmv2 
+                        ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag_shifted, alpha=0.2),zorder=150); #nighttime shading, only relevant for geographic
+                    #END IF
                     
                     if(geoMap_projectionStyle_polar == 1): # Can draw on the sun, otherwise live with nighttime shading
                         if( snaps_sunPos == 1 ):
@@ -15259,7 +15343,22 @@ if( FLG_enable_movieSnaps  == 1 ):
                 else:
                     imAMP = ax[snaps_rowsArray[i],snaps_colsArray[i]].scatter(AMPERE_long_portion,AMPERE_lat_portion,s=settings_map['AMPERE scatter size'],c=AMPERE_data_portion,cmap=AMPERE_colorMap, transform=cartopy.crs.PlateCarree(), zorder=151);
                 #END IF
-                ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading
+                
+                #Do the nighttiem shading
+                if( settings_map_snaps['coord type'] == 'geo' ):
+                    ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag, alpha=0.2),zorder=150); #nighttime shading, only relevant for geographic
+                else:
+                    #this ain't perfect, but it's plenty good for general where not sun
+                    shifter = (np.mod(sunSubSolar_loc['long'][itot],360) - np.mod(sunSubSolar_loc_geo['long'][itot],360))*240 #sec, effective time to shift by so Sun is in right spot; 240 = 24*3600/360
+                    shifted = snaps_times_currSec[i] - shifter; #shift the time so Sun is in the right spot
+                    kk = np.where(np.int64(shifted/86400) == dates['date range full padded dayNum'][:,1])[0].item(); #get where the year is gonna be
+                    time4mag_hr = np.int32(np.mod(shifted,86400)//3600); #get hours
+                    time4mag_min = np.int32(np.mod(shifted,86400)//60-time4mag_hr*60); #get the minutes
+                    time4mag_sec = np.int32(np.mod(shifted,86400)-time4mag_min*60-time4mag_hr*3600); #get the seconds
+                    time4mag_shifted = datetime.datetime(dates['date range full padded'][kk,0],dates['date range full padded'][kk,1],dates['date range full padded'][kk,2], \
+                                                  hour = time4mag_hr, minute = time4mag_min, second = time4mag_sec); #date time object for aacgmv2 
+                    ax[snaps_rowsArray[i],snaps_colsArray[i]].add_feature(Nightshade(time4mag_shifted, alpha=0.2),zorder=150); #nighttime shading, only relevant for geographic
+                #END IF
                 
     #             #Do the TEC plotting
     #             pltHelprX, pltHelprY = np.meshgrid( gif_Grid_Long, gif_Grid_Lat); #helps the pcolor work
