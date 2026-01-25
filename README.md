@@ -71,5 +71,7 @@ Dinsmore, R., Mathews, J.D., Coster, A., Robinson, R.M., Sarkhel, S., Erickson, 
 
 Bostan, S.M., Urbina, J.V., Mathews, J.D., Dinsmore, R.L., Robinson, R.M., 2023. Multi-instrument study of a spread-F event at Arecibo linked to solar wind variations. Journal of Atmospheric and Solar-Terrestrial Physics 249, 106099. https://doi.org/10.1016/j.jastp.2023.106099
 
+Dinsmore, R. [L by PSU req], 2024. Semi-coherent Ionospheric Pulsing Structures (SCIPS): The Ionosphere’s Steady State. Dissertation at PSU Libraries ETDA, 19862rld5204. https://etda.libraries.psu.edu/catalog/19862rld5204
+
 ---
 **GRITI** was made by [Ross Dinsmore](https://github.com/dinsmoro), who was supported by the US National Science Foundation under Grant No. AGS-1241407 to The Pennsylvania State University for updates up to the "Multi-instrument observations of SCIPS: 1." paper. 
